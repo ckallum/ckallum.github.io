@@ -3,172 +3,277 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="The Investment State of AI 2025 - A comprehensive analysis of artificial intelligence investment trends">
-  <title>The Investment State of AI 2025</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Personal website and portfolio of Callum Ke">
+  <title>Callum Ke - Portfolio</title>
+  <link rel="stylesheet" href="home-styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="script.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <!-- Navigation Drawer -->
-  <div class="NavigationDrawer-root" id="navigation-drawer">
-    <div class="NavigationDrawer-paper">
-      <div class="NavigationDrawer-header">
-        <h3 class="NavigationDrawer-title">The Investment State of AI</h3>
-        <button class="NavigationDrawer-closeButton" id="close-nav" aria-label="Close navigation drawer">
-          <span class="NavigationDrawer-closeIcon">×</span>
-        </button>
-      </div>
-      <div class="NavigationDrawer-content">
-        <div class="NavigationDrawer-section">
-          <ul class="NavigationDrawer-menu">
-            <li class="NavigationDrawer-menuItem">
-              <a href="https://ckallum.github.io/" class="NavigationDrawer-menuLink">Home</a>
-            </li>
-            <li class="NavigationDrawer-menuItem">
-              <a href="#" class="NavigationDrawer-menuLink active">AI Investment Report</a>
-            </li>
-          </ul>
+  <header class="site-header">
+    <div class="container">
+      <nav class="main-nav">
+        <div class="logo">Callum Ke</div>
+        <ul class="nav-links">
+          <li><a href="#articles" class="nav-link">Articles</a></li>
+          <li><a href="#projects" class="nav-link">Projects</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Hi, I'm Callum Ke</h1>
+        <p class="hero-text">Software engineer, researcher, and writer exploring the frontiers of technology.</p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn btn-primary">View My Work</a>
+          <a href="#contact" class="btn btn-secondary">Get In Touch</a>
         </div>
       </div>
     </div>
-  </div>
-  
-  <!-- Overlay -->
-  <div class="overlay" id="overlay"></div>
-  
-  <!-- Main content -->
-  <div class="site-wrapper">
-    <!-- Header Bar -->
-    <header class="site-header">
-      <div class="header-left">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <div class="site-title">The Investment State of AI 2025</div>
-      </div>
-      <div class="header-right">
-        <a href="https://ckallum.github.io/" class="header-button">Home</a>
-      </div>
-    </header>
-    
+  </section>
+
+  <section id="articles" class="section articles-section">
     <div class="container">
-      <div class="MultiToCLayout">
-        <!-- Table of Contents Sidebar -->
-        <div class="MultiToCLayout-sidebar">
-          <div class="MultiToCLayout-tableOfContents">
-            <h2>Contents</h2>
-            <ul id="table-of-contents-list">
-              <li><a href="#introduction" class="toc-h1">Introduction</a></li>
-              <li><a href="#market-overview" class="toc-h2">Market Overview</a></li>
-              <li><a href="#investment-trends" class="toc-h2">Investment Trends</a></li>
-              <li><a href="#technological-breakthroughs" class="toc-h2">Technological Breakthroughs</a></li>
-              <li><a href="#coming-soon" class="toc-h2">Coming Soon</a></li>
-            </ul>
+      <h2 class="section-title">Recent Articles</h2>
+      
+      <div class="articles-grid">
+        <article class="article-card">
+          <div class="article-card-content">
+            <h3 class="article-title">
+              <a href="the-investment-state-of-ai-2025/index.html">The Investment State of AI 2025</a>
+            </h3>
+            <p class="article-meta">March 15, 2025 · 5 min read</p>
+            <p class="article-excerpt">An analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</p>
+            <a href="the-investment-state-of-ai-2025/index.html" class="read-more">Read more →</a>
+          </div>
+        </article>
+        
+        <article class="article-card">
+          <div class="article-card-content">
+            <h3 class="article-title">
+              <a href="#">Machine Learning for Time Series Forecasting</a>
+            </h3>
+            <p class="article-meta">February 28, 2025 · 8 min read</p>
+            <p class="article-excerpt">Exploring modern approaches to time series forecasting using deep learning and traditional statistical methods.</p>
+            <a href="#" class="read-more">Coming soon →</a>
+          </div>
+        </article>
+        
+        <article class="article-card">
+          <div class="article-card-content">
+            <h3 class="article-title">
+              <a href="#">The Evolution of Computer Vision</a>
+            </h3>
+            <p class="article-meta">January 15, 2025 · 6 min read</p>
+            <p class="article-excerpt">From traditional feature extraction to deep learning: how computer vision has transformed in the past decade.</p>
+            <a href="#" class="read-more">Coming soon →</a>
+          </div>
+        </article>
+      </div>
+      
+      <div class="section-footer">
+        <a href="#" class="btn btn-outline">View All Articles</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="section projects-section">
+    <div class="container">
+      <h2 class="section-title">Recent Projects</h2>
+      
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-card-content">
+            <h3 class="project-title">Neural Network Framework</h3>
+            <p class="project-tags">Python · TensorFlow · Machine Learning</p>
+            <p class="project-description">A lightweight neural network framework built from scratch with NumPy, implementing various architectures for educational purposes.</p>
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fab fa-github"></i> View on GitHub</a>
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+            </div>
           </div>
         </div>
         
-        <!-- Main Content -->
-        <div class="MultiToCLayout-content">
-          <main>
-            <article>
-              <h1 id="introduction">The Investment State of AI 2025</h1>
-              
-              <p>Welcome to The Investment State of AI 2025. This site provides a detailed analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</p>
-              
-              <h2 id="market-overview">Market Overview</h2>
-              
-              <p>The convergence of technological advancement and capital investment is reshaping the landscape of artificial intelligence in profound ways. This report examines the intricate relationship between funding patterns, research focus areas, and market applications that will define the AI ecosystem in 2025.</p>
-              
-              <blockquote>
-                <p>As AI capabilities continue to mature, the strategic allocation of investment resources will increasingly determine which technologies achieve mainstream adoption and which remain experimental curiosities.</p>
-              </blockquote>
-              
-              <h2 id="investment-trends">Investment Trends</h2>
-              
-              <p>Over the past decade, we've witnessed a dramatic shift in AI investment patterns. Early funding primarily targeted foundational research and academic initiatives, but today's landscape reveals a much more diverse ecosystem of investors and applications.</p>
-              
-              <p>Key areas attracting significant investment include:</p>
-              
-              <ul>
-                <li>Large language models and multimodal AI systems</li>
-                <li>AI infrastructure and compute optimization</li>
-                <li>Vertical-specific AI applications in healthcare, finance, and manufacturing</li>
-                <li>AI safety and alignment research</li>
-              </ul>
-              
-              <h2 id="technological-breakthroughs">Technological Breakthroughs</h2>
-              
-              <p>Recent advancements in AI capabilities have dramatically expanded the range of potential applications. The rapid progress in large language models has enabled new forms of human-computer interaction, while improvements in computer vision are transforming industries from healthcare to autonomous vehicles.</p>
-              
-              <p>These breakthroughs have been fueled by both theoretical innovations and unprecedented levels of investment in computational resources. As we look toward 2025, we anticipate continued acceleration across several key domains.</p>
-              
-              <h2 id="coming-soon">Coming Soon</h2>
-              
-              <p>We are currently preparing comprehensive sections on:</p>
-              
-              <ul>
-                <li>Venture capital investment trends in AI startups</li>
-                <li>Public market valuations of AI-focused companies</li>
-                <li>Corporate research and development budgets</li>
-                <li>Government funding initiatives</li>
-                <li>Key technological breakthroughs driving investment</li>
-              </ul>
-              
-              <p>Check back soon for updates as we develop this analysis.</p>
-            </article>
-          </main>
+        <div class="project-card">
+          <div class="project-card-content">
+            <h3 class="project-title">Distributed Systems Visualizer</h3>
+            <p class="project-tags">JavaScript · D3.js · WebSockets</p>
+            <p class="project-description">Interactive visualization tool for distributed systems algorithms, helping students understand complex distributed protocols.</p>
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fab fa-github"></i> View on GitHub</a>
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="project-card">
+          <div class="project-card-content">
+            <h3 class="project-title">Natural Language Processing API</h3>
+            <p class="project-tags">Python · FastAPI · NLP · Docker</p>
+            <p class="project-description">A microservice-based NLP API that provides sentiment analysis, entity recognition, and text summarization capabilities.</p>
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fab fa-github"></i> View on GitHub</a>
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Documentation</a>
+            </div>
+          </div>
         </div>
       </div>
       
-      <footer>
-        <p>&copy; 2025 · <a href="https://ckallum.github.io/">Home</a></p>
-      </footer>
+      <div class="section-footer">
+        <a href="#" class="btn btn-outline">View All Projects</a>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section id="about" class="section about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-content">
+          <h2 class="section-title">About Me</h2>
+          <p>I'm a software engineer and researcher specializing in machine learning and distributed systems. With over 5 years of experience building scalable applications, I enjoy tackling complex problems at the intersection of AI and software engineering.</p>
+          
+          <p>My background includes work in computer vision, natural language processing, and large-scale distributed systems. I'm particularly interested in making advanced AI techniques more accessible and robust for real-world applications.</p>
+          
+          <p>When I'm not coding, you can find me reading technical papers, hiking, or experimenting with new programming languages and frameworks.</p>
+          
+          <div class="skills">
+            <h3>Skills & Technologies</h3>
+            <div class="skill-tags">
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">JavaScript</span>
+              <span class="skill-tag">TypeScript</span>
+              <span class="skill-tag">React</span>
+              <span class="skill-tag">TensorFlow</span>
+              <span class="skill-tag">PyTorch</span>
+              <span class="skill-tag">Kubernetes</span>
+              <span class="skill-tag">AWS</span>
+              <span class="skill-tag">Docker</span>
+              <span class="skill-tag">Distributed Systems</span>
+              <span class="skill-tag">Machine Learning</span>
+              <span class="skill-tag">Computer Vision</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="about-image">
+          <!-- Placeholder for your profile image -->
+          <div class="profile-image-placeholder">
+            <i class="fas fa-user"></i>
+          </div>
+          
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section contact-section">
+    <div class="container">
+      <h2 class="section-title">Get In Touch</h2>
+      
+      <div class="contact-grid">
+        <div class="contact-info">
+          <p>I'm always open to interesting conversations, collaboration opportunities, or discussing potential projects. Feel free to reach out through any of the channels below.</p>
+          
+          <ul class="contact-list">
+            <li class="contact-item">
+              <i class="fas fa-envelope"></i>
+              <a href="mailto:your.email@example.com">your.email@example.com</a>
+            </li>
+            <li class="contact-item">
+              <i class="fab fa-github"></i>
+              <a href="https://github.com/ckallum" target="_blank">github.com/ckallum</a>
+            </li>
+            <li class="contact-item">
+              <i class="fab fa-linkedin-in"></i>
+              <a href="#" target="_blank">LinkedIn</a>
+            </li>
+            <li class="contact-item">
+              <i class="fab fa-twitter"></i>
+              <a href="#" target="_blank">Twitter</a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="contact-form-container">
+          <form class="contact-form">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <p>&copy; 2025 Callum Ke. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <script>
-    // Table of Contents Active Link Highlighting
-    document.addEventListener('DOMContentLoaded', function() {
-      const tocLinks = document.querySelectorAll('#table-of-contents-list a');
-      const headings = document.querySelectorAll('h1[id], h2[id], h3[id], h4[id]');
-      
-      // Highlight the active section in the table of contents as user scrolls
-      function highlightActiveSection() {
-        // Get current scroll position with some offset for better UX
-        const scrollPosition = window.scrollY + 100;
+    // Simple smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
         
-        // Find the current section
-        let currentSection = null;
-        headings.forEach(heading => {
-          if (heading.offsetTop <= scrollPosition) {
-            currentSection = heading.getAttribute('id');
-          }
-        });
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
         
-        // Remove active class from all links
-        tocLinks.forEach(link => {
-          link.classList.remove('active');
-        });
-        
-        // Add active class to current section link
-        if (currentSection) {
-          const activeLink = document.querySelector(`#table-of-contents-list a[href="#${currentSection}"]`);
-          if (activeLink) {
-            activeLink.classList.add('active');
-          }
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80, // Offset for the fixed header
+            behavior: 'smooth'
+          });
         }
+      });
+    });
+    
+    // Simple sticky header
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('.site-header');
+      if (window.scrollY > 50) {
+        header.classList.add('sticky');
+      } else {
+        header.classList.remove('sticky');
       }
-      
-      // Initial highlighting
-      highlightActiveSection();
-      
-      // Update on scroll
-      window.addEventListener('scroll', highlightActiveSection);
     });
   </script>
 </body>
