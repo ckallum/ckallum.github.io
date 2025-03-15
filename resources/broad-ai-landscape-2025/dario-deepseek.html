@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dario Amodei — On DeepSeek and Export Controls</title>
+
+    <meta
+      property="og:title"
+      content="Dario Amodei — On DeepSeek and Export Controls"
+    />
+    <meta property="og:description" content="On DeepSeek and Export Controls" />
+    <meta
+      property="og:url"
+      content="https://darioamodei.com/on-deepseek-and-export-controls.html"
+    />
+    <meta
+      property="og:image"
+      content="https://darioamodei.com/images/ds-card.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="author" content="Dario Amodei" />
+    <meta name="description" content="On DeepSeek and Export Controls" />
+
+    <style>
+      html {
+        visibility: hidden;
+      }
+
+      html.js-loaded {
+        visibility: visible;
+      }
+
+      header h1 a {
+        display: block;
+        width: 140px;
+        font-family: Newsreader;
+      }
+    </style>
+
+    <link
+      rel="preload"
+      href="/fonts/Newsreader.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Newsreader-italic.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <link rel="stylesheet" href="/styles.css" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <script>
+      (function () {
+        try {
+          const root = document.documentElement;
+          const classes = ["preload"];
+
+          if (localStorage.getItem("darkMode") === "enabled") {
+            classes.push("dark-mode");
+            root.style.setProperty("--bg-color", "#141413");
+            root.style.setProperty("--text-color", "#f0efea");
+          }
+
+          root.classList.add(...classes);
+
+          queueMicrotask(() => {
+            root.classList.add("js-loaded");
+          });
+        } catch (e) {
+          document.documentElement.classList.add("preload", "js-loaded");
+        }
+      })();
+    </script>
+    <script
+      src="https://cdn.usefathom.com/script.js"
+      data-site="VDZFYXIJ"
+      defer
+    ></script>
+    <script src="/darkmode.js" defer></script>
+    <script src="/footnotes.js" defer></script>
+    <script src="/toc.js" defer></script>
+  </head>
+
+  <body class="has-toc">
+    <header>
+      <div>
+        <h1>
+          <a href="/">Dario Amodei</a>
+        </h1>
+        <div class="header-controls">
+          <div class="toggle-switch">
+            <input type="checkbox" id="darkModeToggle" class="toggle-input" />
+            <label for="darkModeToggle" class="toggle-label">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button id="tocToggle">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <nav
+      id="tableOfContents"
+      class="toc-container"
+      aria-label="Table of contents"
+    >
+      <h2>Contents</h2>
+      <ul id="tocList"></ul>
+    </nav>
+
+    <main class="content-wrapper">
+      <article class="content-container">
+        <h1>On DeepSeek and Export Controls</h1>
+        <p class="author-date">
+          <time datetime="2025-01-28">January 2025</time>
+        </p>
+
+        <p>
+          A few weeks ago I
+          <a
+            href="https://www.wsj.com/opinion/trump-can-keep-americas-ai-advantage-china-chips-data-eccdce91"
+            >made the case</a
+          >
+          for stronger US export controls on chips to China. Since then
+          DeepSeek, a Chinese AI company, has managed to — at least in some
+          respects —
+          <a
+            href="https://techcrunch.com/2025/01/27/deepseek-claims-its-reasoning-model-beats-openais-o1-on-certain-benchmarks/"
+            >come close to the performance</a
+          >
+          of US frontier AI models at lower cost.
+        </p>
+
+        <p>
+          Here, I won't focus on whether DeepSeek is or isn't a threat to US AI
+          companies like Anthropic (although I do believe many of the claims
+          about their threat to US AI leadership are greatly overstated)<sup
+            id="fnref:1"
+            ><a class="footnote-ref" href="#fn:1">1</a></sup
+          >. Instead, I'll focus on whether DeepSeek's releases undermine the
+          case for those export control policies on chips. I don't think they
+          do. In fact,
+          <strong
+            >I think they make export control policies even more existentially
+            important than they were a week ago<sup id="fnref:2"
+              ><a class="footnote-ref" href="#fn:2">2</a></sup
+            ></strong
+          >.
+        </p>
+
+        <p>
+          Export controls serve a vital purpose: keeping democratic nations at
+          the forefront of AI development. To be clear, they’re not a way to
+          duck the competition between the US and China. In the end, AI
+          companies in the US and other democracies must have better models than
+          those in China if we want to prevail. But we shouldn't hand the
+          Chinese Communist Party technological advantages when we don't have
+          to.
+        </p>
+
+        <h2>Three Dynamics of AI Development</h2>
+
+        <p>
+          Before I make my policy argument, I'm going to describe three basic
+          dynamics of AI systems that it's crucial to understand:
+        </p>
+
+        <ol>
+          <li>
+            <p>
+              <strong>Scaling laws.</strong> A property of AI — which I and my
+              co-founders were among the first
+              <a href="https://arxiv.org/abs/2001.08361">to document</a> back
+              when we worked at OpenAI — is that <em>all else equal</em>,
+              <em
+                >scaling up the training of AI systems leads to smoothly better
+                results on a range of cognitive tasks, across the board</em
+              >. So, for example, a $1M model might solve 20% of important
+              coding tasks, a $10M might solve 40%, $100M might solve 60%, and
+              so on. These differences tend to have huge implications in
+              practice — another factor of 10 may correspond to the difference
+              between an undergraduate and PhD skill level — and thus companies
+              are investing heavily in training these models.
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>Shifting the curve.</strong> The field is constantly
+              coming up with ideas, large and small, that make things more
+              effective or efficient: it could be an improvement to the
+              <em>architecture</em> of the model (a tweak to the basic
+              Transformer architecture that all of today's models use) or simply
+              a way of running the model more efficiently on the underlying
+              hardware. New generations of hardware also have the same effect.
+              What this typically does is
+              <a href="https://arxiv.org/abs/2311.15377"
+                ><em>shift the curve</em></a
+              >: if the innovation is a 2x "compute multiplier" (CM), then it
+              allows you to get 40% on a coding task for $5M instead of $10M; or
+              60% for $50M instead of $100M, etc. Every frontier AI company
+              regularly discovers many of these CM's: frequently small ones
+              (~1.2x), sometimes medium-sized ones (~2x), and every once in a
+              while very large ones (~10x). Because the value of having a more
+              intelligent system is so high, this shifting of the curve
+              typically causes companies
+              <a
+                href="https://epoch.ai/blog/how-much-does-it-cost-to-train-frontier-ai-models#:~:text=The%20cost%20of%20training%20frontier,a%20billion%20dollars%20by%202027."
+                >to spend <em>more</em></a
+              >, not less, on training models: the gains in cost efficiency end
+              up entirely devoted to training smarter models, limited only by
+              the company's financial resources. People are naturally attracted
+              to the idea that "first something is expensive, then it gets
+              cheaper" — as if AI is a single thing of constant quality, and
+              when it gets cheaper, we'll use fewer chips to train it. But
+              what's important is the <em>scaling curve</em>: when it shifts, we
+              simply traverse it faster, because the value of what's at the end
+              of the curve is so high. In 2020, my team published
+              <a href="https://cdn.openai.com/papers/ai_and_efficiency.pdf"
+                >a paper</a
+              >
+              suggesting that the shift in the curve due to
+              <em>algorithmic</em> progress is ~1.68x/year. That has probably
+              sped up significantly since; it also doesn't take efficiency and
+              hardware into account. I'd guess the number today is maybe
+              ~4x/year. Another estimate is
+              <a
+                href="https://epoch.ai/blog/algorithmic-progress-in-language-models"
+                >here</a
+              >. Shifts in the training curve also shift the inference curve,
+              and as a result large decreases in price
+              <em>holding constant the quality of model</em> have been occurring
+              for years. For instance, Claude 3.5 Sonnet which was released 15
+              months later than the original GPT-4 outscores GPT-4 on almost all
+              benchmarks, while having a ~10x lower API price.
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>Shifting the paradigm.</strong> Every once in a while, the
+              underlying thing that is being scaled changes a bit, or a new type
+              of scaling is added to the training process. From 2020-2023, the
+              main thing being scaled was <em>pretrained models</em>: models
+              trained on increasing amounts of internet text with a tiny bit of
+              other training on top. In 2024, the idea of using
+              <em>reinforcement learning</em> (RL) to train models to generate
+              chains of thought has become a new focus of scaling. Anthropic,
+              DeepSeek, and many other companies (perhaps most notably OpenAI
+              who released their o1-preview model in September) have found that
+              this training greatly increases performance on certain select,
+              objectively measurable tasks like math, coding competitions, and
+              on reasoning that resembles these tasks. This new paradigm
+              involves <em>starting</em> with the ordinary type of pretrained
+              models, and then as a second stage using RL to add the reasoning
+              skills. Importantly, because this type of RL is new, we are still
+              very early on the scaling curve: the amount being spent on the
+              second, RL stage is small for all players. Spending $1M instead of
+              $0.1M is enough to get huge gains. Companies are now working very
+              quickly to scale up the second stage to hundreds of millions and
+              billions, but it's crucial to understand that we're at a unique
+              "crossover point" where there is a powerful new paradigm that is
+              early on the scaling curve and therefore can make big gains
+              quickly.
+            </p>
+          </li>
+        </ol>
+
+        <h2>DeepSeek's Models</h2>
+
+        <p>
+          The three dynamics above can help us understand DeepSeek's recent
+          releases. About a month ago, DeepSeek released a model called "<a
+            href="https://github.com/deepseek-ai/DeepSeek-V3"
+            >DeepSeek-V3</a
+          >" that was a pure <em>pretrained model</em
+          ><sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup> —
+          the first stage described in #3 above. Then last week, they released
+          "<a href="https://github.com/deepseek-ai/DeepSeek-R1">R1</a>", which
+          added a second stage. It's not possible to determine everything about
+          these models from the outside, but the following is my best
+          understanding of the two releases.
+        </p>
+
+        <p>
+          <strong>DeepSeek-V3</strong> was actually the real innovation and what
+          <em>should</em> have made people take notice a month ago (we certainly
+          did). As a pretrained model, it appears to come
+          <a href="https://github.com/deepseek-ai/DeepSeek-V3"
+            >close to the performance of</a
+          ><sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>
+          state of the art US models on some important tasks, while costing
+          substantially less to train (although, we find that Claude 3.5 Sonnet
+          in particular remains much better on some other key tasks, such as
+          real-world coding). DeepSeek's team did this via some genuine and
+          impressive innovations, mostly focused on engineering efficiency.
+          There were particularly innovative improvements in the management of
+          an aspect called the "Key-Value cache", and in enabling a method
+          called "mixture of experts" to be pushed further than it had before.
+        </p>
+
+        <p>However, it's important to look closer:</p>
+
+        <ul>
+          <li>
+            <p>
+              DeepSeek does not "do for $6M<sup id="fnref:5"
+                ><a class="footnote-ref" href="#fn:5">5</a></sup
+              >
+              what cost US AI companies billions". I can only speak for
+              Anthropic, but Claude 3.5 Sonnet is a mid-sized model that cost a
+              few $10M's to train (I won't give an exact number). Also, 3.5
+              Sonnet was <em>not</em> trained in any way that involved a larger
+              or more expensive model (contrary to some rumors). Sonnet's
+              training was conducted 9-12 months ago, and DeepSeek's model was
+              trained in November/December, while Sonnet remains notably ahead
+              in many internal and external evals. Thus, I think a fair
+              statement is "<strong
+                >DeepSeek produced a model close to the performance of US models
+                7-10 months older, for a good deal less cost (but not anywhere
+                near the ratios people have suggested)</strong
+              >".
+            </p>
+          </li>
+          <li>
+            <p>
+              If the historical trend of the cost curve decrease is ~4x per
+              year, that means that in the ordinary course of business — in the
+              normal trends of historical cost decreases like those that
+              happened in 2023 and 2024 — we’d expect a model 3-4x cheaper than
+              3.5 Sonnet/GPT-4o around now. Since DeepSeek-V3 is worse than
+              those US frontier models — let’s say by ~2x on the scaling curve,
+              which I think is quite generous to DeepSeek-V3 — that means it
+              would be totally normal, totally "on trend", if DeepSeek-V3
+              training cost ~8x less than the current US models developed a year
+              ago. I’m not going to give a number but it’s clear from the
+              previous bullet point that even if you take DeepSeek’s training
+              cost at face value, they are on-trend at best and probably not
+              even that. For example this is less steep than the original GPT-4
+              to Claude 3.5 Sonnet inference price differential (10x), and 3.5
+              Sonnet is a better model than GPT-4.
+              <strong
+                >All of this is to say that DeepSeek-V3 is not a unique
+                breakthrough or something that fundamentally changes the
+                economics of LLM’s; it’s an expected point on an ongoing cost
+                reduction curve. What’s different this time is that the company
+                that was first to demonstrate the expected cost reductions was
+                Chinese.</strong
+              >
+              This has never happened before and is geopolitically significant.
+              However, US companies will soon follow suit — and they won’t do
+              this by copying DeepSeek, but because they too are achieving the
+              usual trend in cost reduction.
+            </p>
+          </li>
+          <li>
+            <p>
+              Both DeepSeek and US AI companies have much more money and many
+              more chips than they used to train their headline models. The
+              extra chips are used for R&D to develop the ideas behind the
+              model, and sometimes to train larger models that are not yet ready
+              (or that needed more than one try to get right). It's been
+              reported — we can't be certain it is true — that DeepSeek actually
+              had
+              <a href="https://x.com/dylan522p/status/1859302712803807696"
+                >50,000 Hopper</a
+              >
+              generation chips<sup id="fnref:6"
+                ><a class="footnote-ref" href="#fn:6">6</a></sup
+              >, which I'd guess is within a factor ~2-3x of what the major US
+              AI companies have (for example, it's 2-3x less than the xAI "<a
+                href="https://www.tomshardware.com/desktops/servers/first-in-depth-look-at-elon-musks-100-000-gpu-ai-cluster-xai-colossus-reveals-its-secrets"
+                >Colossus</a
+              >" cluster)<sup id="fnref:7"
+                ><a class="footnote-ref" href="#fn:7">7</a></sup
+              >. Those 50,000 Hopper chips cost on the order of ~$1B.
+              <strong
+                >Thus, DeepSeek's total spend as a company (as distinct from
+                spend to train an individual model) is not vastly different from
+                US AI labs.</strong
+              >
+            </p>
+          </li>
+          <li>
+            <p>
+              It’s worth noting that the "scaling curve" analysis is a bit
+              oversimplified, because models are somewhat differentiated and
+              have different strengths and weaknesses; the scaling curve numbers
+              are a crude average that ignores a lot of details. I can only
+              speak to Anthropic’s models, but as I’ve hinted at above, Claude
+              is extremely good at coding and at having a well-designed style of
+              interaction with people (many people use it for personal advice or
+              support). On these and some additional tasks, there’s just no
+              comparison with DeepSeek. These factors don’t appear in the
+              scaling numbers.
+            </p>
+          </li>
+        </ul>
+
+        <p>
+          <a href="https://github.com/deepseek-ai/DeepSeek-R1"
+            ><strong>R1</strong></a
+          >, which is the model that was released last week and which triggered
+          an explosion of public attention (including a
+          <a
+            href="https://www.reuters.com/technology/chinas-deepseek-sets-off-ai-market-rout-2025-01-27/"
+            >~17% decrease</a
+          >
+          in Nvidia's stock price), is much less interesting from an innovation
+          or engineering perspective than V3. It adds the second phase of
+          training — reinforcement learning, described in #3 in the previous
+          section — and essentially replicates what OpenAI has done with o1
+          (they appear to be at similar scale with similar results)<sup
+            id="fnref:8"
+            ><a class="footnote-ref" href="#fn:8">8</a></sup
+          >. However, because we are on the early part of the scaling curve,
+          it’s possible for several companies to produce models of this type, as
+          long as they’re starting from a strong pretrained model. Producing R1
+          given V3 was probably very cheap. We’re therefore at an interesting
+          “crossover point”, where it is temporarily the case that several
+          companies can produce good reasoning models. This will rapidly cease
+          to be true as everyone moves further up the scaling curve on these
+          models.
+        </p>
+
+        <h2>Export Controls</h2>
+
+        <p>
+          All of this is just a preamble to my main topic of interest: the
+          export controls on chips to China. In light of the above facts, I see
+          the situation as follows:
+        </p>
+
+        <ul>
+          <li>
+            <p>
+              There is an ongoing trend where companies
+              <a
+                href="https://epoch.ai/blog/how-much-does-it-cost-to-train-frontier-ai-models#:~:text=The%20cost%20of%20training%20frontier,a%20billion%20dollars%20by%202027."
+                >spend more and more</a
+              >
+              on training powerful AI models, even as the curve is periodically
+              shifted and the cost of training a <em>given</em> level of model
+              intelligence declines rapidly. It's just that the economic value
+              of training more and more intelligent models is so great that any
+              cost gains are <em>more than eaten up</em> almost immediately —
+              they're poured back into making even smarter models for the same
+              huge cost we were originally planning to spend. To the extent that
+              US labs haven't already discovered them, the efficiency
+              innovations DeepSeek developed will soon be applied by both US and
+              Chinese labs to train multi-billion dollar models. These will
+              perform better than the multi-billion models they were previously
+              planning to train — but they'll still spend multi-billions. That
+              number will continue going up, until we reach AI that is smarter
+              than almost all humans at almost all things.
+            </p>
+          </li>
+          <li>
+            <p>
+              Making AI that is smarter than almost all humans at almost all
+              things will require millions of chips, tens of billions of dollars
+              (at least), and is most likely to happen in 2026-2027. DeepSeek's
+              releases don't change this, because they're roughly on the
+              expected cost reduction curve that has always been factored into
+              these calculations.
+            </p>
+          </li>
+          <li>
+            <p>
+              This means that in 2026-2027 we could end up in one of two starkly
+              different worlds. In the US, multiple companies will definitely
+              have the required millions of chips (at the cost of tens of
+              billions of dollars). The question is whether China will also be
+              able to get millions of chips<sup id="fnref:9"
+                ><a class="footnote-ref" href="#fn:9">9</a></sup
+              >.
+            </p>
+            <ul>
+              <li>
+                If they can, we'll live in a <em>bipolar</em> world, where both
+                the US and China have powerful AI models that will cause
+                extremely rapid advances in science and technology — what I've
+                called "<a
+                  href="https://darioamodei.com/machines-of-loving-grace"
+                  >countries of geniuses in a datacenter</a
+                >". A bipolar world would not necessarily be balanced
+                indefinitely. Even if the US and China were at parity in AI
+                systems, it seems likely that China could direct more talent,
+                capital, and focus to military applications of the technology.
+                Combined with its large industrial base and military-strategic
+                advantages, this could help China take a commanding lead on the
+                global stage, not just for AI but for everything.
+              </li>
+              <li>
+                If China <em>can't</em> get millions of chips, we'll (at least
+                temporarily) live in a <em>unipolar</em> world, where only the
+                US and its allies have these models. It's unclear whether the
+                unipolar world will last, but there's at least the possibility
+                that,
+                <strong
+                  >because AI systems can eventually help make even smarter AI
+                  systems, a temporary lead could be parlayed into a durable
+                  advantage</strong
+                ><sup id="fnref:10"
+                  ><a class="footnote-ref" href="#fn:10">10</a></sup
+                >. Thus, in this world, the US and its allies might take a
+                commanding and long-lasting lead on the global stage.
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p>
+              Well-enforced export controls<sup id="fnref:11"
+                ><a class="footnote-ref" href="#fn:11">11</a></sup
+              >
+              are the only thing that can prevent China from getting millions of
+              chips, and are therefore the most important determinant of whether
+              we end up in a unipolar or bipolar world.
+            </p>
+          </li>
+          <li>
+            <p>
+              The performance of DeepSeek does not mean the export controls
+              failed. As I stated above, DeepSeek had a moderate-to-large number
+              of chips, so it's not surprising that they were able to develop
+              and then train a powerful model. They were not substantially more
+              resource-constrained than US AI companies, and the export controls
+              were not the main factor causing them to "innovate". They are
+              simply very talented engineers and show why China is a serious
+              competitor to the US.
+            </p>
+          </li>
+          <li>
+            <p>
+              DeepSeek also does not show that China can always obtain the chips
+              it needs via smuggling, or that the controls always have
+              loopholes. I don't believe the export controls were ever designed
+              to prevent China from getting a few tens of thousands of chips.
+              $1B of economic activity can be hidden, but it's hard to hide
+              $100B or even $10B. A million chips may also be physically
+              difficult to smuggle. It's also instructive to look at the chips
+              DeepSeek is currently reported to have. This is a mix of H100's,
+              H800's, and H20's,
+              <a href="https://x.com/dylan522p/status/1883934275516654060"
+                >according to SemiAnalysis</a
+              >, adding up to 50k total. H100's have been banned under the
+              export controls since their release, so if DeepSeek has any they
+              must have been smuggled (note that Nvidia
+              <a
+                href="https://www.axios.com/2025/01/27/nvidia-shares-deepseek-china-ai"
+                >has stated</a
+              >
+              that DeepSeek's advances are "fully export control compliant").
+              H800's were allowed under the initial round of
+              <a
+                href="https://www.federalregister.gov/documents/2022/10/13/2022-21658/implementation-of-additional-export-controls-certain-advanced-computing-and-semiconductor"
+                >2022 export controls</a
+              >, but were banned in Oct 2023 when the controls
+              <a
+                href="https://www.axios.com/2023/10/17/biden-export-restrictions-ai-chips-china"
+                >were updated</a
+              >, so these were probably shipped before the ban. H20's are less
+              efficient for training and more efficient for sampling — and are
+              still allowed, although I think they should be banned. All of that
+              is to say that it appears that a substantial fraction of
+              DeepSeek's AI chip fleet consists of chips that haven't been
+              banned (but should be); chips that were shipped before they were
+              banned; and some that seem very likely to have been smuggled. This
+              shows that the export controls are actually working and adapting:
+              loopholes are being closed; otherwise, they would likely have a
+              full fleet of top-of-the-line H100's. If we can close them fast
+              enough, we may be able to prevent China from getting millions of
+              chips, increasing the likelihood of a unipolar world with the US
+              ahead.
+            </p>
+          </li>
+        </ul>
+
+        <p>
+          Given my focus on export controls and US national security, I want to
+          be clear on one thing. I don't see DeepSeek themselves as adversaries
+          and the point isn't to target them in particular. In interviews
+          they've done, they seem like smart, curious researchers who just want
+          to make useful technology.
+        </p>
+
+        <p>
+          But they're beholden to an authoritarian government that has committed
+          human rights violations, has behaved aggressively on the world stage,
+          and will be far more unfettered in these actions if they're able to
+          match the US in AI. Export controls are one of
+          <a href="https://www.rand.org/pubs/perspectives/PEA3776-1.html"
+            >our most powerful tools</a
+          >
+          for preventing this, and the idea that the technology getting
+          <em>more powerful</em>, having <em>more</em> bang for the buck, is a
+          reason to lift our export controls makes no sense at all.
+        </p>
+
+        <section class="footnotes">
+          <h3>Footnotes</h3>
+          <ol class="footnotes-list">
+            <li id="fn:1" class="footnote-item">
+              <p>
+                <sup>1</sup>I’m not taking any position on reports of
+                distillation from Western models in this essay. Here, I’ll just
+                take DeepSeek at their word that they trained it the way they
+                said in the paper.
+                <a href="#fnref:1" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:2" class="footnote-item">
+              <p>
+                <sup>2</sup>Incidentally, I think the release of the DeepSeek
+                models is clearly not bad for Nvidia, and that a double-digit
+                (~17%) drop in their stock in reaction to this was baffling. The
+                case for this release not being bad for Nvidia is even clearer
+                than it not being bad for AI companies. But my main goal in this
+                piece is to defend export control policies.
+                <a href="#fnref:2" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:3" class="footnote-item">
+              <p>
+                <sup>3</sup>To be completely precise, it was a pretrained model
+                with the tiny amount of RL training typical of models before the
+                reasoning paradigm shift.
+                <a href="#fnref:3" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:4" class="footnote-item">
+              <p>
+                <sup>4</sup>It is stronger on some very narrow tasks.
+                <a href="#fnref:4" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:5" class="footnote-item">
+              <p>
+                <sup>5</sup>This is the number quoted in
+                <a href="https://arxiv.org/html/2412.19437v1"
+                  >DeepSeek's paper</a
+                >
+                — I am taking it at face value, and not doubting this part of
+                it, only the comparison to US company model training costs, and
+                the distinction between the cost to train a specific model
+                (which is the $6M) and the overall cost of R&D (which is much
+                higher). However we also can't be completely sure of the $6M —
+                model size is verifiable but other aspects like quantity of
+                tokens are not.
+                <a href="#fnref:5" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:6" class="footnote-item">
+              <p>
+                <sup>6</sup>In some
+                <a href="https://www.youtube.com/watch?v=uvMolVW_2v0&t=637s"
+                  >interviews</a
+                >
+                I said they had "50,000 H100's" which was a subtly incorrect
+                summary of the reporting and which I want to correct here. By
+                far the best known "Hopper chip" is the H100 (which is what I
+                assumed was being referred to), but Hopper also includes H800's,
+                and H20's, and DeepSeek is reported to have a mix of all three,
+                adding up to 50,000. That doesn't change the situation much, but
+                it's worth correcting. I'll discuss the H800 and H20 more when I
+                talk about export controls.
+                <a href="#fnref:6" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:7" class="footnote-item">
+              <p>
+                <sup>7</sup>Note: I expect this gap to grow greatly on the next
+                generation of clusters, because of export controls.
+                <a href="#fnref:7" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:8" class="footnote-item">
+              <p>
+                <sup>8</sup>I suspect one of the principal reasons R1 gathered
+                so much attention is that it was the first model to
+                <em>show the user</em> the chain-of-thought reasoning that the
+                model exhibits (OpenAI's o1 only shows the final answer).
+                DeepSeek showed that users find this interesting. To be clear
+                this is a user interface choice and is not related to the model
+                itself. <a href="#fnref:8" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:9" class="footnote-item">
+              <p>
+                <sup>9</sup>Note that China's own chips won't be able to compete
+                with US-made chips any time soon. As I wrote in my
+                <a
+                  href="https://www.wsj.com/opinion/trump-can-keep-americas-ai-advantage-china-chips-data-eccdce91"
+                  >recent op-ed</a
+                >
+                with Matt Pottinger: "China's best AI chips, the Huawei Ascend
+                series, are substantially less capable than the leading chip
+                made by U.S.-based Nvidia. China also may not have the
+                production capacity to keep pace with growing demand. There's
+                not a single noteworthy cluster of Huawei Ascend chips outside
+                China today, suggesting that China is struggling to meet its
+                domestic needs...".
+                <a href="#fnref:9" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:10" class="footnote-item">
+              <p>
+                <sup>10</sup>To be clear, the goal here is not to deny China or
+                any other authoritarian country the immense benefits in science,
+                medicine, quality of life, etc. that come from very powerful AI
+                systems. Everyone should be able to benefit from AI. The goal is
+                to prevent them from gaining military dominance.
+                <a href="#fnref:10" class="footnote-backref">↩</a>
+              </p>
+            </li>
+            <li id="fn:11" class="footnote-item">
+              <p>
+                <sup>11</sup>Several links, as there have been several rounds.
+                To cover some of the major actions:
+                <a
+                  href="https://www.reuters.com/article/technology/us-restricts-exports-to-chinese-semiconductor-firm-fujian-jinhua-idUSKCN1N328E/"
+                  >One</a
+                >,
+                <a
+                  href="https://www.federalregister.gov/documents/2022/10/13/2022-21658/implementation-of-additional-export-controls-certain-advanced-computing-and-semiconductor"
+                  >two</a
+                >,
+                <a
+                  href="https://www.axios.com/2023/10/17/biden-export-restrictions-ai-chips-china"
+                  >three</a
+                >,
+                <a
+                  href="https://www.bis.gov/press-release/biden-harris-administration-announces-regulatory-framework-responsible-diffusion"
+                  >four</a
+                >. <a href="#fnref:11" class="footnote-backref">↩</a>
+              </p>
+            </li>
+          </ol>
+        </section>
+
+        <footer>
+          <div class="content-wrapper">
+            <div class="subscribe-form-container">
+              <form
+                id="subscribeForm"
+                class="subscribe-form"
+                action="https://docs.google.com/forms/d/e/1FAIpQLSfG3qq6S5Y1CK5G9Vv-MVoVlpSrXb5nhZWedazSMgi3oNz-Pg/formResponse"
+                method="POST"
+              >
+                <input
+                  type="email"
+                  id="emailInput"
+                  name="entry.1821458260"
+                  required
+                  placeholder="Enter your email"
+                  class="email-input"
+                />
+                <button type="submit" class="submit-button">
+                  Subscribe for future updates
+                </button>
+              </form>
+              <div id="formMessage"></div>
+            </div>
+            <center><a href="/privacy.html">Privacy policy</a></center>
+            <script src="/subscribe.js"></script>
+          </div>
+        </footer>
+      </article>
+    </main>
+
+    <script>
+      console.log(
+        "%cIf you're curious about making reliable, interpretable, and steerable AI systems, you might enjoy working with us at Anthropic. Take a look at our openings: https://anthropic.com/careers",
+        "font-family: monospace; font-size: 14px; color: #141413; background-color: #F0EFEA; padding: 5px; border-radius: 5px;",
+      );
+    </script>
+  </body>
+</html>
