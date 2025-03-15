@@ -4,7 +4,7 @@ This repository hosts my personal website published at [ckallum.github.io](https
 
 ## Repository Structure
 
-The website follows a modern, simplified file structure:
+The website follows a modern, simplified file structure with TypeScript:
 
 ```
 /
@@ -13,15 +13,19 @@ The website follows a modern, simplified file structure:
 │   ├── css/               # Stylesheets
 │   │   ├── home.css       # Styles for the landing page
 │   │   └── article.css    # Styles for article pages
-│   ├── js/                # JavaScript files
-│   │   ├── darkmode.js    # Dark mode functionality
-│   │   ├── toc.js         # Table of contents functionality
-│   │   └── footnotes.js   # Footnote functionality
+│   ├── js/                # Compiled JavaScript files
+│   │   ├── darkmode.js    # Dark mode functionality (compiled from TS)
+│   │   ├── toc.js         # Table of contents functionality (compiled from TS)
+│   │   └── footnotes.js   # Footnote functionality (compiled from TS)
 │   └── fonts/             # Web fonts
 │       ├── Newsreader.woff2
 │       └── Newsreader-italic.woff2
+├── src/                   # TypeScript source files
+│   ├── darkmode.ts        # Dark mode functionality source
+│   ├── toc.ts             # Table of contents functionality source
+│   └── footnotes.ts       # Footnote functionality source
 └── articles/              # All articles
-    └── broad-ai-trends-of-2025/
+    └── the-investment-state-of-ai-2025/
         └── index.html     # Article content
 ```
 
@@ -35,6 +39,7 @@ This repository is configured to deploy as a GitHub Pages site. The main branch 
 - Dark mode support with preference memory
 - Clean, minimal design
 - Table of contents for articles
+- TypeScript for improved code quality and maintainability
 
 ## Local Development
 
@@ -42,14 +47,18 @@ To run the site locally:
 
 1. Clone the repository
 2. Navigate to the repository directory
-3. Open `index.html` in your browser
+3. Install dependencies: `npm install`
+4. Build TypeScript files: `npm run build`
+5. For development with auto-recompile: `npm run watch`
+6. Open `index.html` in your browser
 
 ## Technologies Used
 
 - HTML5
 - CSS3
-- JavaScript (vanilla)
+- TypeScript
 - GitHub Pages for hosting
+- ESLint for code quality
 
 ## License
 
