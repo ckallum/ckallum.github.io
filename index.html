@@ -5,29 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Personal website and portfolio of Callum Ke">
   <title>Callum Ke - Portfolio</title>
-  <link rel="stylesheet" href="home-styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
-  <!-- Dark Mode Styles -->
   <style>
-    /* Dark Mode CSS Variables */
+    /* Base Styles */
     :root {
-      --bg-color: #f8f8f8;
-      --text-color: #333;
-      --border-color: #ddd;
-      --card-bg: #fff;
-      --card-shadow: rgba(0, 0, 0, 0.1);
-      --header-bg: #ffffff;
-      --btn-primary-bg: #0066cc;
-      --btn-primary-text: #ffffff;
-      --btn-secondary-bg: #f0f0f0;
-      --btn-secondary-text: #333;
-      --btn-outline-border: #333;
-      --btn-outline-text: #333;
-      --footer-bg: #f5f5f5;
+      --bg-color: #f0efea;
+      --text-color: #141413;
+      --border-color: #e6e4dd;
+      --link-color: #0066cc;
+      --section-spacing: 2rem;
+      --content-max-width: 800px;
+      --header-height: 60px;
       --toggle-bg: #fff;
       --toggle-border: #333;
       --toggle-slider: #333;
@@ -35,27 +27,65 @@
     
     /* Dark Mode Theme */
     .dark-mode {
-      --bg-color: #121212;
+      --bg-color: #141413;
       --text-color: #f0efea;
       --border-color: #444;
-      --card-bg: #1e1e1e;
-      --card-shadow: rgba(0, 0, 0, 0.3);
-      --header-bg: #1a1a1a;
-      --btn-primary-bg: #4d8ad3;
-      --btn-primary-text: #ffffff;
-      --btn-secondary-bg: #2a2a2a;
-      --btn-secondary-text: #f0efea;
-      --btn-outline-border: #f0efea;
-      --btn-outline-text: #f0efea;
-      --footer-bg: #1a1a1a;
+      --link-color: #4d8ad3;
       --toggle-bg: #333;
       --toggle-border: #f0efea;
       --toggle-slider: #f0efea;
     }
     
     /* For smooth transitions */
-    body, .site-header, .site-footer, .article-card, .project-card, .btn {
-      transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    body, header, section, a, h1, h2, h3, p, li {
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Open Sans', sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      padding: 0;
+      margin: 0;
+    }
+    
+    /* Header Styles */
+    header {
+      height: var(--header-height);
+      padding: 1rem 0;
+      display: flex;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-color);
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    header > div {
+      width: 100%;
+      max-width: var(--content-max-width);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem;
+    }
+    
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    header h1 a {
+      text-decoration: none;
+      color: var(--text-color);
     }
     
     /* Dark Mode Toggle Switch Styles */
@@ -63,7 +93,6 @@
       position: relative;
       width: 40px;
       height: 20px;
-      margin-left: 15px;
     }
     
     .toggle-input {
@@ -106,261 +135,155 @@
       background-color: var(--toggle-bg);
     }
     
-    /* Apply dark mode styles */
-    body {
-      background-color: var(--bg-color);
+    /* Main Content */
+    .content-wrapper {
+      max-width: var(--content-max-width);
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    
+    section {
+      margin-bottom: var(--section-spacing);
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    h3 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+    }
+    
+    a {
+      color: var(--link-color);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-thickness: 1px;
+    }
+    
+    a:hover {
+      text-decoration-thickness: 2px;
+    }
+    
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    li {
+      margin-bottom: 0.75rem;
+    }
+    
+    .article-list li, .project-list li {
+      margin-bottom: 1.5rem;
+    }
+    
+    .article-title, .project-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .article-date, .project-date {
+      font-size: 0.9rem;
+      color: #767676;
+      margin-bottom: 0.25rem;
+    }
+    
+    .article-excerpt, .project-description {
+      margin-bottom: 0.5rem;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .social-links a {
       color: var(--text-color);
+      font-size: 1.5rem;
     }
     
-    .site-header {
-      background-color: var(--header-bg);
-    }
-    
-    .site-header.sticky {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      background-color: var(--header-bg);
-    }
-    
-    .site-footer {
-      background-color: var(--footer-bg);
-    }
-    
-    .article-card, .project-card {
-      background-color: var(--card-bg);
-      box-shadow: 0 2px 10px var(--card-shadow);
-    }
-    
-    .btn-primary {
-      background-color: var(--btn-primary-bg);
-      color: var(--btn-primary-text);
-    }
-    
-    .btn-secondary {
-      background-color: var(--btn-secondary-bg);
-      color: var(--btn-secondary-text);
-    }
-    
-    .btn-outline {
-      border-color: var(--btn-outline-border);
-      color: var(--btn-outline-text);
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      h3 {
+        font-size: 1.2rem;
+      }
     }
   </style>
   
   <script src="styling/new/darkmode.js" defer></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <nav class="main-nav">
-        <div class="logo">Callum Ke</div>
-        <ul class="nav-links">
-          <li><a href="#articles" class="nav-link">Articles</a></li>
-          <li><a href="#projects" class="nav-link">Projects</a></li>
-          <li><a href="#about" class="nav-link">About</a></li>
-          <li><a href="#contact" class="nav-link">Contact</a></li>
-          <!-- Dark Mode Toggle -->
-          <li class="toggle-container">
-            <div class="toggle-switch">
-              <input type="checkbox" id="darkModeToggle" class="toggle-input">
-              <label for="darkModeToggle" class="toggle-label">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </li>
-        </ul>
-      </nav>
+  <header>
+    <div>
+      <h1><a href="/">Callum Ke</a></h1>
+      <div class="header-controls">
+        <div class="toggle-switch">
+          <input type="checkbox" id="darkModeToggle" class="toggle-input">
+          <label for="darkModeToggle" class="toggle-label">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
     </div>
   </header>
 
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <h1>Hi, I'm Callum Ke</h1>
-        <p class="hero-text">Software engineer, researcher, and writer exploring the frontiers of technology.</p>
-        <div class="hero-cta">
-          <a href="#projects" class="btn btn-primary">View My Work</a>
-          <a href="#contact" class="btn btn-secondary">Get In Touch</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="articles" class="section articles-section">
-    <div class="container">
-      <h2 class="section-title">Recent Articles</h2>
-      
-      <div class="articles-grid">
-        <article class="article-card">
-          <div class="article-card-content">
-            <h3 class="article-title">
-              <a href="articles/the-investment-state-of-ai-2025/index.html">The Investment State of AI 2025</a>
-            </h3>
-            <p class="article-meta">March 15, 2025 · 5 min read</p>
-            <p class="article-excerpt">An analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</p>
-            <a href="articles/the-investment-state-of-ai-2025/index.html" class="read-more">Read more →</a>
+  <main class="content-wrapper">
+    <section>
+      <p>I'm currently a Software Development Engineer at Amazon. I'm interested in distributed systems and interpreting and building fair AI models.</p>
+      <p>I studied Computer Science at the University of Bristol, achieving First Class Honours.</p>
+      <p>When I'm not coding, you can find me reading, running, and eating. But mostly running.</p>
+    </section>
+    
+    <section>
+      <h3>Articles</h3>
+      <ul class="article-list">
+        <li>
+          <div class="article-title">
+            <a href="articles/the-investment-state-of-ai-2025/index.html">The Investment State of AI 2025</a>
           </div>
-        </article>
+          <div class="article-date">March 15, 2025</div>
+          <div class="article-excerpt">An analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</div>
+        </li>
+      </ul>
+    </section>
+    
+    <section>
+      <h3>Projects</h3>
+      <ul class="project-list">
+        <li>
+          <div class="project-title">Coming Soon</div>
+          <div class="project-description">Work in progress, will update soon!</div>
+        </li>
+      </ul>
+    </section>
+    
+    <section>
+      <h3>Connect</h3>
+      <div class="social-links">
+        <a href="https://github.com/ckallum" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+        <a href="#" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a>
       </div>
-      
-      <div class="section-footer">
-        <a href="#" class="btn btn-outline">View All Articles</a>
-      </div>
-    </div>
-  </section>
-
-  <section id="projects" class="section projects-section">
-    <div class="container">
-      <h2 class="section-title">Recent Projects</h2>
-      
-      <div class="projects-grid">
-        <div class="project-card">
-          <div class="project-card-content">
-            <h3 class="project-title">Coming Soon</h3>
-            <p class="project-tags">TBD</p>
-            <p class="project-description">Work in progress, will update soon!.</p>
-            <div class="project-links">
-              <a href="#" class="project-link"><i class="fab fa-github"></i> View on GitHub</a>
-              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live Demo</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section-footer">
-        <a href="#" class="btn btn-outline">View All Projects</a>
-      </div>
-    </div>
-  </section>
-
-  <section id="about" class="section about-section">
-    <div class="container">
-      <div class="about-grid">
-        <div class="about-content">
-          <h2 class="section-title">About Me</h2>
-          <p>I'm currently a SDE at Amazon. I'm interested in distributed systems and interpreting and building fair AI models.</p>
-          
-          <p>I studied Computer Science at the University of Bristol, achieving First Class Honours.</p>
-          
-          <p>When I'm not coding, you can find me reading, running and eating. But mostly running.</p>
-          
-          <div class="skills">
-            <h3>Skills & Technologies</h3>
-            <div class="skill-tags">
-              <span class="skill-tag">WI</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="about-image">
-          <!-- Placeholder for your profile image -->
-          <div class="profile-image-placeholder">
-            <i class="fas fa-user"></i>
-          </div>
-          
-          <div class="social-links">
-            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="contact" class="section contact-section">
-    <div class="container">
-      <h2 class="section-title">Get In Touch</h2>
-      
-      <div class="contact-grid">
-        <div class="contact-info">
-          <p>I'm always open to interesting conversations, collaboration opportunities, or discussing potential projects. Feel free to reach out through any of the channels below.</p>
-          
-          <ul class="contact-list">
-            <li class="contact-item">
-              <i class="fas fa-envelope"></i>
-              <a href="mailto:ckallum@proton.me">ckallum@proton.me</a>
-            </li>
-            <li class="contact-item">
-              <i class="fab fa-github"></i>
-              <a href="https://github.com/ckallum" target="_blank">github.com/ckallum</a>
-            </li>
-            <li class="contact-item">
-              <i class="fab fa-linkedin-in"></i>
-              <a href="https://www.linkedin.com/in/callum-ke/" target="_blank">linkedin.com/in/callum-ke/</a>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="contact-form-container">
-          <form class="contact-form">
-            <div class="form-group">
-              <label for="name">Name</label>
-              <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="subject">Subject</label>
-              <input type="text" id="subject" name="subject" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="message">Message</label>
-              <textarea id="message" name="message" rows="5" required></textarea>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Send Message</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-content">
-        <p>&copy; 2025 Callum Ke. All rights reserved.</p>
-        <div class="footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+    </section>
+  </main>
 
   <script>
-    // Simple smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
-        
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 80, // Offset for the fixed header
-            behavior: 'smooth'
-          });
-        }
-      });
-    });
-    
-    // Simple sticky header
-    window.addEventListener('scroll', function() {
-      const header = document.querySelector('.site-header');
-      if (window.scrollY > 50) {
-        header.classList.add('sticky');
-      } else {
-        header.classList.remove('sticky');
-      }
-    });
-    
     // Initialize dark mode from localStorage
     document.addEventListener('DOMContentLoaded', function() {
       const darkModeToggle = document.getElementById('darkModeToggle');
@@ -372,6 +295,17 @@
         document.documentElement.classList.add('dark-mode');
         darkModeToggle.checked = true;
       }
+      
+      // Toggle dark mode
+      darkModeToggle.addEventListener('change', function() {
+        if (this.checked) {
+          document.documentElement.classList.add('dark-mode');
+          localStorage.setItem('darkMode', 'enabled');
+        } else {
+          document.documentElement.classList.remove('dark-mode');
+          localStorage.setItem('darkMode', 'disabled');
+        }
+      });
       
       // Remove preload class to enable animations
       requestAnimationFrame(() => {
