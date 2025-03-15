@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="preload">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,143 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- Dark Mode Styles -->
+  <style>
+    /* Dark Mode CSS Variables */
+    :root {
+      --bg-color: #f8f8f8;
+      --text-color: #333;
+      --border-color: #ddd;
+      --card-bg: #fff;
+      --card-shadow: rgba(0, 0, 0, 0.1);
+      --header-bg: #ffffff;
+      --btn-primary-bg: #0066cc;
+      --btn-primary-text: #ffffff;
+      --btn-secondary-bg: #f0f0f0;
+      --btn-secondary-text: #333;
+      --btn-outline-border: #333;
+      --btn-outline-text: #333;
+      --footer-bg: #f5f5f5;
+      --toggle-bg: #fff;
+      --toggle-border: #333;
+      --toggle-slider: #333;
+    }
+    
+    /* Dark Mode Theme */
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #f0efea;
+      --border-color: #444;
+      --card-bg: #1e1e1e;
+      --card-shadow: rgba(0, 0, 0, 0.3);
+      --header-bg: #1a1a1a;
+      --btn-primary-bg: #4d8ad3;
+      --btn-primary-text: #ffffff;
+      --btn-secondary-bg: #2a2a2a;
+      --btn-secondary-text: #f0efea;
+      --btn-outline-border: #f0efea;
+      --btn-outline-text: #f0efea;
+      --footer-bg: #1a1a1a;
+      --toggle-bg: #333;
+      --toggle-border: #f0efea;
+      --toggle-slider: #f0efea;
+    }
+    
+    /* For smooth transitions */
+    body, .site-header, .site-footer, .article-card, .project-card, .btn {
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    /* Dark Mode Toggle Switch Styles */
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      margin-left: 15px;
+    }
+    
+    .toggle-input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-label {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--toggle-bg);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      border-radius: 34px;
+      border: 1px solid var(--toggle-border);
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--toggle-slider);
+      transition: transform 0.2s ease, background-color 0.2s ease;
+      border-radius: 50%;
+    }
+    
+    .toggle-input:checked + .toggle-label {
+      background-color: var(--toggle-slider);
+    }
+    
+    .toggle-input:checked + .toggle-label .toggle-slider {
+      transform: translateX(20px);
+      background-color: var(--toggle-bg);
+    }
+    
+    /* Apply dark mode styles */
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+    
+    .site-header {
+      background-color: var(--header-bg);
+    }
+    
+    .site-header.sticky {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      background-color: var(--header-bg);
+    }
+    
+    .site-footer {
+      background-color: var(--footer-bg);
+    }
+    
+    .article-card, .project-card {
+      background-color: var(--card-bg);
+      box-shadow: 0 2px 10px var(--card-shadow);
+    }
+    
+    .btn-primary {
+      background-color: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+    }
+    
+    .btn-secondary {
+      background-color: var(--btn-secondary-bg);
+      color: var(--btn-secondary-text);
+    }
+    
+    .btn-outline {
+      border-color: var(--btn-outline-border);
+      color: var(--btn-outline-text);
+    }
+  </style>
+  
+  <script src="styling/new/darkmode.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -21,6 +158,15 @@
           <li><a href="#projects" class="nav-link">Projects</a></li>
           <li><a href="#about" class="nav-link">About</a></li>
           <li><a href="#contact" class="nav-link">Contact</a></li>
+          <!-- Dark Mode Toggle -->
+          <li class="toggle-container">
+            <div class="toggle-switch">
+              <input type="checkbox" id="darkModeToggle" class="toggle-input">
+              <label for="darkModeToggle" class="toggle-label">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </li>
         </ul>
       </nav>
     </div>
@@ -213,6 +359,24 @@
       } else {
         header.classList.remove('sticky');
       }
+    });
+    
+    // Initialize dark mode from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      if (!darkModeToggle) return;
+      
+      // Apply saved preference
+      const savedDarkMode = localStorage.getItem('darkMode');
+      if (savedDarkMode === 'enabled') {
+        document.documentElement.classList.add('dark-mode');
+        darkModeToggle.checked = true;
+      }
+      
+      // Remove preload class to enable animations
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('preload');
+      });
     });
   </script>
 </body>
