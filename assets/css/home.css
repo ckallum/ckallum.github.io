@@ -338,6 +338,72 @@ img {
   align-self: flex-start;
 }
 
+/* Race Report Section */
+.race-report-section {
+  background-color: var(--bg-color);
+}
+
+.race-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.race-report-card {
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  background-color: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.race-report-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.race-report-card-content {
+  padding: var(--spacing-lg);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.race-report-title {
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.25rem;
+}
+
+.race-report-title a {
+  color: var(--text-color);
+}
+
+.race-report-title a:hover {
+  color: var(--primary-color);
+}
+
+.race-report-meta {
+  font-size: 0.85rem;
+  color: var(--text-lighter);
+  margin-bottom: var(--spacing-md);
+}
+
+.race-report-excerpt {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-light);
+  flex-grow: 1;
+}
+
+.race-report-read-more {
+  font-weight: 600;
+  font-size: 0.9rem;
+  align-self: flex-start;
+}
+
 /* Projects Section */
 .projects-section {
   background-color: var(--bg-alt);
