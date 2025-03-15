@@ -29,6 +29,7 @@
   --max-post-width: 700px;
   --header-height: 60px;
   --drawer-width: 280px;
+  --toc-width: 260px;
   
   /* Z-index layers */
   --z-drawer: 1300;
@@ -67,6 +68,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.01em;
+  scroll-margin-top: calc(var(--header-height) + var(--spacing-lg));
 }
 
 h1 {
@@ -79,6 +81,7 @@ h2 {
   font-size: 2rem;
   margin-top: var(--spacing-xl);
   margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
 }
 
 h3 {
@@ -130,6 +133,101 @@ main {
   padding-bottom: var(--spacing-xl);
 }
 
+/* MultiToC Layout (LessWrong Style) */
+.MultiToCLayout {
+  display: flex;
+  position: relative;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
+
+.MultiToCLayout-sidebar {
+  width: var(--toc-width);
+  position: sticky;
+  top: calc(var(--header-height) + var(--spacing-md));
+  max-height: calc(100vh - var(--header-height) - var(--spacing-md) * 2);
+  overflow-y: auto;
+  padding-top: var(--spacing-lg);
+  margin-right: var(--spacing-lg);
+  align-self: flex-start;
+}
+
+.MultiToCLayout-content {
+  flex: 1;
+  width: calc(100% - var(--toc-width) - var(--spacing-lg));
+  max-width: var(--max-post-width);
+}
+
+.MultiToCLayout-tableOfContents {
+  font-family: var(--font-family-ui);
+  font-size: 0.9rem;
+  padding: var(--spacing-md);
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.MultiToCLayout-tableOfContents h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--secondary-color);
+}
+
+.MultiToCLayout-tableOfContents ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+  font-family: var(--font-family-ui);
+}
+
+.MultiToCLayout-tableOfContents li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.MultiToCLayout-tableOfContents a {
+  display: block;
+  padding: var(--spacing-xs) 0;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+  padding-left: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.MultiToCLayout-tableOfContents a:hover,
+.MultiToCLayout-tableOfContents a.active {
+  color: var(--primary-color);
+  border-left-color: var(--primary-color);
+  padding-left: var(--spacing-md);
+}
+
+.MultiToCLayout-tableOfContents .toc-h1 { 
+  font-weight: 600;
+}
+
+.MultiToCLayout-tableOfContents .toc-h2 { 
+  padding-left: var(--spacing-md);
+  font-size: 0.85rem;
+}
+
+.MultiToCLayout-tableOfContents .toc-h3 { 
+  padding-left: calc(var(--spacing-md) * 2);
+  font-size: 0.8rem;
+  color: var(--muted-text-color);
+}
+
+.MultiToCLayout-tableOfContents .toc-h4 { 
+  padding-left: calc(var(--spacing-md) * 3);
+  font-size: 0.75rem;
+  color: var(--muted-text-color);
+}
+
 /* Article Styles (LessWrong-specific) */
 article {
   background-color: var(--card-background);
@@ -138,9 +236,6 @@ article {
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
   overflow-wrap: break-word;
-  max-width: var(--max-post-width);
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* Quote Styles */
@@ -419,6 +514,28 @@ footer a:hover {
 }
 
 /* Media Queries for Responsive Design */
+@media (max-width: 1024px) {
+  .MultiToCLayout {
+    flex-direction: column;
+  }
+  
+  .MultiToCLayout-sidebar {
+    width: 100%;
+    position: relative;
+    top: 0;
+    padding-top: 0;
+    margin-right: 0;
+    margin-bottom: var(--spacing-lg);
+    max-height: none;
+    overflow-y: visible;
+  }
+  
+  .MultiToCLayout-content {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   html {
     font-size: 15px;
