@@ -1,36 +1,4 @@
-/* LessWrong-inspired styling - 2023 version */
-:root {
-  --background-color: #fbfbfb;
-  --text-color: #2b2b2b;
-  --primary-color: #5f9bc9;
-  --secondary-color: #3f5d75;
-  --border-color: #e8e8e8;
-  --card-background: #ffffff;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--font-family);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--text-color);
-  background-color: var(--background-color);
-  overflow-x: hidden;
-}
-
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px 16px;
-}
-
-/* Navigation Drawer Styling */
+/* LessWrong Navigation Drawer Styling */
 
 /* Overlay that appears when drawer is open */
 .overlay {
@@ -196,7 +164,6 @@ body {
   width: 100%;
   background-color: #2b2b2b;
   transition: all 0.3s ease;
-  margin: 3px 0;
 }
 
 .site-title {
@@ -224,66 +191,11 @@ body {
   background-color: rgba(95, 155, 201, 0.08);
 }
 
-/* Main content styling */
-.site-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.header-button.primary {
+  background-color: #5f9bc9;
+  color: white;
 }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--secondary-color);
-  margin-bottom: 16px;
-  letter-spacing: -0.5px;
-}
-
-h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: var(--secondary-color);
-  letter-spacing: -0.3px;
-}
-
-main {
-  flex: 1;
-}
-
-article {
-  background-color: var(--card-background);
-  padding: 32px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 32px;
-}
-
-p {
-  margin-bottom: 16px;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  font-family: Charter, Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
-footer {
-  margin-top: 40px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  font-size: 0.9rem;
-  color: #888;
-}
-
-/* Add subtle hover effects to interactive elements */
-a {
-  color: var(--primary-color);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a:hover {
-  color: var(--secondary-color);
-  text-decoration: underline;
+.header-button.primary:hover {
+  background-color: #4d89b3;
 }

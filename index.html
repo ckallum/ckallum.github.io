@@ -8,25 +8,89 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>The Investment State of AI 2025</h1>
-      <p>A comprehensive analysis of artificial intelligence investment trends</p>
+  <!-- Navigation Drawer -->
+  <div class="NavigationDrawer-root" id="navigation-drawer">
+    <div class="NavigationDrawer-paper">
+      <div class="NavigationDrawer-header">
+        <h3 class="NavigationDrawer-title">The Investment State of AI</h3>
+        <button class="NavigationDrawer-closeButton" id="close-nav" aria-label="Close navigation drawer">
+          <span class="NavigationDrawer-closeIcon">×</span>
+        </button>
+      </div>
+      <div class="NavigationDrawer-content">
+        <div class="NavigationDrawer-section">
+          <ul class="NavigationDrawer-menu">
+            <li class="NavigationDrawer-menuItem">
+              <a href="/" class="NavigationDrawer-menuLink active">Home</a>
+            </li>
+            <li class="NavigationDrawer-menuItem">
+              <a href="/investment-trends" class="NavigationDrawer-menuLink">Investment Trends</a>
+            </li>
+            <li class="NavigationDrawer-menuItem">
+              <a href="/key-technologies" class="NavigationDrawer-menuLink">Key Technologies</a>
+            </li>
+            <li class="NavigationDrawer-menuItem">
+              <a href="/market-analysis" class="NavigationDrawer-menuLink">Market Analysis</a>
+            </li>
+            <li class="NavigationDrawer-menuItem">
+              <a href="/predictions" class="NavigationDrawer-menuLink">Predictions</a>
+            </li>
+          </ul>
+        </div>
+        <div class="NavigationDrawer-divider"></div>
+        <div class="NavigationDrawer-section">
+          <h4 class="NavigationDrawer-sectionTitle">About</h4>
+          <ul class="NavigationDrawer-menu">
+            <li class="NavigationDrawer-menuItem">
+              <a href="/about" class="NavigationDrawer-menuLink">About This Project</a>
+            </li>
+            <li class="NavigationDrawer-menuItem">
+              <a href="/methodology" class="NavigationDrawer-menuLink">Methodology</a>
+            </li>
+            <li class="NavigationDrawer-menuItem">
+              <a href="/contributors" class="NavigationDrawer-menuLink">Contributors</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+  
+  <!-- Main content -->
+  <div class="site-wrapper">
+    <header class="site-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="site-title">The Investment State of AI 2025</div>
+      </div>
+      <div class="header-right">
+        <a href="#" class="header-button">Subscribe</a>
+      </div>
     </header>
     
-    <main>
-      <article>
-        <h2>Hello World</h2>
-        <p>Welcome to The Investment State of AI 2025. This site will provide a detailed analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</p>
-        <p>Content coming soon.</p>
-      </article>
-    </main>
-    
-    <footer>
-      <p>&copy; 2025 · <a href="#">About</a> · <a href="#">Contact</a></p>
-    </footer>
+    <div class="container">
+      <main>
+        <article>
+          <h1>Hello World</h1>
+          <p>Welcome to The Investment State of AI 2025. This site will provide a detailed analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</p>
+          <p>Content coming soon.</p>
+        </article>
+      </main>
+      
+      <footer>
+        <p>&copy; 2025 · <a href="#">About</a> · <a href="#">Contact</a></p>
+      </footer>
+    </div>
   </div>
 </body>
 </html>
