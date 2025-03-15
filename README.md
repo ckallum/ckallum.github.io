@@ -6,7 +6,6 @@ This repository hosts my personal website published at [ckallum.github.io](https
 
 - `index.html` - Main landing page with portfolio sections
 - `home-styles.css` - Styling for the main landing page
-- `/the-investment-state-of-ai-2025/` - Subpage for AI investment analysis with LessWrong-inspired styling
 
 ## GitHub Pages Setup
 
