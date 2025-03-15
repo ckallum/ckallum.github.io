@@ -21,7 +21,7 @@ The website follows a modern, simplified file structure:
 │       ├── Newsreader.woff2
 │       └── Newsreader-italic.woff2
 └── articles/              # All articles
-    └── the-investment-state-of-ai-2025/
+    └── broad-ai-trends-of-2025/
         └── index.html     # Article content
 ```
 
