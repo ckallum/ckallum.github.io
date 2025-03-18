@@ -3,29 +3,126 @@
  * 
  * This file contains D3.js visualizations for the AI trends article.
  * Created using D3.js v7
+ * Modified to include lazy loading for better performance
  */
 
-// Wait for DOM to fully load
+// Store visualization functions in a mapping by their container IDs
+const visualizationFunctions = {
+  'magnificent-seven-chart': magnificentSevenChart,
+  'chinese-tech-chart': chineseTechChart,
+  'datacenter-map': datacenterMap,
+  'gpu-comparison-chart': gpuComparisonChart,
+  'model-comparison-chart': modelComparisonChart,
+  'hbm-comparison-chart': hbmComparisonChart,
+  'hbm-market-share-chart': hbmMarketShareChart,
+  'gpu-comparison-table': gpuExportControlTable,
+  'dev-tool-adoption-chart': devToolAdoptionChart,
+  'enterprise-adoption-chart': enterpriseAdoptionChart
+};
+
+// Keep track of which visualizations have been initialized
+const initializedVisualizations = new Set();
+
+/**
+ * Initialize the lazy loading system
+ */
+function initLazyLoading() {
+  console.log('Initializing lazy loading for visualizations');
+  
+  // Define options for the Intersection Observer
+  const options = {
+    root: null, // Use the viewport as the root
+    rootMargin: '100px', // Start loading when within 100px of viewport
+    threshold: 0.1 // Start when at least 10% is visible
+  };
+
+  // Create the Intersection Observer
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      // If the element is intersecting the viewport
+      if (entry.isIntersecting) {
+        const vizContainer = entry.target;
+        const vizId = vizContainer.id;
+        
+        // Check if we have a visualization function for this container
+        if (visualizationFunctions[vizId] && !initializedVisualizations.has(vizId)) {
+          console.log(`Lazy loading visualization: ${vizId}`);
+          
+          try {
+            // Call the visualization function
+            visualizationFunctions[vizId]();
+            
+            // Mark this visualization as initialized
+            initializedVisualizations.add(vizId);
+            
+            // Once loaded, stop observing this element
+            observer.unobserve(vizContainer);
+          } catch (error) {
+            console.error(`Error initializing ${vizId}:`, error);
+          }
+        }
+      }
+    });
+  }, options);
+
+  // Find all visualization containers and observe them
+  document.querySelectorAll('.visualization-container').forEach(container => {
+    if (container.id) {
+      observer.observe(container);
+      console.log(`Observing container: ${container.id}`);
+    } else {
+      console.warn('Found visualization container without ID, cannot lazy load');
+    }
+  });
+}
+
+/**
+ * Initialize the lazy loading system when the DOM is fully loaded
+ */
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize all visualizations
-  magnificentSevenChart();
-  chineseTechChart();
-  datacenterMap();
-  gpuComparisonChart();
-  modelComparisonChart();
-  hbmComparisonChart();
-  hbmMarketShareChart();
-  gpuExportControlTable();
-  devToolAdoptionChart();
-  enterpriseAdoptionChart();
+  // Initialize lazy loading instead of calling all visualization functions
+  initLazyLoading();
 });
+
+// Add a debugging utility to help with troubleshooting
+function debugVisualizations() {
+  const containers = document.querySelectorAll('.visualization-container');
+  console.log(`Found ${containers.length} visualization containers:`);
+  
+  containers.forEach(container => {
+    const id = container.id || 'NO-ID';
+    const hasChartContainer = !!container.querySelector('.chart-container');
+    const chartContainerEmpty = hasChartContainer && 
+                               !container.querySelector('.chart-container').hasChildNodes();
+    const dimensions = hasChartContainer ? 
+                      `${container.querySelector('.chart-container').clientWidth}x${container.querySelector('.chart-container').clientHeight}` : 
+                      'N/A';
+    const isInitialized = initializedVisualizations.has(id);
+    const hasFunction = !!visualizationFunctions[id];
+    
+    console.log({
+      id,
+      hasChartContainer,
+      chartContainerEmpty,
+      dimensions,
+      isInitialized,
+      hasFunction
+    });
+  });
+}
+
+// Expose debugging function globally
+window.debugVisualizations = debugVisualizations;
 
 /**
  * Create the Magnificent Seven revenue growth chart
  */
 function magnificentSevenChart() {
   const container = document.querySelector('#magnificent-seven-chart .chart-container');
-  if (!container) return;
+  if (!container) {
+    console.error('Magnificent Seven chart container not found');
+    return;
+  }
   
   // Data
   const data = [
@@ -65,6 +162,9 @@ function magnificentSevenChart() {
       {year: 2029, revenue: 44}, {year: 2030, revenue: 52}
     ]}
   ];
+  
+  // Add rest of the function body...
+  // Original implementation continues below...
   
   // Dimensions
   const margin = {top: 30, right: 50, bottom: 50, left: 60};
@@ -142,23 +242,29 @@ function magnificentSevenChart() {
   
   // Create legend
   const legend = document.querySelector('#magnificent-seven-chart .chart-legend');
+  if (legend) {
+    legend.innerHTML = '';
+    
+    data.forEach(company => {
+      const item = document.createElement('div');
+      item.className = 'chart-legend-item';
+      
+      const colorBox = document.createElement('span');
+      colorBox.className = 'legend-color';
+      colorBox.style.backgroundColor = company.color;
+      
+      const text = document.createElement('span');
+      text.textContent = company.name;
+      
+      item.appendChild(colorBox);
+      item.appendChild(text);
+      legend.appendChild(item);
+    });
+  }
   
-  data.forEach(company => {
-    const item = document.createElement('div');
-    item.className = 'chart-legend-item';
-    
-    const colorBox = document.createElement('span');
-    colorBox.className = 'legend-color';
-    colorBox.style.backgroundColor = company.color;
-    
-    const text = document.createElement('span');
-    text.textContent = company.name;
-    
-    item.appendChild(colorBox);
-    item.appendChild(text);
-    legend.appendChild(item);
-  });
+  console.log('Magnificent Seven chart rendered successfully');
 }
+
 
 /**
  * Create the Chinese Tech Giants R&D investment chart
@@ -1391,9 +1497,6 @@ function devToolAdoptionChart() {
   });
 }
 
-/**
- * Create Enterprise Concerns in AI Development Tool Adoption Chart
- */
 /**
  * Create Enterprise Concerns in AI Development Tool Adoption Chart
  */
