@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
   datacenterMap();
   gpuComparisonChart();
   modelComparisonChart();
+  hbmComparisonChart();
+  hbmMarketShareChart();
+  gpuExportControlTable();
+  devToolAdoptionChart();
+  enterpriseAdoptionChart();
 });
 
 /**
@@ -915,4 +920,596 @@ function modelComparisonChart() {
     currentMetric = e.target.value;
     updateChart(currentMetric);
   });
+}
+
+// Add these two functions to your visualizations.js file
+// and update the document.addEventListener call at the top of the file
+// to include them in initialization
+
+/**
+ * Create HBM Memory Capacity and Bandwidth Evolution Chart
+ */
+function hbmComparisonChart() {
+  const container = document.querySelector('#hbm-comparison-chart .chart-container');
+  if (!container) return;
+  
+  // Data
+  const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+  const capacityData = [
+    {name: 'HBM3', color: '#3366cc', values: [48, 64, 80, 96, 96, 0, 0, 0]},
+    {name: 'HBM3e', color: '#dc3912', values: [0, 96, 128, 144, 192, 192, 0, 0]},
+    {name: 'HBM4', color: '#ff9900', values: [0, 0, 0, 192, 256, 384, 512, 768]}
+  ];
+  const bandwidthData = [
+    {name: 'HBM3', color: '#3366cc', values: [3.2, 3.8, 4.0, 4.2, 4.2, 0, 0, 0]},
+    {name: 'HBM3e', color: '#dc3912', values: [0, 4.8, 5.2, 5.6, 6.0, 6.0, 0, 0]},
+    {name: 'HBM4', color: '#ff9900', values: [0, 0, 0, 6.4, 8.0, 10.0, 12.0, 14.0]}
+  ];
+  
+  // Dimensions
+  const margin = {top: 40, right: 20, bottom: 50, left: 60};
+  const width = container.clientWidth - margin.left - margin.right;
+  const height = container.clientHeight - margin.top - margin.bottom;
+  
+  // Create SVG
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+  // Add toggle buttons
+  const controls = d3.select(container).insert('div', 'svg')
+    .attr('class', 'chart-controls')
+    .style('text-align', 'center')
+    .style('margin-bottom', '10px');
+  
+  controls.append('button')
+    .attr('id', 'capacity-btn')
+    .attr('class', 'active')
+    .text('Memory Capacity (GB)')
+    .style('margin', '0 5px')
+    .style('padding', '5px 10px')
+    .style('border', '1px solid var(--border-color)')
+    .style('border-radius', '4px')
+    .style('background', 'var(--bg-primary)')
+    .style('color', 'var(--text-primary)')
+    .style('cursor', 'pointer')
+    .on('click', () => updateChart('capacity'));
+  
+  controls.append('button')
+    .attr('id', 'bandwidth-btn')
+    .text('Bandwidth (TB/s)')
+    .style('margin', '0 5px')
+    .style('padding', '5px 10px')
+    .style('border', '1px solid var(--border-color)')
+    .style('border-radius', '4px')
+    .style('background', 'var(--bg-primary)')
+    .style('color', 'var(--text-primary)')
+    .style('cursor', 'pointer')
+    .on('click', () => updateChart('bandwidth'));
+  
+  // Active button style
+  d3.select('#capacity-btn')
+    .style('background', 'var(--bg-secondary)')
+    .style('font-weight', 'bold');
+  
+  // X scale
+  const x = d3.scaleBand()
+    .domain(years)
+    .range([0, width])
+    .padding(0.2);
+  
+  // Y scales
+  const yCapacity = d3.scaleLinear()
+    .domain([0, 800])
+    .range([height, 0]);
+  
+  const yBandwidth = d3.scaleLinear()
+    .domain([0, 15])
+    .range([height, 0]);
+  
+  // Create axes
+  const xAxis = svg.append('g')
+    .attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll('text')
+    .style('color', 'var(--text-secondary)');
+  
+  const yAxisCapacity = svg.append('g')
+    .attr('class', 'y-axis-capacity')
+    .call(d3.axisLeft(yCapacity))
+    .style('color', 'var(--text-secondary)');
+  
+  const yAxisBandwidth = svg.append('g')
+    .attr('class', 'y-axis-bandwidth')
+    .call(d3.axisLeft(yBandwidth))
+    .style('color', 'var(--text-secondary)')
+    .style('opacity', 0);
+  
+  // Create legend
+  const legend = document.querySelector('#hbm-comparison-chart .chart-legend');
+  legend.innerHTML = '';
+  
+  capacityData.forEach((d) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'chart-legend-item';
+    
+    const colorBox = document.createElement('span');
+    colorBox.className = 'legend-color';
+    colorBox.style.backgroundColor = d.color;
+    
+    const text = document.createElement('span');
+    text.textContent = d.name;
+    
+    legendItem.appendChild(colorBox);
+    legendItem.appendChild(text);
+    legend.appendChild(legendItem);
+  });
+  
+  // Function to update chart based on selected view
+  function updateChart(view) {
+    // Update button styles
+    d3.select('#capacity-btn')
+      .style('background', view === 'capacity' ? 'var(--bg-secondary)' : 'var(--bg-primary)')
+      .style('font-weight', view === 'capacity' ? 'bold' : 'normal');
+    
+    d3.select('#bandwidth-btn')
+      .style('background', view === 'bandwidth' ? 'var(--bg-secondary)' : 'var(--bg-primary)')
+      .style('font-weight', view === 'bandwidth' ? 'bold' : 'normal');
+    
+    // Update y-axis visibility
+    yAxisCapacity.style('opacity', view === 'capacity' ? 1 : 0);
+    yAxisBandwidth.style('opacity', view === 'bandwidth' ? 1 : 0);
+    
+    // Y axis label
+    svg.selectAll('.y-axis-label').remove();
+    svg.append('text')
+      .attr('class', 'y-axis-label')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', -margin.left + 15)
+      .attr('x', -height / 2)
+      .attr('text-anchor', 'middle')
+      .text(view === 'capacity' ? 'Memory Capacity (GB)' : 'Bandwidth (TB/s)')
+      .style('fill', 'var(--text-primary)');
+    
+    // Clear existing bars
+    svg.selectAll('.bar-group').remove();
+    
+    // Draw new bars based on selected data
+    const data = view === 'capacity' ? capacityData : bandwidthData;
+    const yScale = view === 'capacity' ? yCapacity : yBandwidth;
+    
+    // Create bar groups
+    data.forEach((series, seriesIndex) => {
+      const barGroup = svg.append('g')
+        .attr('class', 'bar-group');
+      
+      // Add bars for each year with a value
+      years.forEach((year, i) => {
+        if (series.values[i] > 0) {
+          barGroup.append('rect')
+            .attr('x', x(year) + (x.bandwidth() / data.length) * seriesIndex)
+            .attr('y', yScale(series.values[i]))
+            .attr('width', x.bandwidth() / data.length - 2)
+            .attr('height', height - yScale(series.values[i]))
+            .attr('fill', series.color)
+            .attr('opacity', 0.8);
+          
+          // Add value labels
+          barGroup.append('text')
+            .attr('x', x(year) + (x.bandwidth() / data.length) * seriesIndex + (x.bandwidth() / data.length) / 2)
+            .attr('y', yScale(series.values[i]) - 5)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '10px')
+            .attr('fill', 'var(--text-primary)')
+            .text(series.values[i]);
+        }
+      });
+    });
+  }
+  
+  // Initialize chart with capacity view
+  updateChart('capacity');
+}
+
+/**
+ * Create HBM Market Share Pie Chart
+ */
+function hbmMarketShareChart() {
+  const container = document.querySelector('#hbm-market-share-chart .chart-container');
+  if (!container) return;
+  
+  // Market share data for 2025
+  const marketShareData = [
+    { company: 'SK Hynix', share: 42, color: '#4285F4' },
+    { company: 'Samsung', share: 31, color: '#34A853' },
+    { company: 'Micron', share: 24, color: '#FBBC05' },
+    { company: 'CXMT', share: 3, color: '#EA4335' }
+  ];
+  
+  // Dimensions
+  const margin = {top: 20, right: 20, bottom: 20, left: 20};
+  const width = container.clientWidth - margin.left - margin.right;
+  const height = container.clientHeight - margin.top - margin.bottom;
+  const radius = Math.min(width, height) / 2;
+  
+  // Create SVG
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${width / 2 + margin.left}, ${height / 2 + margin.top})`);
+  
+  // Create pie generator
+  const pie = d3.pie()
+    .value(d => d.share)
+    .sort(null);
+  
+  // Create arc generators
+  const arc = d3.arc()
+    .innerRadius(0)
+    .outerRadius(radius * 0.8);
+  
+  const outerArc = d3.arc()
+    .innerRadius(radius * 0.9)
+    .outerRadius(radius * 0.9);
+  
+  // Draw pie segments
+  const slices = svg.selectAll('.arc')
+    .data(pie(marketShareData))
+    .enter()
+    .append('g')
+    .attr('class', 'arc');
+  
+  slices.append('path')
+    .attr('d', arc)
+    .attr('fill', d => d.data.color)
+    .attr('stroke', 'var(--bg-primary)')
+    .style('stroke-width', '2px')
+    .style('opacity', 0.9);
+  
+  // Add labels with connecting lines
+  slices.append('polyline')
+    .attr('points', function(d) {
+      const pos = outerArc.centroid(d);
+      pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+      return [arc.centroid(d), outerArc.centroid(d), pos];
+    })
+    .style('fill', 'none')
+    .style('stroke', 'var(--text-secondary)')
+    .style('stroke-width', '1px');
+  
+  slices.append('text')
+    .attr('transform', function(d) {
+      const pos = outerArc.centroid(d);
+      pos[0] = radius * 0.98 * (midAngle(d) < Math.PI ? 1 : -1);
+      return `translate(${pos})`;
+    })
+    .attr('text-anchor', d => midAngle(d) < Math.PI ? 'start' : 'end')
+    .text(d => `${d.data.company} (${d.data.share}%)`)
+    .style('fill', 'var(--text-primary)')
+    .style('font-size', '12px');
+  
+  // Helper function for angle calculation
+  function midAngle(d) {
+    return d.startAngle + (d.endAngle - d.startAngle) / 2;
+  }
+  
+  // Create legend
+  const legend = document.querySelector('#hbm-market-share-chart .chart-legend');
+  legend.innerHTML = '';
+  
+  marketShareData.forEach(d => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'chart-legend-item';
+    
+    const colorBox = document.createElement('span');
+    colorBox.className = 'legend-color';
+    colorBox.style.backgroundColor = d.color;
+    
+    const text = document.createElement('span');
+    text.textContent = `${d.company}: ${d.share}%`;
+    
+    legendItem.appendChild(colorBox);
+    legendItem.appendChild(text);
+    legend.appendChild(legendItem);
+  });
+}
+
+/**
+ * Create GPU export control comparison table
+ */
+function gpuExportControlTable() {
+  const container = document.querySelector('#gpu-comparison-table');
+  if (!container) return;
+  
+  // Data is already in the HTML table
+  // This function could be used to add interactivity in the future
+}
+
+/**
+ * Create AI Developer Tool Adoption Growth Chart
+ */
+function devToolAdoptionChart() {
+  const container = document.querySelector('#dev-tool-adoption-chart .chart-container');
+  if (!container) return;
+  
+  // Data
+  const data = [
+    {
+      name: 'GitHub Copilot',
+      color: '#6e40c9',
+      values: [
+        {year: 2023, adoption: 24},
+        {year: 2024, adoption: 43},
+        {year: 2025, adoption: 62}
+      ]
+    },
+    {
+      name: 'Amazon Q / CodeWhisperer',
+      color: '#ff9900',
+      values: [
+        {year: 2023, adoption: 9},
+        {year: 2024, adoption: 22},
+        {year: 2025, adoption: 38}
+      ]
+    },
+    {
+      name: 'Cursor',
+      color: '#0072ef',
+      values: [
+        {year: 2023, adoption: 8},
+        {year: 2024, adoption: 18},
+        {year: 2025, adoption: 35}
+      ]
+    },
+    {
+      name: 'VSCode AI Assistant',
+      color: '#007acc',
+      values: [
+        {year: 2023, adoption: 17},
+        {year: 2024, adoption: 32},
+        {year: 2025, adoption: 48}
+      ]
+    },
+    {
+      name: 'JetBrains AI Assistant',
+      color: '#f97a12',
+      values: [
+        {year: 2023, adoption: 11},
+        {year: 2024, adoption: 28},
+        {year: 2025, adoption: 42}
+      ]
+    }
+  ];
+  
+  // Dimensions
+  const margin = {top: 30, right: 80, bottom: 50, left: 60};
+  const width = container.clientWidth - margin.left - margin.right;
+  const height = container.clientHeight - margin.top - margin.bottom;
+  
+  // Create SVG
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+  // X scale
+  const x = d3.scaleLinear()
+    .domain([2023, 2025])
+    .range([0, width]);
+  
+  // Y scale
+  const y = d3.scaleLinear()
+    .domain([0, 70])
+    .range([height, 0]);
+  
+  // Line generator
+  const line = d3.line()
+    .x(d => x(d.year))
+    .y(d => y(d.adoption))
+    .curve(d3.curveMonotoneX);
+  
+  // Add X axis
+  svg.append('g')
+    .attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x).ticks(3).tickFormat(d => d.toString()))
+    .style('color', 'var(--text-secondary)');
+  
+  // Add Y axis
+  svg.append('g')
+    .call(d3.axisLeft(y).ticks(7))
+    .style('color', 'var(--text-secondary)');
+  
+  // Add Y axis label
+  svg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('y', -margin.left + 15)
+    .attr('x', -height / 2)
+    .attr('text-anchor', 'middle')
+    .text('Developer Adoption (%)')
+    .style('fill', 'var(--text-primary)');
+  
+  // Add lines
+  svg.selectAll('.line')
+    .data(data)
+    .join('path')
+    .attr('class', 'line')
+    .attr('d', d => line(d.values))
+    .style('stroke', d => d.color)
+    .style('stroke-width', 3)
+    .style('fill', 'none');
+  
+  // Add points
+  data.forEach(tool => {
+    svg.selectAll(`.points-${tool.name.replace(/\s+/g, '-')}`)
+      .data(tool.values)
+      .join('circle')
+      .attr('cx', d => x(d.year))
+      .attr('cy', d => y(d.adoption))
+      .attr('r', 5)
+      .style('fill', tool.color)
+      .style('stroke', 'var(--bg-primary)')
+      .style('stroke-width', 2);
+  });
+  
+  // Add labels for the last year
+  data.forEach(tool => {
+    const lastPoint = tool.values[tool.values.length - 1];
+    svg.append('text')
+      .attr('x', x(lastPoint.year) + 10)
+      .attr('y', y(lastPoint.adoption))
+      .attr('dy', '0.35em')
+      .style('fill', 'var(--text-primary)')
+      .style('font-size', '12px')
+      .text(tool.name);
+  });
+  
+  // Create legend
+  const legend = document.querySelector('#dev-tool-adoption-chart .chart-legend');
+  legend.innerHTML = '';
+  
+  data.forEach(tool => {
+    const item = document.createElement('div');
+    item.className = 'chart-legend-item';
+    
+    const colorBox = document.createElement('span');
+    colorBox.className = 'legend-color';
+    colorBox.style.backgroundColor = tool.color;
+    
+    const text = document.createElement('span');
+    text.textContent = tool.name;
+    
+    item.appendChild(colorBox);
+    item.appendChild(text);
+    legend.appendChild(item);
+  });
+}
+
+/**
+ * Create Enterprise Concerns in AI Development Tool Adoption Chart
+ */
+function enterpriseAdoptionChart() {
+  // Get the container and force a minimum height to ensure it renders
+  const container = document.querySelector('#enterprise-adoption-chart .chart-container');
+  if (!container) {
+    console.error('Enterprise adoption chart container not found');
+    return;
+  }
+  
+  // Force a minimum height on the container to ensure it renders properly
+  container.style.minHeight = "400px";
+  
+  // Log dimensions for debugging
+  console.log('Enterprise container dimensions:', container.clientWidth, container.clientHeight);
+  
+  // Data
+  const data = [
+    { category: 'Security & Compliance', value: 78 },
+    { category: 'Intellectual Property', value: 72 },
+    { category: 'Code Quality', value: 65 },
+    { category: 'Integration with Existing Tools', value: 58 },
+    { category: 'Training & Skills Gap', value: 52 },
+    { category: 'Developer Productivity', value: 45 }
+  ];
+  
+  // Sort data by value in descending order
+  data.sort((a, b) => b.value - a.value);
+  
+  // Dimensions - ensure sensible defaults if container size is zero
+  const margin = {top: 20, right: 20, bottom: 70, left: 220};
+  const width = Math.max(400, container.clientWidth || 400) - margin.left - margin.right;
+  const height = Math.max(300, container.clientHeight || 300) - margin.top - margin.bottom;
+  
+  // Remove any existing SVG from previous renders
+  d3.select(container).select("svg").remove();
+  
+  // Create SVG
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+  // X scale
+  const x = d3.scaleLinear()
+    .domain([0, 100])
+    .range([0, width]);
+  
+  // Y scale
+  const y = d3.scaleBand()
+    .domain(data.map(d => d.category))
+    .range([0, height])
+    .padding(0.3);
+  
+  // Add X axis
+  svg.append('g')
+    .attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => `${d}%`))
+    .style('color', 'var(--text-secondary, #666)');
+  
+  // Add X axis label
+  svg.append('text')
+    .attr('x', width / 2)
+    .attr('y', height + margin.bottom - 10)
+    .attr('text-anchor', 'middle')
+    .text('Percentage of Enterprises Citing as Major Concern')
+    .style('fill', 'var(--text-primary, #333)')
+    .style('font-size', '12px');
+  
+  // Add Y axis
+  svg.append('g')
+    .call(d3.axisLeft(y))
+    .style('color', 'var(--text-secondary, #666)');
+  
+  // Add bars
+  svg.selectAll('.bar')
+    .data(data)
+    .join('rect')
+    .attr('class', 'bar')
+    .attr('x', 0)
+    .attr('y', d => y(d.category))
+    .attr('width', d => x(d.value))
+    .attr('height', y.bandwidth())
+    .attr('fill', '#4285f4')
+    .attr('opacity', 0.8);
+  
+  // Add value labels
+  svg.selectAll('.value-label')
+    .data(data)
+    .join('text')
+    .attr('class', 'value-label')
+    .attr('x', d => x(d.value) + 5)
+    .attr('y', d => y(d.category) + y.bandwidth() / 2)
+    .attr('dy', '0.35em')
+    .style('fill', 'var(--text-primary, #333)')
+    .text(d => `${d.value}%`);
+  
+  // Create legend
+  const legend = document.querySelector('#enterprise-adoption-chart .chart-legend');
+  if (legend) {
+    legend.innerHTML = '';
+    
+    const explanationText = document.createElement('div');
+    explanationText.className = 'chart-explanation';
+    explanationText.innerHTML = 'Percentage of enterprises citing each factor as a major concern when adopting AI development tools';
+    explanationText.style.fontSize = '0.9rem';
+    explanationText.style.fontStyle = 'italic';
+    explanationText.style.marginBottom = '8px';
+    legend.appendChild(explanationText);
+    
+    const sourceText = document.createElement('div');
+    sourceText.className = 'chart-source';
+    sourceText.innerHTML = 'Based on survey data from enterprise CTOs and development leaders, 2025';
+    sourceText.style.fontSize = '0.8rem';
+    legend.appendChild(sourceText);
+  }
+  
+  console.log('Enterprise adoption chart rendered successfully');
 }
