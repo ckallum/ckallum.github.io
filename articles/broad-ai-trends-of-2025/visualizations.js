@@ -347,73 +347,74 @@ function datacenterMap() {
   const width = container.clientWidth;
   const height = container.clientHeight;
   
-  // Data centers by region and year
+  // Data centers by region and year with coordinates for a proper world map
+  // Coordinates are based on Mercator projection
   const dataCenters = {
     2025: [
-      {region: 'North America', count: 420, x: 220, y: 180},
-      {region: 'Europe', count: 350, x: 450, y: 150},
-      {region: 'China', count: 380, x: 680, y: 200},
-      {region: 'India', count: 180, x: 630, y: 240},
-      {region: 'Southeast Asia', count: 200, x: 700, y: 270},
-      {region: 'Australia', count: 110, x: 780, y: 350},
-      {region: 'South America', count: 90, x: 300, y: 320},
-      {region: 'Middle East', count: 130, x: 550, y: 210},
-      {region: 'Africa', count: 70, x: 480, y: 280}
+      {region: 'North America', count: 420, lat: 40, lng: -100},
+      {region: 'Europe', count: 350, lat: 50, lng: 10},
+      {region: 'China', count: 380, lat: 35, lng: 105},
+      {region: 'India', count: 180, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 200, lat: 10, lng: 115},
+      {region: 'Australia', count: 110, lat: -25, lng: 135},
+      {region: 'South America', count: 90, lat: -20, lng: -60},
+      {region: 'Middle East', count: 130, lat: 25, lng: 45},
+      {region: 'Africa', count: 70, lat: 0, lng: 20}
     ],
     2026: [
-      {region: 'North America', count: 470, x: 220, y: 180},
-      {region: 'Europe', count: 390, x: 450, y: 150},
-      {region: 'China', count: 450, x: 680, y: 200},
-      {region: 'India', count: 210, x: 630, y: 240},
-      {region: 'Southeast Asia', count: 230, x: 700, y: 270},
-      {region: 'Australia', count: 125, x: 780, y: 350},
-      {region: 'South America', count: 110, x: 300, y: 320},
-      {region: 'Middle East', count: 150, x: 550, y: 210},
-      {region: 'Africa', count: 85, x: 480, y: 280}
+      {region: 'North America', count: 470, lat: 40, lng: -100},
+      {region: 'Europe', count: 390, lat: 50, lng: 10},
+      {region: 'China', count: 450, lat: 35, lng: 105},
+      {region: 'India', count: 210, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 230, lat: 10, lng: 115},
+      {region: 'Australia', count: 125, lat: -25, lng: 135},
+      {region: 'South America', count: 110, lat: -20, lng: -60},
+      {region: 'Middle East', count: 150, lat: 25, lng: 45},
+      {region: 'Africa', count: 85, lat: 0, lng: 20}
     ],
     2027: [
-      {region: 'North America', count: 520, x: 220, y: 180},
-      {region: 'Europe', count: 430, x: 450, y: 150},
-      {region: 'China', count: 530, x: 680, y: 200},
-      {region: 'India', count: 250, x: 630, y: 240},
-      {region: 'Southeast Asia', count: 270, x: 700, y: 270},
-      {region: 'Australia', count: 140, x: 780, y: 350},
-      {region: 'South America', count: 130, x: 300, y: 320},
-      {region: 'Middle East', count: 170, x: 550, y: 210},
-      {region: 'Africa', count: 105, x: 480, y: 280}
+      {region: 'North America', count: 520, lat: 40, lng: -100},
+      {region: 'Europe', count: 430, lat: 50, lng: 10},
+      {region: 'China', count: 530, lat: 35, lng: 105},
+      {region: 'India', count: 250, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 270, lat: 10, lng: 115},
+      {region: 'Australia', count: 140, lat: -25, lng: 135},
+      {region: 'South America', count: 130, lat: -20, lng: -60},
+      {region: 'Middle East', count: 170, lat: 25, lng: 45},
+      {region: 'Africa', count: 105, lat: 0, lng: 20}
     ],
     2028: [
-      {region: 'North America', count: 580, x: 220, y: 180},
-      {region: 'Europe', count: 480, x: 450, y: 150},
-      {region: 'China', count: 620, x: 680, y: 200},
-      {region: 'India', count: 300, x: 630, y: 240},
-      {region: 'Southeast Asia', count: 320, x: 700, y: 270},
-      {region: 'Australia', count: 160, x: 780, y: 350},
-      {region: 'South America', count: 160, x: 300, y: 320},
-      {region: 'Middle East', count: 200, x: 550, y: 210},
-      {region: 'Africa', count: 130, x: 480, y: 280}
+      {region: 'North America', count: 580, lat: 40, lng: -100},
+      {region: 'Europe', count: 480, lat: 50, lng: 10},
+      {region: 'China', count: 620, lat: 35, lng: 105},
+      {region: 'India', count: 300, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 320, lat: 10, lng: 115},
+      {region: 'Australia', count: 160, lat: -25, lng: 135},
+      {region: 'South America', count: 160, lat: -20, lng: -60},
+      {region: 'Middle East', count: 200, lat: 25, lng: 45},
+      {region: 'Africa', count: 130, lat: 0, lng: 20}
     ],
     2029: [
-      {region: 'North America', count: 650, x: 220, y: 180},
-      {region: 'Europe', count: 540, x: 450, y: 150},
-      {region: 'China', count: 720, x: 680, y: 200},
-      {region: 'India', count: 350, x: 630, y: 240},
-      {region: 'Southeast Asia', count: 380, x: 700, y: 270},
-      {region: 'Australia', count: 180, x: 780, y: 350},
-      {region: 'South America', count: 190, x: 300, y: 320},
-      {region: 'Middle East', count: 240, x: 550, y: 210},
-      {region: 'Africa', count: 160, x: 480, y: 280}
+      {region: 'North America', count: 650, lat: 40, lng: -100},
+      {region: 'Europe', count: 540, lat: 50, lng: 10},
+      {region: 'China', count: 720, lat: 35, lng: 105},
+      {region: 'India', count: 350, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 380, lat: 10, lng: 115},
+      {region: 'Australia', count: 180, lat: -25, lng: 135},
+      {region: 'South America', count: 190, lat: -20, lng: -60},
+      {region: 'Middle East', count: 240, lat: 25, lng: 45},
+      {region: 'Africa', count: 160, lat: 0, lng: 20}
     ],
     2030: [
-      {region: 'North America', count: 730, x: 220, y: 180},
-      {region: 'Europe', count: 610, x: 450, y: 150},
-      {region: 'China', count: 850, x: 680, y: 200},
-      {region: 'India', count: 420, x: 630, y: 240},
-      {region: 'Southeast Asia', count: 450, x: 700, y: 270},
-      {region: 'Australia', count: 205, x: 780, y: 350},
-      {region: 'South America', count: 230, x: 300, y: 320},
-      {region: 'Middle East', count: 280, x: 550, y: 210},
-      {region: 'Africa', count: 190, x: 480, y: 280}
+      {region: 'North America', count: 730, lat: 40, lng: -100},
+      {region: 'Europe', count: 610, lat: 50, lng: 10},
+      {region: 'China', count: 850, lat: 35, lng: 105},
+      {region: 'India', count: 420, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 450, lat: 10, lng: 115},
+      {region: 'Australia', count: 205, lat: -25, lng: 135},
+      {region: 'South America', count: 230, lat: -20, lng: -60},
+      {region: 'Middle East', count: 280, lat: 25, lng: 45},
+      {region: 'Africa', count: 190, lat: 0, lng: 20}
     ]
   };
   
@@ -423,44 +424,82 @@ function datacenterMap() {
     .attr('width', width)
     .attr('height', height);
   
-  // Add a simple world map outline
+  // Create a projection for the map
+  const projection = d3.geoMercator()
+    .scale((width) / (2 * Math.PI))
+    .translate([width / 2, height / 1.5]);
+  
+  // Create a path generator
+  const path = d3.geoPath().projection(projection);
+  
+  // Create a group for the map
   const mapGroup = svg.append('g');
   
-  // Simple continents as rectangles with rounded corners
-  const continents = [
-    {name: 'North America', x: 150, y: 140, width: 120, height: 100},
-    {name: 'South America', x: 220, y: 250, width: 80, height: 120},
-    {name: 'Europe', x: 420, y: 120, width: 80, height: 70},
-    {name: 'Africa', x: 420, y: 200, width: 120, height: 140},
-    {name: 'Asia', x: 520, y: 120, width: 200, height: 180},
-    {name: 'Australia', x: 750, y: 320, width: 80, height: 60}
-  ];
-  
-  // Add continents
-  mapGroup.selectAll('.continent')
-    .data(continents)
-    .enter()
-    .append('rect')
-    .attr('class', 'continent')
-    .attr('x', d => d.x)
-    .attr('y', d => d.y)
-    .attr('width', d => d.width)
-    .attr('height', d => d.height)
-    .attr('rx', 20)
-    .attr('ry', 20)
-    .attr('fill', 'var(--bg-secondary)')
-    .attr('stroke', 'var(--border-color)')
-    .attr('stroke-width', 1)
-    .attr('opacity', 0.6);
+  // Load world map data (simplified GeoJSON)
+  // Using a simplified world map outline
+  fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+    .then(response => response.json())
+    .then(data => {
+      // Draw the map
+      mapGroup.selectAll('path')
+        .data(data.features)
+        .enter()
+        .append('path')
+        .attr('d', path)
+        .attr('fill', 'var(--bg-secondary)')
+        .attr('stroke', 'var(--border-color)')
+        .attr('stroke-width', 0.5)
+        .attr('opacity', 0.6);
+        
+      // Initialize with 2025 data
+      updateVisualization(2025);
+    })
+    .catch(error => {
+      console.error('Error loading map data:', error);
+      // Fallback if map data fails to load - simple regional outlines
+      const continents = [
+        {name: 'North America', d: "M52,102 Q63,83 102,92 Q142,106 166,150 Q152,172 136,175 Q125,203 96,207 Q79,196 62,163 Q56,130 52,102 Z"},
+        {name: 'South America', d: "M136,209 Q145,229 155,256 Q157,284 148,323 Q126,348 105,337 Q90,312 78,259 Q99,228 136,209 Z"},
+        {name: 'Europe', d: "M258,103 Q274,91 297,90 Q324,96 341,106 Q352,121 346,139 Q330,148 300,149 Q282,140 269,124 Q256,115 258,103 Z"},
+        {name: 'Africa', d: "M271,155 Q295,155 318,163 Q344,184 351,216 Q340,245 320,264 Q295,278 269,271 Q250,249 243,216 Q252,177 271,155 Z"},
+        {name: 'Asia', d: "M354,103 Q380,90 420,95 Q465,110 493,136 Q504,168 485,201 Q453,217 417,217 Q376,211 354,194 Q343,162 354,103 Z"},
+        {name: 'Australia', d: "M466,267 Q495,267 507,282 Q507,302 495,316 Q481,323 458,312 Q448,298 451,279 Q461,269 466,267 Z"}
+      ];
+      
+      mapGroup.selectAll('.continent')
+        .data(continents)
+        .enter()
+        .append('path')
+        .attr('class', 'continent')
+        .attr('d', d => d.d)
+        .attr('fill', 'var(--bg-secondary)')
+        .attr('stroke', 'var(--border-color)')
+        .attr('stroke-width', 1)
+        .attr('opacity', 0.6);
+      
+      // Initialize with 2025 data
+      updateVisualization(2025);
+    });
   
   // Function to update the visualization based on year
   function updateVisualization(year) {
-    // Remove existing circles
+    // Remove existing circles and labels
     svg.selectAll('.data-center').remove();
+    svg.selectAll('.region-label').remove();
+    
+    // Convert lat/lng to x/y coordinates
+    const dataWithCoords = dataCenters[year].map(d => {
+      const coords = projection([d.lng, d.lat]);
+      return {
+        ...d,
+        x: coords ? coords[0] : null,
+        y: coords ? coords[1] : null
+      };
+    });
     
     // Add data centers as circles
     svg.selectAll('.data-center')
-      .data(dataCenters[year])
+      .data(dataWithCoords)
       .enter()
       .append('circle')
       .attr('class', 'data-center')
@@ -474,7 +513,7 @@ function datacenterMap() {
     
     // Add labels
     svg.selectAll('.region-label')
-      .data(dataCenters[year])
+      .data(dataWithCoords)
       .enter()
       .append('text')
       .attr('class', 'region-label')
@@ -488,9 +527,6 @@ function datacenterMap() {
     // Update selected year display
     document.getElementById('selected-year').textContent = year;
   }
-  
-  // Initialize with 2025 data
-  updateVisualization(2025);
   
   // Add event listener to the year slider
   document.getElementById('year-slider').addEventListener('input', function(e) {
