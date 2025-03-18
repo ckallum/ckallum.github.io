@@ -1394,122 +1394,132 @@ function devToolAdoptionChart() {
 /**
  * Create Enterprise Concerns in AI Development Tool Adoption Chart
  */
+/**
+ * Create Enterprise Concerns in AI Development Tool Adoption Chart
+ */
 function enterpriseAdoptionChart() {
-  // Get the container and force a minimum height to ensure it renders
+  // First, check if the container exists and log the result
   const container = document.querySelector('#enterprise-adoption-chart .chart-container');
+  console.log('Enterprise adoption chart container:', container);
+  
   if (!container) {
-    console.error('Enterprise adoption chart container not found');
+    console.error('Enterprise adoption chart container not found. Make sure #enterprise-adoption-chart .chart-container exists in your HTML.');
     return;
   }
   
-  // Force a minimum height on the container to ensure it renders properly
-  container.style.minHeight = "400px";
-  
-  // Log dimensions for debugging
-  console.log('Enterprise container dimensions:', container.clientWidth, container.clientHeight);
-  
-  // Data
-  const data = [
-    { category: 'Security & Compliance', value: 78 },
-    { category: 'Intellectual Property', value: 72 },
-    { category: 'Code Quality', value: 65 },
-    { category: 'Integration with Existing Tools', value: 58 },
-    { category: 'Training & Skills Gap', value: 52 },
-    { category: 'Developer Productivity', value: 45 }
-  ];
-  
-  // Sort data by value in descending order
-  data.sort((a, b) => b.value - a.value);
-  
-  // Dimensions - ensure sensible defaults if container size is zero
-  const margin = {top: 20, right: 20, bottom: 70, left: 220};
-  const width = Math.max(400, container.clientWidth || 400) - margin.left - margin.right;
-  const height = Math.max(300, container.clientHeight || 300) - margin.top - margin.bottom;
-  
-  // Remove any existing SVG from previous renders
-  d3.select(container).select("svg").remove();
-  
-  // Create SVG
-  const svg = d3.select(container)
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`);
-  
-  // X scale
-  const x = d3.scaleLinear()
-    .domain([0, 100])
-    .range([0, width]);
-  
-  // Y scale
-  const y = d3.scaleBand()
-    .domain(data.map(d => d.category))
-    .range([0, height])
-    .padding(0.3);
-  
-  // Add X axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(5).tickFormat(d => `${d}%`))
-    .style('color', 'var(--text-secondary, #666)');
-  
-  // Add X axis label
-  svg.append('text')
-    .attr('x', width / 2)
-    .attr('y', height + margin.bottom - 10)
-    .attr('text-anchor', 'middle')
-    .text('Percentage of Enterprises Citing as Major Concern')
-    .style('fill', 'var(--text-primary, #333)')
-    .style('font-size', '12px');
-  
-  // Add Y axis
-  svg.append('g')
-    .call(d3.axisLeft(y))
-    .style('color', 'var(--text-secondary, #666)');
-  
-  // Add bars
-  svg.selectAll('.bar')
-    .data(data)
-    .join('rect')
-    .attr('class', 'bar')
-    .attr('x', 0)
-    .attr('y', d => y(d.category))
-    .attr('width', d => x(d.value))
-    .attr('height', y.bandwidth())
-    .attr('fill', '#4285f4')
-    .attr('opacity', 0.8);
-  
-  // Add value labels
-  svg.selectAll('.value-label')
-    .data(data)
-    .join('text')
-    .attr('class', 'value-label')
-    .attr('x', d => x(d.value) + 5)
-    .attr('y', d => y(d.category) + y.bandwidth() / 2)
-    .attr('dy', '0.35em')
-    .style('fill', 'var(--text-primary, #333)')
-    .text(d => `${d.value}%`);
-  
-  // Create legend
-  const legend = document.querySelector('#enterprise-adoption-chart .chart-legend');
-  if (legend) {
-    legend.innerHTML = '';
+  try {
+    // Data
+    const data = [
+      { category: 'Security & Compliance', value: 78 },
+      { category: 'Intellectual Property', value: 72 },
+      { category: 'Code Quality', value: 65 },
+      { category: 'Integration with Existing Tools', value: 58 },
+      { category: 'Training & Skills Gap', value: 52 },
+      { category: 'Developer Productivity', value: 45 }
+    ];
     
-    const explanationText = document.createElement('div');
-    explanationText.className = 'chart-explanation';
-    explanationText.innerHTML = 'Percentage of enterprises citing each factor as a major concern when adopting AI development tools';
-    explanationText.style.fontSize = '0.9rem';
-    explanationText.style.fontStyle = 'italic';
-    explanationText.style.marginBottom = '8px';
-    legend.appendChild(explanationText);
+    // Sort data by value in descending order
+    data.sort((a, b) => b.value - a.value);
     
-    const sourceText = document.createElement('div');
-    sourceText.className = 'chart-source';
-    sourceText.innerHTML = 'Based on survey data from enterprise CTOs and development leaders, 2025';
-    sourceText.style.fontSize = '0.8rem';
-    legend.appendChild(sourceText);
+    // Log the container dimensions
+    console.log('Container dimensions:', { 
+      width: container.clientWidth, 
+      height: container.clientHeight 
+    });
+    
+    // Dimensions - use minimum values if container is too small
+    const minWidth = 400;
+    const minHeight = 300;
+    const margin = {top: 20, right: 20, bottom: 70, left: 220};
+    const width = Math.max(minWidth, container.clientWidth) - margin.left - margin.right;
+    const height = Math.max(minHeight, container.clientHeight) - margin.top - margin.bottom;
+    
+    // Create SVG with specific dimensions
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+    
+    // X scale
+    const x = d3.scaleLinear()
+      .domain([0, 100])
+      .range([0, width]);
+    
+    // Y scale
+    const y = d3.scaleBand()
+      .domain(data.map(d => d.category))
+      .range([0, height])
+      .padding(0.3);
+    
+    // Add X axis
+    svg.append('g')
+      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d => `${d}%`))
+      .style('color', 'var(--text-secondary, #666)');
+    
+    // Add X axis label
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', height + margin.bottom - 10)
+      .attr('text-anchor', 'middle')
+      .text('Percentage of Enterprises Citing as Major Concern')
+      .style('fill', 'var(--text-primary, #333)')
+      .style('font-size', '12px');
+    
+    // Add Y axis
+    svg.append('g')
+      .call(d3.axisLeft(y))
+      .style('color', 'var(--text-secondary, #666)');
+    
+    // Add bars
+    svg.selectAll('.bar')
+      .data(data)
+      .join('rect')
+      .attr('class', 'bar')
+      .attr('x', 0)
+      .attr('y', d => y(d.category))
+      .attr('width', d => x(d.value))
+      .attr('height', y.bandwidth())
+      .attr('fill', '#4285f4')
+      .attr('opacity', 0.8);
+    
+    // Add value labels
+    svg.selectAll('.value-label')
+      .data(data)
+      .join('text')
+      .attr('class', 'value-label')
+      .attr('x', d => x(d.value) + 5)
+      .attr('y', d => y(d.category) + y.bandwidth() / 2)
+      .attr('dy', '0.35em')
+      .style('fill', 'var(--text-primary, #333)')
+      .text(d => `${d.value}%`);
+    
+    // Create legend
+    const legend = document.querySelector('#enterprise-adoption-chart .chart-legend');
+    if (legend) {
+      legend.innerHTML = '';
+      
+      const explanationText = document.createElement('div');
+      explanationText.className = 'chart-explanation';
+      explanationText.innerHTML = 'Percentage of enterprises citing each factor as a major concern when adopting AI development tools';
+      explanationText.style.fontSize = '0.9rem';
+      explanationText.style.fontStyle = 'italic';
+      explanationText.style.marginBottom = '8px';
+      legend.appendChild(explanationText);
+      
+      const sourceText = document.createElement('div');
+      sourceText.className = 'chart-source';
+      sourceText.innerHTML = 'Based on survey data from enterprise CTOs and development leaders, 2025';
+      sourceText.style.fontSize = '0.8rem';
+      legend.appendChild(sourceText);
+    } else {
+      console.warn('Enterprise adoption chart legend container not found.');
+    }
+    
+    console.log('Enterprise adoption chart successfully created');
+  } catch (error) {
+    console.error('Error creating enterprise adoption chart:', error);
   }
-  
-  console.log('Enterprise adoption chart rendered successfully');
 }
