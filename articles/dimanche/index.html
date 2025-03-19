@@ -213,9 +213,25 @@
     
     .comment-form-actions {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       padding: 0.8rem 1.2rem;
       background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .reply-indicator {
+      color: var(--text-secondary, #767676);
+      font-size: 0.85rem;
+      font-style: italic;
+      display: none;
+    }
+    
+    .reply-indicator.active {
+      display: block;
+    }
+    
+    .form-buttons {
+      display: flex;
+      gap: 0.5rem;
     }
     
     .comment-form-actions button {
@@ -360,6 +376,15 @@
       padding-left: 1.5rem;
       margin-top: 1rem;
       margin-left: 0.5rem;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+    
+    /* Collapsed replies */
+    .comment-with-replies.collapsed {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-top: 0;
     }
     
     /* Dark mode support */
@@ -598,8 +623,13 @@
             <form class="comment-form">
               <textarea placeholder="Write a comment..." required></textarea>
               <div class="comment-form-actions">
-                <button type="button" class="cancel-button">Cancel</button>
-                <button type="submit" class="submit-comment">Post Comment</button>
+                <div class="reply-indicator">
+                  Replying to a comment
+                </div>
+                <div class="form-buttons">
+                  <button type="button" class="cancel-button">Cancel</button>
+                  <button type="submit" class="submit-comment">Post Comment</button>
+                </div>
               </div>
             </form>
           </div>
@@ -646,6 +676,11 @@
         cancelButton.addEventListener('click', function() {
           // Clear the textarea
           commentInput.value = '';
+          
+          // Reset reply state
+          delete commentForm.dataset.replyTo;
+          const replyIndicator = commentForm.querySelector('.reply-indicator');
+          replyIndicator.classList.remove('active');
         });
         
         commentForm.addEventListener('submit', function(e) {
@@ -653,16 +688,23 @@
           
           const content = commentInput.value.trim();
           if (content) {
+            // Check if this is a reply to another comment
+            const parentCommentId = commentForm.dataset.replyTo || null;
+            
             // Send comment to server
             socket.emit('send-message', {
               username,
               content,
               pageId,
-              votes: 0 // Initialize vote count
+              votes: 0, // Initialize vote count
+              parentCommentId // Include parent ID for threaded comments
             });
             
-            // Clear input
+            // Clear input and reset reply state
             commentInput.value = '';
+            delete commentForm.dataset.replyTo;
+            const replyIndicator = commentForm.querySelector('.reply-indicator');
+            replyIndicator.classList.remove('active');
           }
         });
         
@@ -687,9 +729,15 @@
         
         // Function to add a comment to the comments list
         function addComment(comment) {
+          // Check if this is a reply to another comment
+          if (comment.parentCommentId) {
+            return addReplyComment(comment);
+          }
+          
           const commentsList = commentsSection.querySelector('.comments-list');
           const commentElement = document.createElement('div');
           commentElement.className = 'comment';
+          commentElement.dataset.commentId = comment._id;
           
           // Format timestamp
           const timestamp = new Date(comment.timestamp);
@@ -716,12 +764,80 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
+                <button class="comment-collapse-btn" style="display: none;">Collapse</button>
               </div>
             </div>
+            <div class="comment-replies"></div>
           `;
           
           // Add comment to list
           commentsList.appendChild(commentElement);
+          
+          return commentElement;
+        }
+        
+        // Function to add a reply to a parent comment
+        function addReplyComment(comment) {
+          // Find the parent comment element
+          const parentComment = document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`);
+          
+          if (!parentComment) {
+            console.error('Parent comment not found:', comment.parentCommentId);
+            return null;
+          }
+          
+          // Get or create the replies container
+          let repliesContainer = parentComment.querySelector('.comment-replies');
+          
+          // Create a new comment element for the reply
+          const replyElement = document.createElement('div');
+          replyElement.className = 'comment reply-comment';
+          replyElement.dataset.commentId = comment._id;
+          
+          // Format timestamp
+          const timestamp = new Date(comment.timestamp);
+          const dateString = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(timestamp);
+          
+          // Set reply content
+          replyElement.innerHTML = `
+            <div class="comment-header">
+              <div class="comment-author">${comment.username}</div>
+              <div class="comment-date">${dateString}</div>
+            </div>
+            <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
+            <div class="comment-footer">
+              <div class="comment-vote">
+                <button class="vote-button vote-up" aria-label="Upvote">▲</button>
+                <span class="vote-count">${comment.votes || 0}</span>
+                <button class="vote-button vote-down" aria-label="Downvote">▼</button>
+              </div>
+              <div class="comment-actions">
+                <button class="comment-reply-btn">Reply</button>
+              </div>
+            </div>
+            <div class="comment-replies"></div>
+          `;
+          
+          // Add the reply to the replies container
+          repliesContainer.appendChild(replyElement);
+          
+          // Add 'with-replies' class to parent and show collapse button
+          if (repliesContainer.children.length > 0) {
+            repliesContainer.classList.add('comment-with-replies');
+            const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
+            if (collapseBtn) {
+              collapseBtn.style.display = 'inline-block';
+            }
+          }
+          
+          return replyElement;
+        }
           
           // Add vote functionality
           const upvoteBtn = commentElement.querySelector('.vote-up');
@@ -795,11 +911,34 @@
             // Scroll to the comment form and focus, prepopulate with reply reference
             const commentForm = document.querySelector('.comment-form');
             const textarea = commentForm.querySelector('textarea');
+            const replyIndicator = commentForm.querySelector('.reply-indicator');
+            
+            // Update text and show reply indicator
             textarea.value = `@${comment.username}: `;
+            replyIndicator.textContent = `Replying to ${comment.username}`;
+            replyIndicator.classList.add('active');
             textarea.focus();
+            
+            // Store the parent comment ID in a data attribute on the form
+            commentForm.dataset.replyTo = comment._id;
+            
             // Scroll the form into view
             commentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
+          
+          // Add collapse functionality if this is a parent comment
+          const collapseBtn = commentElement.querySelector('.comment-collapse-btn');
+          if (collapseBtn) {
+            collapseBtn.addEventListener('click', function() {
+              const repliesContainer = commentElement.querySelector('.comment-replies');
+              
+              // Toggle collapsed state
+              const isCollapsed = repliesContainer.classList.toggle('collapsed');
+              
+              // Update button text
+              collapseBtn.textContent = isCollapsed ? 'Expand' : 'Collapse';
+            });
+          }
         }
         
         // Function to update comment count
