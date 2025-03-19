@@ -266,11 +266,12 @@
     /* Comment styles inspired by LessWrong */
     .comment {
       position: relative;
-      padding: 1.5rem 0;
+      padding: 1.8rem 1.2rem;
+      margin: 0.5rem 0;
       border-bottom: 1px solid var(--border-color, #e6e4dd);
-      border-radius: 0;
+      border-radius: 5px;
       background-color: transparent;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, box-shadow 0.2s;
     }
     
     .comment:last-child {
@@ -279,6 +280,7 @@
     
     .comment:hover {
       background-color: rgba(0, 0, 0, 0.015);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
     }
     
     .comment-header {
@@ -343,20 +345,38 @@
     /* Collapse/Expand button specific styling */
     .comment-collapse-btn {
       display: none; /* Hidden by default, shown when replies are present */
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: bold;
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
+      min-width: 30px;
+      height: 26px;
+      line-height: 26px;
       text-align: center;
       background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 50%;
-      padding: 0 !important;
+      border-radius: 4px;
+      padding: 0 0.4rem !important;
       margin-left: 0.5rem;
+      transition: background-color 0.2s, color 0.2s, transform 0.2s;
+    }
+    
+    .comment-collapse-btn:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+      transform: scale(1.05);
+    }
+    
+    .comment-collapse-btn.expanded:after {
+      content: "−";
+    }
+    
+    .comment-collapse-btn.collapsed:after {
+      content: "+";
     }
     
     .dark-mode .comment-collapse-btn {
       background-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .dark-mode .comment-collapse-btn:hover {
+      background-color: rgba(255, 255, 255, 0.15);
     }
     
     /* Vote buttons */
@@ -444,10 +464,11 @@
     
     /* Reply comments - slightly different styling */
     .reply-comment {
-      padding: 1rem;
+      padding: 1.5rem 1.2rem;
       border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      margin: 0.7rem 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
     }
     
     /* Visual indentation for each nesting level */
@@ -551,8 +572,8 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     
-    /* Collapse All button styling */
-    .close-all-replies-btn {
+    /* Comment thread control buttons styling */
+    .thread-control-btn {
       font-size: 0.85rem;
       background-color: rgba(0, 0, 0, 0.05);
       border: none;
@@ -561,22 +582,37 @@
       cursor: pointer;
       font-family: "Newsreader", serif;
       color: var(--text-secondary, #767676);
-      margin-left: 1rem;
+      margin-left: 0.5rem;
       transition: background-color 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
     }
     
-    .close-all-replies-btn:hover {
+    .thread-control-btn:hover {
       background-color: rgba(0, 0, 0, 0.08);
       color: var(--text-primary, #141413);
     }
     
-    /* Dark mode support for Collapse All button */
-    .dark-mode .close-all-replies-btn {
+    .thread-control-btn .control-icon {
+      font-size: 0.95rem;
+      font-weight: bold;
+      line-height: 1;
+    }
+    
+    .thread-controls-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+    
+    /* Dark mode support for thread control buttons */
+    .dark-mode .thread-control-btn {
       background-color: rgba(255, 255, 255, 0.05);
       color: var(--text-secondary, #767676);
     }
     
-    .dark-mode .close-all-replies-btn:hover {
+    .dark-mode .thread-control-btn:hover {
       background-color: rgba(255, 255, 255, 0.1);
       color: var(--text-primary, #DDD2BD);
     }
@@ -1181,16 +1217,32 @@
           }
         });
         
-        // Add a "Close All Replies" button to the comments header
+        // Add thread control buttons to the comments header
         const commentsHeader = commentsSection.querySelector('.comments-header');
-        const closeAllButton = document.createElement('button');
-        closeAllButton.className = 'close-all-replies-btn';
-        closeAllButton.textContent = 'Collapse All';
-        closeAllButton.setAttribute('aria-label', 'Collapse all reply threads');
-        commentsHeader.appendChild(closeAllButton);
+        const threadControlsContainer = document.createElement('div');
+        threadControlsContainer.className = 'thread-controls-container';
         
-        // Add event listener for closing all reply threads
-        closeAllButton.addEventListener('click', function() {
+        // Create Collapse All button
+        const collapseAllButton = document.createElement('button');
+        collapseAllButton.className = 'thread-control-btn collapse-all-btn';
+        collapseAllButton.innerHTML = '<span class="control-icon">−</span> Collapse All';
+        collapseAllButton.setAttribute('aria-label', 'Collapse all reply threads');
+        
+        // Create Expand All button
+        const expandAllButton = document.createElement('button');
+        expandAllButton.className = 'thread-control-btn expand-all-btn';
+        expandAllButton.innerHTML = '<span class="control-icon">+</span> Expand All';
+        expandAllButton.setAttribute('aria-label', 'Expand all reply threads');
+        
+        // Add buttons to container
+        threadControlsContainer.appendChild(collapseAllButton);
+        threadControlsContainer.appendChild(expandAllButton);
+        
+        // Add container to header
+        commentsHeader.appendChild(threadControlsContainer);
+        
+        // Add event listener for collapsing all reply threads
+        collapseAllButton.addEventListener('click', function() {
           const allRepliesContainers = commentsSection.querySelectorAll('.comment-replies');
           
           allRepliesContainers.forEach(container => {
@@ -1199,12 +1251,43 @@
               container.style.maxHeight = '0';
               container.style.opacity = '0';
               
-              // Update the button text for each thread
+              // Update the collapse/expand button for each thread
               const parentComment = container.closest('.comment');
               if (parentComment) {
                 const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
                 if (collapseBtn) {
-                  collapseBtn.textContent = '+';
+                  collapseBtn.classList.remove('expanded');
+                  collapseBtn.classList.add('collapsed');
+                }
+              }
+            }
+          });
+        });
+        
+        // Add event listener for expanding all reply threads
+        expandAllButton.addEventListener('click', function() {
+          const allRepliesContainers = commentsSection.querySelectorAll('.comment-replies');
+          
+          allRepliesContainers.forEach(container => {
+            if (container.children.length > 0) {
+              container.classList.remove('collapsed');
+              
+              // Set a large enough max-height
+              container.style.maxHeight = '10000px';
+              container.style.opacity = '1';
+              
+              // After animation, remove max-height for natural flow
+              setTimeout(() => {
+                container.style.maxHeight = '';
+              }, 300);
+              
+              // Update the collapse/expand button for each thread
+              const parentComment = container.closest('.comment');
+              if (parentComment) {
+                const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
+                if (collapseBtn) {
+                  collapseBtn.classList.add('expanded');
+                  collapseBtn.classList.remove('collapsed');
                 }
               }
             }
@@ -1497,14 +1580,23 @@
           // Add collapse functionality
           const collapseBtn = commentElement.querySelector('.comment-collapse-btn');
           if (collapseBtn) {
+            // Set initial state classes
+            collapseBtn.classList.add('expanded');
+            
             collapseBtn.addEventListener('click', function() {
               const repliesContainer = commentElement.querySelector('.comment-replies');
               
               // Toggle collapsed state
               const isCollapsed = repliesContainer.classList.toggle('collapsed');
               
-              // Update button text with + or -
-              collapseBtn.textContent = isCollapsed ? '+' : '-';
+              // Update button classes
+              if (isCollapsed) {
+                collapseBtn.classList.remove('expanded');
+                collapseBtn.classList.add('collapsed');
+              } else {
+                collapseBtn.classList.add('expanded');
+                collapseBtn.classList.remove('collapsed');
+              }
               
               // Add animation by temporarily applying a transition
               repliesContainer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
@@ -1515,7 +1607,7 @@
                 repliesContainer.style.opacity = '0';
               } else {
                 // Temporarily set a large max-height for animation
-                repliesContainer.style.maxHeight = '1000px';
+                repliesContainer.style.maxHeight = '5000px';
                 repliesContainer.style.opacity = '1';
               }
               
@@ -1561,7 +1653,7 @@
             minute: '2-digit'
           }).format(timestamp);
           
-          // Set comment content with +/- for collapse/expand
+          // Set comment content with collapse/expand buttons using CSS classes
           commentElement.innerHTML = `
             <div class="comment-header">
               <div class="comment-author">${comment.username}</div>
@@ -1576,7 +1668,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
-                <button class="comment-collapse-btn" style="display: none;">-</button>
+                <button class="comment-collapse-btn" style="display: none;" aria-label="Expand/collapse replies"></button>
               </div>
             </div>
             <div class="comment-replies">
@@ -1642,7 +1734,7 @@
             minute: '2-digit'
           }).format(timestamp);
           
-          // Set reply content with collapse/expand button
+          // Set reply content with collapse/expand buttons using CSS classes
           replyElement.innerHTML = `
             <div class="comment-header">
               <div class="comment-author">${comment.username}</div>
@@ -1657,7 +1749,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
-                <button class="comment-collapse-btn" style="display: none;">+</button>
+                <button class="comment-collapse-btn" style="display: none;" aria-label="Expand/collapse replies"></button>
               </div>
             </div>
             <div class="comment-replies">
@@ -1677,7 +1769,8 @@
             const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
             if (collapseBtn) {
               collapseBtn.style.display = 'inline-block';
-              collapseBtn.textContent = '-'; // Show as expanded by default
+              collapseBtn.classList.add('expanded');
+              collapseBtn.classList.remove('collapsed');
             }
           }
           
