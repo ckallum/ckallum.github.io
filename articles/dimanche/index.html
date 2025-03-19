@@ -34,7 +34,11 @@
   
   <style>
     :root {
-      --accent-color-rgb: 59, 130, 246; /* Blue color in RGB format */
+      /* Use more neutral color palette aligned with the site design */
+      --accent-color: #605C55; /* Neutral gray-brown */
+      --accent-color-hover: #4A4742; /* Darker neutral */
+      --accent-color-rgb: 96, 92, 85; /* Neutral gray-brown in RGB format */
+      --accent-light: rgba(96, 92, 85, 0.1); /* Light neutral for backgrounds */
     }
     
     /* Password protection styles */
@@ -79,18 +83,19 @@
     }
     
     #password-container button {
-      background-color: var(--accent-color, #3b82f6);
-      color: white;
+      background-color: var(--text-primary, #141413);
+      color: var(--bg-primary, #f0efea);
       border: none;
       border-radius: 4px;
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
+      font-family: "Newsreader", serif;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: opacity 0.2s;
     }
     
     #password-container button:hover {
-      background-color: var(--accent-color-hover, #2563eb);
+      opacity: 0.85;
     }
     
     #password-error {
@@ -111,10 +116,10 @@
       max-width: 90vw;
       height: 450px;
       max-height: 70vh;
-      background-color: var(--bg-secondary);
+      background-color: var(--bg-secondary, #f9f9f8);
       border-radius: 10px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color, #e6e4dd);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -129,9 +134,9 @@
     
     .chat-header {
       padding: 1rem 1.2rem;
-      background-color: var(--accent-color, #3b82f6);
-      color: white;
-      border-bottom: 1px solid var(--border-color);
+      background-color: var(--text-primary, #141413);
+      color: var(--bg-primary, #f0efea);
+      border-bottom: 1px solid var(--border-color, #e6e4dd);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -148,7 +153,7 @@
     .chat-toggle {
       background: none;
       border: none;
-      color: white;
+      color: var(--bg-primary, #f0efea);
       cursor: pointer;
       padding: 0;
       font-size: 1.2rem;
@@ -162,7 +167,7 @@
     }
     
     .chat-toggle:hover {
-      background-color: rgba(255, 255, 255, 0.2);
+      background-color: rgba(240, 239, 234, 0.2);
     }
     
     .chat-messages {
@@ -172,7 +177,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      background-color: rgba(var(--accent-color-rgb, 59, 130, 246), 0.03);
+      background-color: var(--bg-primary, #f0efea);
     }
     
     .message {
@@ -189,8 +194,8 @@
     
     .message-sender {
       align-self: flex-end;
-      background-color: var(--accent-color, #3b82f6);
-      color: white;
+      background-color: var(--text-primary, #141413);
+      color: var(--bg-primary, #f0efea);
       border-radius: 14px 14px 0 14px;
       border: none;
     }
@@ -232,7 +237,7 @@
       display: flex;
       gap: 0.5rem;
       align-items: center;
-      background-color: rgba(var(--accent-color-rgb, 59, 130, 246), 0.05);
+      background-color: var(--bg-secondary, #f9f9f8);
     }
     
     .username-container label {
@@ -256,8 +261,8 @@
     
     .username-container input:focus {
       outline: none;
-      border-color: var(--accent-color, #3b82f6);
-      box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 59, 130, 246), 0.2);
+      border-color: var(--text-primary, #141413);
+      box-shadow: 0 0 0 2px rgba(20, 20, 19, 0.1);
     }
     
     .chat-form {
@@ -282,13 +287,13 @@
     
     .chat-form input:focus {
       outline: none;
-      border-color: var(--accent-color, #3b82f6);
-      box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 59, 130, 246), 0.2);
+      border-color: var(--text-primary, #141413);
+      box-shadow: 0 0 0 2px rgba(20, 20, 19, 0.1);
     }
     
     .chat-form button {
-      background-color: var(--accent-color, #3b82f6);
-      color: white;
+      background-color: var(--text-primary, #141413);
+      color: var(--bg-primary, #f0efea);
       border: none;
       border-radius: 20px;
       padding: 0.5rem 1.2rem;
@@ -300,7 +305,7 @@
     }
     
     .chat-form button:hover {
-      background-color: var(--accent-color-hover, #2563eb);
+      opacity: 0.85;
       transform: translateY(-1px);
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
     }
@@ -329,6 +334,12 @@
       right: 50%;
       bottom: 3rem;
       transform: translateX(50%);
+    }
+    
+    /* When positioned above the footer */
+    .chat-above-footer {
+      box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.15);
+      border-top: 1px solid var(--border-color);
     }
     
     /* Two column layout */
@@ -521,8 +532,15 @@
         // Position the chat box based on viewport
         positionChatBox(chatContainer);
         
-        // Handle window resize for responsive positioning
+        // Handle window events for responsive positioning
         window.addEventListener('resize', () => positionChatBox(chatContainer));
+        window.addEventListener('scroll', () => positionChatBox(chatContainer));
+        
+        // Periodic check for layout changes
+        const intervalId = setInterval(() => positionChatBox(chatContainer), 1000);
+        
+        // Clean up interval when page is unloaded
+        window.addEventListener('beforeunload', () => clearInterval(intervalId));
         
         // Set up username input
         const usernameInput = chatContainer.querySelector('#username-input');
@@ -546,6 +564,18 @@
           if (!chatContainer.classList.contains('chat-minimized')) {
             setTimeout(() => positionChatBox(chatContainer), 100);
           }
+        });
+        
+        // Ensure box repositions when interacting with it
+        chatContainer.addEventListener('mousedown', function() {
+          // Short delay to allow any layout changes to settle
+          setTimeout(() => positionChatBox(chatContainer), 50);
+        });
+        
+        // Reposition after focus changes
+        const chatInputs = chatContainer.querySelectorAll('input');
+        chatInputs.forEach(input => {
+          input.addEventListener('focus', () => setTimeout(() => positionChatBox(chatContainer), 300));
         });
         
         // API base URL for socket connection
@@ -643,12 +673,9 @@
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         
-        // Get content wrapper to determine main content width
-        const contentWrapper = document.querySelector('.content-wrapper');
-        const contentRect = contentWrapper ? contentWrapper.getBoundingClientRect() : null;
-        
         // Reset any existing position classes
         chatContainer.classList.remove('chat-position-bottom');
+        chatContainer.classList.remove('chat-above-footer');
         
         // Default side position for large screens
         chatContainer.style.right = '3rem';
@@ -659,6 +686,15 @@
         const chatRect = chatContainer.getBoundingClientRect();
         const chatHeight = chatRect.height;
         const chatWidth = chatRect.width;
+        
+        // Get content elements to check for overlap
+        const contentWrapper = document.querySelector('.content-wrapper');
+        const mainImage = document.querySelector('.responsive-image');
+        const footer = document.querySelector('footer');
+        
+        const contentRect = contentWrapper ? contentWrapper.getBoundingClientRect() : null;
+        const imageRect = mainImage ? mainImage.getBoundingClientRect() : null;
+        const footerRect = footer ? footer.getBoundingClientRect() : null;
         
         // Check if chat fits in viewport
         const isMobile = viewportWidth <= 768;
@@ -673,15 +709,50 @@
           const rightEdgeOfContent = contentRect.right;
           const leftEdgeOfChat = viewportWidth - chatWidth - 48; // 48px = 3rem
           
-          // If chat would overlap with content, position at bottom
+          // Check if chat would overlap with content
           if (leftEdgeOfChat < rightEdgeOfContent + 60) { // 60px buffer
             chatContainer.classList.add('chat-position-bottom');
           }
+          
+          // Check if chat overlaps with the image when on the right side
+          if (imageRect && !chatContainer.classList.contains('chat-position-bottom')) {
+            const chatLeft = leftEdgeOfChat;
+            const chatRight = chatLeft + chatWidth;
+            const chatTop = viewportHeight - chatHeight - 48; // 48px = 3rem
+            const chatBottom = viewportHeight - 48;
+            
+            // Check if chat overlaps with image
+            const overlapsImage = !(
+              chatRight < imageRect.left ||
+              chatLeft > imageRect.right ||
+              chatBottom < imageRect.top ||
+              chatTop > imageRect.bottom
+            );
+            
+            if (overlapsImage) {
+              chatContainer.classList.add('chat-position-bottom');
+            }
+          }
         }
         
-        // Final check: make sure chat isn't too tall for viewport
-        if (chatHeight > viewportHeight - 40) { // 40px buffer
-          chatContainer.style.maxHeight = (viewportHeight - 80) + 'px'; // 80px total buffer
+        // Final adjustments for bottom position - avoid footer
+        if (chatContainer.classList.contains('chat-position-bottom') && footerRect) {
+          // Calculate distance from bottom to avoid footer
+          const footerTop = footerRect.top;
+          const viewportBottom = window.scrollY + window.innerHeight;
+          const footerDistanceFromBottom = viewportBottom - footerTop;
+          
+          // If footer is visible in viewport, position chat above it
+          if (footerDistanceFromBottom > 0) {
+            // Position above footer with padding
+            chatContainer.style.bottom = (footerDistanceFromBottom + 20) + 'px';
+            chatContainer.classList.add('chat-above-footer');
+          }
+        }
+        
+        // Make sure chat isn't too tall for viewport
+        if (chatHeight > viewportHeight - 80) { // 80px buffer
+          chatContainer.style.maxHeight = (viewportHeight - 100) + 'px'; // 100px total buffer
         }
       }
     });
