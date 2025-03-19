@@ -302,6 +302,13 @@
       color: var(--text-secondary, #767676);
     }
     
+    .comment-edited-indicator {
+      font-size: 0.8rem;
+      color: var(--text-secondary, #767676);
+      font-style: italic;
+      margin-left: 0.5rem;
+    }
+    
     .comment-content {
       margin-bottom: 1rem;
       line-height: 1.6;
@@ -345,6 +352,19 @@
       text-decoration: underline;
     }
     
+    /* Action button styling */
+    .comment-edit-btn {
+      color: var(--text-secondary, #767676) !important;
+      opacity: 0.9;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    
+    .comment-edit-btn:hover {
+      color: var(--text-primary, #141413) !important;
+      opacity: 1;
+      text-decoration: underline;
+    }
+    
     /* Delete button styling */
     .comment-delete-btn {
       color: #9e2a2a !important;
@@ -364,6 +384,94 @@
     
     .dark-mode .comment-delete-btn:hover {
       color: #e99797 !important;
+    }
+    
+    /* Edit interface */
+    .edit-comment-form {
+      margin: 0.5rem 0;
+      background-color: var(--bg-secondary, #f9f9f8);
+      border: 1px solid var(--border-color, #e6e4dd);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .edit-comment-form textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 1rem;
+      border: none;
+      border-bottom: 1px solid var(--border-color, #e6e4dd);
+      background-color: var(--bg-primary, #f0efea);
+      color: var(--text-primary, #141413);
+      font-family: "Newsreader", serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      resize: vertical;
+    }
+    
+    .edit-comment-form textarea:focus {
+      outline: none;
+      border-color: var(--text-primary, #141413);
+    }
+    
+    .edit-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.8rem;
+      gap: 0.5rem;
+    }
+    
+    .edit-form-actions button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 3px;
+      font-family: "Newsreader", serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    
+    .cancel-edit-btn {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--text-secondary, #767676);
+    }
+    
+    .cancel-edit-btn:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+      color: var(--text-primary, #141413);
+    }
+    
+    .save-edit-btn {
+      background-color: var(--text-primary, #141413);
+      color: var(--bg-primary, #f0efea);
+    }
+    
+    .save-edit-btn:hover {
+      opacity: 0.9;
+    }
+    
+    /* Dark mode edit interface */
+    .dark-mode .edit-comment-form {
+      background-color: var(--bg-secondary, #1a1a19);
+      border-color: var(--border-color, #444);
+    }
+    
+    .dark-mode .edit-comment-form textarea {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color, #444);
+    }
+    
+    .dark-mode .cancel-edit-btn {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .dark-mode .cancel-edit-btn:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    
+    .dark-mode .save-edit-btn {
+      background-color: var(--text-primary, #DDD2BD);
+      color: var(--bg-primary, #1a1a19);
     }
     
     /* Delete confirmation popup */
@@ -1476,14 +1584,14 @@
         
         // Handle socket events for comment updates and deletion
         socket.on('comment-updated', function(updateData) {
-          const { commentId, content, username } = updateData;
+          const { commentId, content, username, edited } = updateData;
           const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
           
           if (commentElement) {
             // Update comment content
             const contentElement = commentElement.querySelector('.comment-content');
             if (contentElement) {
-              contentElement.innerHTML = content;
+              contentElement.innerHTML = formatCommentText(escapeHTML(content));
             }
             
             // Update comment author
@@ -1492,8 +1600,20 @@
               authorElement.textContent = username;
             }
             
-            // Add a visual indication that the comment was deleted
-            commentElement.classList.add('comment-deleted');
+            // Check if this is a deleted comment or an edited comment
+            if (username === "Deleted" && content === "[Comment deleted]") {
+              // Add a visual indication that the comment was deleted
+              commentElement.classList.add('comment-deleted');
+            } else if (edited) {
+              // Show "edited" indicator if this is an edit
+              const dateElement = commentElement.querySelector('.comment-date');
+              if (dateElement && !commentElement.querySelector('.comment-edited-indicator')) {
+                const editedIndicator = document.createElement('span');
+                editedIndicator.className = 'comment-edited-indicator';
+                editedIndicator.textContent = '(edited)';
+                dateElement.insertAdjacentElement('afterend', editedIndicator);
+              }
+            }
           }
         });
         
@@ -1714,6 +1834,102 @@
             });
           });
           
+          // Add edit functionality
+          const editBtn = commentElement.querySelector('.comment-edit-btn');
+          if (editBtn) {
+            editBtn.addEventListener('click', function() {
+              // Check if comment is already in edit mode
+              if (commentElement.querySelector('.edit-comment-form')) {
+                return; // Already in edit mode
+              }
+              
+              // Get the current content from the comment
+              const contentElement = commentElement.querySelector('.comment-content');
+              const originalContent = comment.content; // Use the original content from the comment object
+              
+              // Create an edit form
+              const editForm = document.createElement('div');
+              editForm.className = 'edit-comment-form';
+              editForm.innerHTML = `
+                <textarea>${originalContent}</textarea>
+                <div class="edit-form-actions">
+                  <button class="cancel-edit-btn">Cancel</button>
+                  <button class="save-edit-btn">Save Changes</button>
+                </div>
+              `;
+              
+              // Hide the original content and append the edit form
+              contentElement.style.display = 'none';
+              contentElement.insertAdjacentElement('afterend', editForm);
+              
+              // Focus the textarea
+              const textarea = editForm.querySelector('textarea');
+              textarea.focus();
+              
+              // Position cursor at the end of text
+              textarea.selectionStart = textarea.value.length;
+              textarea.selectionEnd = textarea.value.length;
+              
+              // Add event listeners for the edit form buttons
+              const cancelBtn = editForm.querySelector('.cancel-edit-btn');
+              const saveBtn = editForm.querySelector('.save-edit-btn');
+              
+              // Function to cancel editing
+              const cancelEdit = function() {
+                editForm.remove();
+                contentElement.style.display = '';
+                
+                // Remove the click handler from the document
+                document.removeEventListener('click', handleOutsideClick);
+              };
+              
+              // Function to handle clicks outside the edit form
+              const handleOutsideClick = function(e) {
+                // Check if the click is outside the edit form
+                if (!editForm.contains(e.target) && e.target !== editBtn) {
+                  cancelEdit();
+                }
+              };
+              
+              // Add the outside click handler (with a slight delay to avoid immediate triggering)
+              setTimeout(() => {
+                document.addEventListener('click', handleOutsideClick);
+              }, 10);
+              
+              // Cancel just removes the edit form and shows the original content
+              cancelBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                cancelEdit();
+              });
+              
+              // Save sends the updated content to the server
+              saveBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const updatedContent = textarea.value.trim();
+                
+                if (updatedContent && updatedContent !== originalContent) {
+                  // Send the edit to the server
+                  socket.emit('edit-comment', { 
+                    commentId: comment._id,
+                    content: updatedContent
+                  });
+                  
+                  // Update the local comment object
+                  comment.content = updatedContent;
+                  comment.edited = true;
+                }
+                
+                // Cancel edit mode
+                cancelEdit();
+              });
+              
+              // Prevent clicks inside the textarea from closing the edit form
+              textarea.addEventListener('click', function(e) {
+                e.stopPropagation();
+              });
+            });
+          }
+          
           // Add delete functionality
           const deleteBtn = commentElement.querySelector('.comment-delete-btn');
           if (deleteBtn) {
@@ -1847,6 +2063,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
+                <button class="comment-edit-btn">Edit</button>
                 <button class="comment-delete-btn">Delete</button>
                 <button class="comment-collapse-btn" style="display: none;" aria-label="Expand/collapse replies"></button>
               </div>
@@ -1929,6 +2146,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
+                <button class="comment-edit-btn">Edit</button>
                 <button class="comment-delete-btn">Delete</button>
                 <button class="comment-collapse-btn" style="display: none;" aria-label="Expand/collapse replies"></button>
               </div>

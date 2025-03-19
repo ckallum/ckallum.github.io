@@ -18,6 +18,7 @@ const commentSchema = new mongoose.Schema({
   username: { type: String, required: true },
   content: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
+  editedAt: { type: Date, default: null }, // Tracks when comment was last edited
   votes: { type: Number, default: 0 },
   pageId: { type: String, required: true, index: true },
   
@@ -304,6 +305,48 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Error updating vote:', error);
       socket.emit('vote-error', { error: error.message });
+    }
+  });
+  
+  // Handle comment editing
+  socket.on('edit-comment', async ({ commentId, content }) => {
+    try {
+      // Validate content
+      const validContent = content && content.trim() ? content.trim() : '';
+      
+      if (!validContent) {
+        throw new Error("Comment content cannot be empty");
+      }
+      
+      // Find and update the comment
+      const comment = await Comment.findById(commentId);
+      
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      
+      const pageId = comment.pageId;
+      
+      // Update the comment content
+      await Comment.findByIdAndUpdate(commentId, {
+        content: validContent,
+        editedAt: new Date() // Add timestamp for editing
+      });
+      
+      // Notify clients about the edit
+      io.to(`page-${pageId}`).emit('comment-updated', {
+        commentId,
+        content: validContent,
+        username: comment.username,
+        edited: true
+      });
+      
+    } catch (error) {
+      console.error('Error editing comment:', error);
+      socket.emit('edit-error', { 
+        message: 'Failed to edit comment',
+        error: error.message 
+      });
     }
   });
   
