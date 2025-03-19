@@ -325,7 +325,7 @@
           // API base URL - change this to your deployed server URL
           const API_BASE_URL = window.location.hostname === 'localhost' 
             ? '' // Empty for local development (same origin)
-            : 'https://ckallum-api.herokuapp.com'; // Replace with your actual server URL
+            : 'https://ckallum-api-9e0b7df25b59.herokuapp.com/'; // Replace with your actual server URL
           
           // Step 1: Get a challenge and salt from the server
           const challengeResponse = await fetch(`${API_BASE_URL}/api/auth-challenge/${pageId}`, {
@@ -445,7 +445,7 @@
         // API base URL for socket connection
         const API_BASE_URL = window.location.hostname === 'localhost' 
           ? 'http://localhost:3000' // Local development
-          : 'https://ckallum-api.herokuapp.com'; // Replace with your actual server URL
+          : 'https://ckallum-api-9e0b7df25b59.herokuapp.com/'; // Replace with your actual server URL
           
         // Initialize Socket.io connection
         socket = io(API_BASE_URL, {
