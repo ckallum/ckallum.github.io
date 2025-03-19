@@ -315,22 +315,45 @@
         });
       }
       
-      // Server-side password verification
+      // Server-side password verification using challenge-response
       async function verifyPassword() {
         const input = document.getElementById('password-input');
         const error = document.getElementById('password-error');
         const password = input.value;
         
         try {
-          const response = await fetch('/api/verify-password', {
+          // Step 1: Get a challenge from the server
+          const challengeResponse = await fetch(`/api/auth-challenge/${pageId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const challengeData = await challengeResponse.json();
+          
+          if (!challengeData.success) {
+            error.textContent = 'Failed to start authentication process. Please try again.';
+            error.style.display = 'block';
+            return;
+          }
+          
+          const { challenge } = challengeData;
+          
+          // Step 2: Create a hash of the challenge + password
+          // This way we never send the actual password over the network
+          const hash = await sha256(challenge + password);
+          
+          // Step 3: Send the hash and challenge back to the server for verification
+          const verifyResponse = await fetch('/api/verify-password', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ pageId, password })
+            body: JSON.stringify({ pageId, hash, challenge })
           });
           
-          const data = await response.json();
+          const data = await verifyResponse.json();
           
           if (data.success) {
             // Password correct - store access token
@@ -354,6 +377,20 @@
           error.textContent = 'Error connecting to server. Please try again.';
           error.style.display = 'block';
         }
+      }
+      
+      // Helper function to compute SHA-256 hash
+      async function sha256(message) {
+        // Encode as UTF-8
+        const msgBuffer = new TextEncoder().encode(message);
+        
+        // Hash the message
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        
+        // Convert ArrayBuffer to hex string
+        return Array.from(new Uint8Array(hashBuffer))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
       }
       
       // Set up chat functionality
