@@ -12,13 +12,43 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-// Create simplified model schemas
-const messageSchema = new mongoose.Schema({
-  username: String,
-  content: String,
-  pageId: String,
-  timestamp: { type: Date, default: Date.now }
+// Enhanced Comment Schema based on EA Forum approach
+const commentSchema = new mongoose.Schema({
+  // Basic fields
+  username: { type: String, required: true },
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  votes: { type: Number, default: 0 },
+  pageId: { type: String, required: true, index: true },
+  
+  // Parent-child relationship fields
+  parentCommentId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    default: null,
+    index: true 
+  },
+  
+  // If this is a reply to a reply, store the top-level parent comment ID
+  // This helps with efficiently finding all comments in a thread
+  topLevelCommentId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    default: null,
+    index: true 
+  },
+  
+  // Counter fields for efficient querying
+  descendentCount: { type: Number, default: 0 },
+  directChildrenCount: { type: Number, default: 0 },
+  
+  // Timestamp of the last activity in this comment's thread
+  // Helps with sorting by "active discussions"
+  lastSubthreadActivity: { type: Date, default: Date.now }
 });
+
+// Create indexes for efficient retrieval
+commentSchema.index({ pageId: 1, parentCommentId: 1 });
+commentSchema.index({ pageId: 1, topLevelCommentId: 1 });
+commentSchema.index({ pageId: 1, lastSubthreadActivity: -1 });
 
 const protectedPageSchema = new mongoose.Schema({
   pageId: String,
@@ -28,7 +58,7 @@ const protectedPageSchema = new mongoose.Schema({
 });
 
 // Create models
-const Message = mongoose.model('Message', messageSchema);
+const Comment = mongoose.model('Comment', commentSchema);
 const ProtectedPage = mongoose.model('ProtectedPage', protectedPageSchema);
 
 // Initialize app
@@ -58,8 +88,57 @@ app.get('/', (req, res) => {
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ckallum-website';
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(() => {
+    console.log('Connected to MongoDB');
+    // Attempt to migrate existing data if needed
+    migrateExistingComments();
+  })
   .catch(err => console.error('MongoDB connection error:', err));
+
+// Helper function to migrate existing messages to the new Comment model
+async function migrateExistingComments() {
+  try {
+    // Check if we have the legacy Message model
+    if (mongoose.modelNames().includes('Message')) {
+      const Message = mongoose.model('Message');
+      const existingMessages = await Message.find({});
+      
+      if (existingMessages.length > 0) {
+        console.log(`Found ${existingMessages.length} legacy messages to migrate`);
+        
+        // Convert old messages to new comments
+        for (const message of existingMessages) {
+          // Check if this message has already been migrated
+          const existingComment = await Comment.findOne({
+            username: message.username,
+            content: message.content,
+            timestamp: message.timestamp
+          });
+          
+          if (!existingComment) {
+            // Create a new comment from the message
+            await Comment.create({
+              username: message.username || 'Anonymous',
+              content: message.content,
+              pageId: message.pageId,
+              timestamp: message.timestamp,
+              votes: 0,
+              parentCommentId: null,
+              topLevelCommentId: null,
+              descendentCount: 0,
+              directChildrenCount: 0,
+              lastSubthreadActivity: message.timestamp
+            });
+          }
+        }
+        
+        console.log('Migration of legacy messages complete');
+      }
+    }
+  } catch (error) {
+    console.error('Error migrating existing messages:', error);
+  }
+}
 
 // Setup Socket.io for chat with proper CORS settings
 const io = socketIo(server, {
@@ -70,22 +149,103 @@ const io = socketIo(server, {
   }
 });
 
+// Create a comment with proper parent-child relationships
+async function createComment(commentData) {
+  try {
+    // For a top-level comment, just save it
+    if (!commentData.parentCommentId) {
+      return await Comment.create(commentData);
+    }
+    
+    // For a reply, we need to:
+    // 1. Find the parent comment
+    const parentComment = await Comment.findById(commentData.parentCommentId);
+    if (!parentComment) {
+      throw new Error("Parent comment not found");
+    }
+    
+    // 2. Set the topLevelCommentId
+    // If replying to a top-level comment, use its ID
+    // If replying to a reply, use the same topLevelCommentId as the parent
+    commentData.topLevelCommentId = parentComment.topLevelCommentId || parentComment._id;
+    
+    // 3. Create the comment
+    const newComment = await Comment.create(commentData);
+    
+    // 4. Update parent comment's directChildrenCount
+    await Comment.findByIdAndUpdate(
+      commentData.parentCommentId,
+      { $inc: { directChildrenCount: 1 } }
+    );
+    
+    // 5. Update the descendentCount and lastSubthreadActivity for all ancestor comments
+    let currentParentId = commentData.parentCommentId;
+    const now = new Date();
+    
+    while (currentParentId) {
+      await Comment.findByIdAndUpdate(
+        currentParentId,
+        { 
+          $inc: { descendentCount: 1 },
+          $set: { lastSubthreadActivity: now }
+        }
+      );
+      
+      // Get the next parent up in the chain
+      const currentParent = await Comment.findById(currentParentId);
+      currentParentId = currentParent?.parentCommentId || null;
+    }
+    
+    return newComment;
+  } catch (error) {
+    console.error('Error creating comment:', error);
+    throw error;
+  }
+}
+
+// Helper function to send existing comments
+async function sendExistingComments(socket, pageId) {
+  try {
+    // Get all comments for the page
+    const comments = await Comment.find({ pageId }).sort({ timestamp: 1 });
+    
+    // Send them to the client
+    socket.emit('init-messages', comments);
+  } catch (error) {
+    socket.emit('comment-error', { 
+      message: 'Failed to load comments',
+      error: error.message 
+    });
+  }
+}
+
 // Handle socket connections
 io.on('connection', (socket) => {
   console.log('New client connected');
   
-  // Send existing messages to newly connected client
-  Message.find({ pageId: 'dimanche' })
-    .sort({ timestamp: 1 })
-    .then(messages => {
-      socket.emit('init-messages', messages);
-    })
-    .catch(err => console.error('Error fetching messages:', err));
+  // Join a room for specific pages when the client connects
+  socket.on('join-page', (pageId) => {
+    console.log(`Client joined page room: ${pageId}`);
+    socket.join(`page-${pageId}`);
+    
+    // Send existing comments to the client who joined
+    sendExistingComments(socket, pageId);
+  });
   
-  // Handle new messages
+  // Fall back to sending dimanche comments if no join-page event is received
+  // (for backward compatibility)
+  setTimeout(() => {
+    // Check if the client has joined a specific page room
+    const rooms = Array.from(socket.rooms);
+    if (rooms.length === 1) { // Only the default room
+      sendExistingComments(socket, 'dimanche');
+    }
+  }, 1000);
+  
+  // Handle new messages with enhanced parent-child support
   socket.on('send-message', async (messageData) => {
     try {
-      const { username, content, pageId } = messageData;
+      const { username, content, pageId, parentCommentId } = messageData;
       
       // Validate message data
       const validUsername = username && username.trim() ? username.trim() : 'Anonymous';
@@ -96,20 +256,54 @@ io.on('connection', (socket) => {
         return;
       }
       
-      // Create and save new message
-      const newMessage = new Message({
+      // Prepare comment data for creation
+      const commentData = {
         username: validUsername,
         content: validContent,
         pageId,
+        votes: 0,
+        parentCommentId: parentCommentId || null,
         timestamp: new Date()
-      });
+      };
       
-      await newMessage.save();
+      // Create the comment with proper relationship handling
+      const newComment = await createComment(commentData);
       
-      // Broadcast the message to all connected clients
-      io.emit('new-message', newMessage);
+      // Broadcast the new comment to everyone on this page
+      io.to(`page-${pageId}`).emit('new-message', newComment);
     } catch (error) {
       console.error('Error handling message:', error);
+      socket.emit('comment-error', { 
+        message: 'Failed to save comment',
+        error: error.message 
+      });
+    }
+  });
+  
+  // Handle voting on comments
+  socket.on('vote', async ({ commentId, voteType }) => {
+    try {
+      const increment = voteType === 'upvote' ? 1 : -1;
+      
+      // Update the vote count in the database
+      const updatedComment = await Comment.findByIdAndUpdate(
+        commentId,
+        { $inc: { votes: increment } },
+        { new: true }
+      );
+      
+      if (!updatedComment) {
+        throw new Error("Comment not found");
+      }
+      
+      // Broadcast the updated vote count
+      io.to(`page-${updatedComment.pageId}`).emit('vote-updated', {
+        commentId: updatedComment._id,
+        votes: updatedComment.votes
+      });
+    } catch (error) {
+      console.error('Error updating vote:', error);
+      socket.emit('vote-error', { error: error.message });
     }
   });
   

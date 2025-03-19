@@ -505,6 +505,38 @@
       font-size: 0.85rem;
     }
     
+    .inline-reply-form .reply-user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.75rem;
+      background-color: rgba(0, 0, 0, 0.02);
+      padding: 0.75rem;
+      border-radius: 4px;
+    }
+    
+    .inline-reply-form .reply-user-info label {
+      font-size: 0.9rem;
+      color: var(--text-secondary, #767676);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    
+    .inline-reply-form .reply-user-info input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color, #e6e4dd);
+      border-radius: 3px;
+      background-color: var(--bg-primary, #f0efea);
+      color: var(--text-primary, #141413);
+      font-family: "Newsreader", serif;
+      font-size: 0.9rem;
+    }
+    
+    .dark-mode .inline-reply-form .reply-user-info {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
     .inline-reply-form textarea {
       min-height: 100px;
       margin-bottom: 0.5rem;
@@ -629,6 +661,228 @@
   </style>
   
   <script>
+    /* 
+    Server-side MongoDB Schema Changes Based on EA Forum:
+    
+    In your server-side code, modify the MongoDB comment schema to:
+    
+    const CommentSchema = new mongoose.Schema({
+      // Basic fields
+      _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+      username: { type: String, required: true },
+      content: { type: String, required: true },
+      timestamp: { type: Date, default: Date.now },
+      votes: { type: Number, default: 0 },
+      pageId: { type: String, required: true, index: true },
+      
+      // Parent-child relationship fields
+      parentCommentId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        default: null,
+        index: true 
+      },
+      
+      // If this is a reply to a reply, store the top-level parent comment ID
+      // This helps with efficiently finding all comments in a thread
+      topLevelCommentId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        default: null,
+        index: true 
+      },
+      
+      // Counter fields for efficient querying
+      descendentCount: { type: Number, default: 0 },
+      directChildrenCount: { type: Number, default: 0 },
+      
+      // Timestamp of the last activity in this comment's thread
+      // Helps with sorting by "active discussions"
+      lastSubthreadActivity: { type: Date, default: Date.now }
+    });
+    
+    // Create indexes for efficient retrieval
+    CommentSchema.index({ pageId: 1, parentCommentId: 1 });
+    CommentSchema.index({ pageId: 1, topLevelCommentId: 1 });
+    CommentSchema.index({ pageId: 1, lastSubthreadActivity: -1 });
+    
+    // HANDLING COMMENTS IN THE SERVER:
+    
+    // 1. When creating a new comment:
+    
+    async function createComment(commentData) {
+      // For a top-level comment, just save it
+      if (!commentData.parentCommentId) {
+        return await Comment.create(commentData);
+      }
+      
+      // For a reply, we need to:
+      // 1. Find the parent comment
+      const parentComment = await Comment.findById(commentData.parentCommentId);
+      if (!parentComment) throw new Error("Parent comment not found");
+      
+      // 2. Set the topLevelCommentId
+      // If replying to a top-level comment, use its ID
+      // If replying to a reply, use the same topLevelCommentId as the parent
+      commentData.topLevelCommentId = parentComment.topLevelCommentId || parentComment._id;
+      
+      // 3. Create the comment
+      const newComment = await Comment.create(commentData);
+      
+      // 4. Update parent comment's directChildrenCount
+      await Comment.findByIdAndUpdate(
+        commentData.parentCommentId,
+        { $inc: { directChildrenCount: 1 } }
+      );
+      
+      // 5. Update the descendentCount and lastSubthreadActivity for all ancestor comments
+      let currentParentId = commentData.parentCommentId;
+      const now = new Date();
+      
+      while (currentParentId) {
+        await Comment.findByIdAndUpdate(
+          currentParentId,
+          { 
+            $inc: { descendentCount: 1 },
+            $set: { lastSubthreadActivity: now }
+          }
+        );
+        
+        // Get the next parent up in the chain
+        const currentParent = await Comment.findById(currentParentId);
+        currentParentId = currentParent?.parentCommentId || null;
+      }
+      
+      return newComment;
+    }
+    
+    // 2. Retrieving comments efficiently:
+    
+    // Option A: Get a fully constructed tree for a page
+    async function getCommentTreeForPage(pageId) {
+      // First, get all top-level comments
+      const topLevelComments = await Comment.find({ 
+        pageId, 
+        parentCommentId: null 
+      }).sort({ timestamp: 1 });
+      
+      // For each top-level comment, get its full subtree
+      const result = [];
+      
+      for (const comment of topLevelComments) {
+        // Get the comment with its entire subtree
+        const commentWithReplies = await getCommentWithReplies(comment._id);
+        result.push(commentWithReplies);
+      }
+      
+      return result;
+    }
+    
+    // Helper function to get a comment and all its descendents
+    async function getCommentWithReplies(commentId) {
+      // Get the comment itself
+      const comment = await Comment.findById(commentId);
+      if (!comment) return null;
+      
+      // Get all direct replies to this comment
+      const replies = await Comment.find({ 
+        parentCommentId: commentId 
+      }).sort({ timestamp: 1 });
+      
+      // Recursively get replies for each direct reply
+      const repliesWithChildren = await Promise.all(
+        replies.map(reply => getCommentWithReplies(reply._id))
+      );
+      
+      // Return the comment with its replies
+      return {
+        ...comment.toObject(),
+        replies: repliesWithChildren
+      };
+    }
+    
+    // Option B: More efficient flat approach (for client-side tree building)
+    async function getAllCommentsForPage(pageId) {
+      // Get all comments for the page
+      return await Comment.find({ pageId })
+        .sort({ timestamp: 1 })
+        .lean();
+    }
+    
+    // 3. Socket.io Implementation for Real-time Comments
+    
+    // On the server-side (Node.js with Socket.io):
+    io.on('connection', (socket) => {
+      // Join a room for the specific page
+      socket.on('join-page', (pageId) => {
+        socket.join(`page-${pageId}`);
+        
+        // Send existing comments to the client when they join
+        sendExistingComments(socket, pageId);
+      });
+      
+      // Handle new comment submission
+      socket.on('send-message', async (commentData) => {
+        try {
+          // Create the comment in the database
+          const newComment = await createComment({
+            username: commentData.username,
+            content: commentData.content,
+            pageId: commentData.pageId,
+            votes: 0,
+            parentCommentId: commentData.parentCommentId || null,
+            timestamp: new Date()
+          });
+          
+          // Broadcast the new comment to everyone on this page
+          io.to(`page-${commentData.pageId}`).emit('new-message', newComment);
+        } catch (error) {
+          // Send error back to the client
+          socket.emit('comment-error', { 
+            message: 'Failed to save comment',
+            error: error.message 
+          });
+        }
+      });
+      
+      // Handle voting
+      socket.on('vote', async ({ commentId, voteType }) => {
+        try {
+          const increment = voteType === 'upvote' ? 1 : -1;
+          
+          // Update the vote count in the database
+          const updatedComment = await Comment.findByIdAndUpdate(
+            commentId,
+            { $inc: { votes: increment } },
+            { new: true }
+          );
+          
+          // Broadcast the updated vote count
+          io.to(`page-${updatedComment.pageId}`).emit('vote-updated', {
+            commentId: updatedComment._id,
+            votes: updatedComment.votes
+          });
+        } catch (error) {
+          socket.emit('vote-error', { error: error.message });
+        }
+      });
+    });
+    
+    // Helper function to send existing comments
+    async function sendExistingComments(socket, pageId) {
+      try {
+        // Get all comments for the page
+        const comments = await Comment.find({ pageId }).sort({ timestamp: 1 });
+        
+        // Send them to the client
+        socket.emit('init-messages', comments);
+      } catch (error) {
+        socket.emit('comment-error', { 
+          message: 'Failed to load comments',
+          error: error.message 
+        });
+      }
+    }
+    /* End of server-side code example */
+    
     // Server validation and chat client script
     document.addEventListener('DOMContentLoaded', function() {
       const siteWrapper = document.querySelector('.site-wrapper');
@@ -859,10 +1113,37 @@
 
           socket.on('connect', function() {
             console.log('Socket.io connected successfully');
+            
+            // Join the specific page room when connection is established
+            socket.emit('join-page', pageId);
+            console.log('Joined page room:', pageId);
           });
 
           socket.on('connect_error', function(err) {
             console.error('Socket.io connection error:', err);
+          });
+
+          // Handle socket.io error events
+          socket.on('error', function(err) {
+            console.error('Socket.io error:', err);
+          });
+
+          // Handle comment errors sent from the server
+          socket.on('comment-error', function(errorData) {
+            console.error('Comment error:', errorData.message, errorData.error);
+          });
+
+          // Handle vote update confirmations
+          socket.on('vote-updated', function(voteData) {
+            const { commentId, votes } = voteData;
+            const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+            
+            if (commentElement) {
+              const voteCount = commentElement.querySelector('.vote-count');
+              if (voteCount) {
+                voteCount.textContent = votes;
+              }
+            }
           });
         } catch (err) {
           console.error('Error initializing Socket.io:', err);
@@ -891,7 +1172,8 @@
               content,
               pageId,
               votes: 0, // Initialize vote count
-              parentCommentId: null // Ensure it's a top-level comment
+              parentCommentId: null, // Ensure it's a top-level comment
+              children: [] // Initialize empty children array
             });
             
             // Clear input
@@ -954,31 +1236,66 @@
           });
           
           // Then add all replies to their proper parent
-          // Sort by parent ID to ensure we process parents before their children
+          // Process deepest ancestors first - sort by topLevelCommentId and timestamp
+          // This ensures we process the comments in a breadth-first manner within threads
           const sortedReplies = [...replyComments].sort((a, b) => {
-            // Replies to the same parent should be processed in chronological order
-            if (a.parentCommentId === b.parentCommentId) {
-              return new Date(a.timestamp) - new Date(b.timestamp);
+            // Group by top-level comment first
+            if (a.topLevelCommentId !== b.topLevelCommentId) {
+              // String comparison of ObjectId is fine for grouping
+              return a.topLevelCommentId > b.topLevelCommentId ? 1 : -1;
             }
-            return 0;
+            
+            // Then sort by parentCommentId (for nested replies)
+            if (a.parentCommentId !== b.parentCommentId) {
+              // For dealing with direct replies to same parent
+              return a.parentCommentId > b.parentCommentId ? 1 : -1;
+            }
+            
+            // Finally sort by timestamp for siblings
+            return new Date(a.timestamp) - new Date(b.timestamp);
           });
           
-          sortedReplies.forEach(message => {
-            // Find the direct parent
-            const parentId = message.parentCommentId;
+          // Process replies in multiple passes if needed to handle deeply nested comments
+          let remainingReplies = [...sortedReplies];
+          let processedInLastPass = -1;
+          
+          // Keep processing replies until we can't add any more
+          // (handles case where parent appears later in the array)
+          while (remainingReplies.length > 0 && processedInLastPass !== 0) {
+            processedInLastPass = 0;
+            const stillRemaining = [];
             
-            if (commentMap.has(parentId)) {
-              // If the parent comment is already rendered, add this as a reply
-              const parentElement = commentMap.get(parentId);
-              const replyElement = addReplyComment(message);
-              commentMap.set(message._id, replyElement);
-            } else {
-              // Fallback if parent not found - add as a top-level comment
-              console.warn(`Parent comment not found for reply: ${message._id}. Adding as top-level.`);
-              const commentElement = addComment(message, 1);
-              commentMap.set(message._id, commentElement);
+            for (const message of remainingReplies) {
+              // Find the direct parent
+              const parentId = message.parentCommentId;
+              
+              if (commentMap.has(parentId)) {
+                // If the parent comment is already rendered, add this as a reply
+                const parentElement = commentMap.get(parentId);
+                const replyElement = addReplyComment(message);
+                commentMap.set(message._id, replyElement);
+                processedInLastPass++;
+              } else {
+                // If parent not found yet, keep for next pass
+                stillRemaining.push(message);
+              }
             }
-          });
+            
+            remainingReplies = stillRemaining;
+          }
+          
+          // Add any remaining replies as top-level comments (fallback)
+          if (remainingReplies.length > 0) {
+            console.warn(`${remainingReplies.length} replies couldn't find parents. Adding as top-level.`);
+            
+            remainingReplies.forEach(message => {
+              const commentElement = addComment({
+                ...message,
+                parentCommentId: null // Convert to top-level comment
+              }, 1);
+              commentMap.set(message._id, commentElement);
+            });
+          }
           
           // Update the comment count
           updateCommentCount();
@@ -1014,17 +1331,38 @@
               comment.votes--;
               delete userVotes[comment._id];
               upvoteBtn.style.color = '';
+              
+              // Send vote removal to server
+              socket.emit('vote', {
+                commentId: comment._id,
+                voteType: 'downvote' // Counteract the previous upvote
+              });
             } else {
               // Add upvote (and remove downvote if exists)
               if (currentVote === 'down') {
                 comment.votes++; // Remove the previous downvote
                 downvoteBtn.style.color = '';
+                
+                // Cancel the previous downvote
+                socket.emit('vote', {
+                  commentId: comment._id,
+                  voteType: 'upvote' // Counter the previous downvote
+                });
               }
+              
+              // Add the new upvote
               comment.votes++;
               userVotes[comment._id] = 'up';
               upvoteBtn.style.color = 'var(--text-primary, #141413)';
+              
+              // Send upvote to server
+              socket.emit('vote', {
+                commentId: comment._id,
+                voteType: 'upvote'
+              });
             }
             
+            // Update UI immediately for responsive feel (server will confirm later)
             voteCount.textContent = comment.votes;
             sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
           });
@@ -1037,17 +1375,38 @@
               comment.votes++;
               delete userVotes[comment._id];
               downvoteBtn.style.color = '';
+              
+              // Send vote removal to server
+              socket.emit('vote', {
+                commentId: comment._id,
+                voteType: 'upvote' // Counteract the previous downvote
+              });
             } else {
               // Add downvote (and remove upvote if exists)
               if (currentVote === 'up') {
                 comment.votes--; // Remove the previous upvote
                 upvoteBtn.style.color = '';
+                
+                // Cancel the previous upvote
+                socket.emit('vote', {
+                  commentId: comment._id,
+                  voteType: 'downvote' // Counter the previous upvote
+                });
               }
+              
+              // Add the new downvote
               comment.votes--;
               userVotes[comment._id] = 'down';
               downvoteBtn.style.color = 'var(--text-primary, #141413)';
+              
+              // Send downvote to server
+              socket.emit('vote', {
+                commentId: comment._id,
+                voteType: 'downvote'
+              });
             }
             
+            // Update UI immediately for responsive feel (server will confirm later)
             voteCount.textContent = comment.votes;
             sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
           });
@@ -1075,6 +1434,10 @@
               <form class="comment-form nesting-level-${nestingLevel}">
                 <div class="reply-indicator active">
                   Replying to ${comment.username}
+                </div>
+                <div class="reply-user-info">
+                  <label for="reply-username-${comment._id}">Your Name:</label>
+                  <input type="text" id="reply-username-${comment._id}" placeholder="Your name" value="${sessionStorage.getItem('dimancheUsername') || 'Anonymous'}">
                 </div>
                 <textarea placeholder="Write a reply..." required></textarea>
                 <div class="comment-form-actions">
@@ -1108,14 +1471,21 @@
               e.preventDefault();
               
               const content = textarea.value.trim();
+              const usernameInput = form.querySelector(`#reply-username-${comment._id}`);
+              const username = usernameInput.value.trim() || 'Anonymous';
+              
               if (content) {
+                // Save the username to sessionStorage for future replies
+                sessionStorage.setItem('dimancheUsername', username);
+                
                 // Send comment to server with parent ID
                 socket.emit('send-message', {
-                  username: sessionStorage.getItem('dimancheUsername') || 'Anonymous',
+                  username,
                   content,
                   pageId,
                   votes: 0,
-                  parentCommentId: comment._id
+                  parentCommentId: comment._id,
+                  children: [] // Initialize empty children array for replies to this comment
                 });
                 
                 // Remove the form after submission
