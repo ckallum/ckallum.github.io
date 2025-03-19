@@ -103,8 +103,6 @@
     /* Chat box styles */
     .chat-container {
       position: fixed;
-      right: 2rem;
-      bottom: 2rem;
       width: 320px;
       max-width: 90vw;
       height: 450px;
@@ -117,6 +115,11 @@
       overflow: hidden;
       font-family: "Newsreader", serif;
       z-index: 100;
+      /* Initial position */
+      right: 2rem;
+      bottom: 2rem;
+      /* Transition for smooth repositioning */
+      transition: all 0.3s ease-in-out;
     }
     
     .chat-header {
@@ -194,6 +197,32 @@
       color: rgba(255, 255, 255, 0.8);
     }
     
+    /* Username input container */
+    .username-container {
+      padding: 0.75rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    
+    .username-container label {
+      font-size: 0.85rem;
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+    
+    .username-container input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: "Newsreader", serif;
+      font-size: 0.9rem;
+    }
+    
     .chat-form {
       padding: 0.75rem;
       border-top: 1px solid var(--border-color);
@@ -231,6 +260,7 @@
     }
     
     .chat-minimized .chat-messages,
+    .chat-minimized .username-container,
     .chat-minimized .chat-form {
       display: none;
     }
@@ -242,6 +272,13 @@
         bottom: 1rem;
         width: calc(100% - 2rem);
       }
+    }
+    
+    /* Position options */
+    .chat-position-bottom {
+      right: 50%;
+      bottom: 1rem;
+      transform: translateX(50%);
     }
     
     /* Two column layout */
@@ -408,15 +445,7 @@
       // Set up chat functionality
       function setupChat() {
         // Check if username exists in session storage
-        username = sessionStorage.getItem('dimancheUsername');
-        if (!username) {
-          // Prompt for username
-          username = prompt('Please enter your name for the chat:', '');
-          if (!username) {
-            username = 'Anonymous';
-          }
-          sessionStorage.setItem('dimancheUsername', username);
-        }
+        username = sessionStorage.getItem('dimancheUsername') || 'Anonymous';
         
         // Create chat box
         const chatContainer = document.createElement('div');
@@ -427,6 +456,10 @@
             <button class="chat-toggle">−</button>
           </div>
           <div class="chat-messages"></div>
+          <div class="username-container">
+            <label for="username-input">Name:</label>
+            <input type="text" id="username-input" placeholder="Your name" value="${username}">
+          </div>
           <form class="chat-form">
             <input type="text" placeholder="Type a message..." required>
             <button type="submit">Send</button>
@@ -435,11 +468,34 @@
         
         document.body.appendChild(chatContainer);
         
+        // Position the chat box based on viewport
+        positionChatBox(chatContainer);
+        
+        // Handle window resize for responsive positioning
+        window.addEventListener('resize', () => positionChatBox(chatContainer));
+        
+        // Set up username input
+        const usernameInput = chatContainer.querySelector('#username-input');
+        usernameInput.addEventListener('change', function() {
+          const newUsername = this.value.trim();
+          if (newUsername) {
+            username = newUsername;
+            sessionStorage.setItem('dimancheUsername', username);
+          } else {
+            this.value = username; // Revert to previous value if empty
+          }
+        });
+        
         // Setup chat toggle
         const toggleButton = chatContainer.querySelector('.chat-toggle');
         toggleButton.addEventListener('click', function() {
           chatContainer.classList.toggle('chat-minimized');
           toggleButton.textContent = chatContainer.classList.contains('chat-minimized') ? '+' : '−';
+          
+          // Reposition after minimizing/maximizing
+          if (!chatContainer.classList.contains('chat-minimized')) {
+            setTimeout(() => positionChatBox(chatContainer), 100);
+          }
         });
         
         // API base URL for socket connection
@@ -526,6 +582,56 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+        }
+      }
+      
+      // Position chat box based on viewport constraints
+      function positionChatBox(chatContainer) {
+        if (!chatContainer) return;
+        
+        // Get viewport dimensions
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Get content wrapper to determine main content width
+        const contentWrapper = document.querySelector('.content-wrapper');
+        const contentRect = contentWrapper ? contentWrapper.getBoundingClientRect() : null;
+        
+        // Reset any existing position classes
+        chatContainer.classList.remove('chat-position-bottom');
+        
+        // Default side position for large screens
+        chatContainer.style.right = '2rem';
+        chatContainer.style.bottom = '2rem';
+        chatContainer.style.transform = 'none';
+        
+        // Get chat dimensions
+        const chatRect = chatContainer.getBoundingClientRect();
+        const chatHeight = chatRect.height;
+        const chatWidth = chatRect.width;
+        
+        // Check if chat fits in viewport
+        const isMobile = viewportWidth <= 768;
+        const isNarrow = viewportWidth <= 1024;
+        
+        // If mobile or narrow viewport, position at bottom center
+        if (isMobile || isNarrow) {
+          chatContainer.classList.add('chat-position-bottom');
+        } 
+        // For larger screens, check if chat overlaps with main content
+        else if (contentRect) {
+          const rightEdgeOfContent = contentRect.right;
+          const leftEdgeOfChat = viewportWidth - chatWidth - 32; // 32px = 2rem
+          
+          // If chat would overlap with content, position at bottom
+          if (leftEdgeOfChat < rightEdgeOfContent + 40) { // 40px buffer
+            chatContainer.classList.add('chat-position-bottom');
+          }
+        }
+        
+        // Final check: make sure chat isn't too tall for viewport
+        if (chatHeight > viewportHeight - 40) { // 40px buffer
+          chatContainer.style.maxHeight = (viewportHeight - 80) + 'px'; // 80px total buffer
         }
       }
     });

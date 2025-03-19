@@ -87,10 +87,19 @@ io.on('connection', (socket) => {
     try {
       const { username, content, pageId } = messageData;
       
+      // Validate message data
+      const validUsername = username && username.trim() ? username.trim() : 'Anonymous';
+      const validContent = content && content.trim() ? content.trim() : '';
+      
+      if (!validContent) {
+        console.log('Ignoring empty message');
+        return;
+      }
+      
       // Create and save new message
       const newMessage = new Message({
-        username,
-        content,
+        username: validUsername,
+        content: validContent,
         pageId,
         timestamp: new Date()
       });
