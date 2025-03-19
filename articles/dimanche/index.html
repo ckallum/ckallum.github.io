@@ -341,14 +341,20 @@
     /* Collapse/Expand button specific styling */
     .comment-collapse-btn {
       display: none; /* Hidden by default, shown when replies are present */
-      font-size: 0.8rem;
-      background-color: rgba(0, 0, 0, 0.03);
-      border-radius: 4px;
-      padding: 0.15rem 0.5rem !important;
+      font-size: 1rem;
+      font-weight: bold;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 50%;
+      padding: 0 !important;
+      margin-left: 0.5rem;
     }
     
     .dark-mode .comment-collapse-btn {
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: rgba(255, 255, 255, 0.08);
     }
     
     /* Vote buttons */
@@ -383,11 +389,17 @@
       color: var(--text-secondary, #767676);
     }
     
+    /* Container for replies */
+    .comment-replies {
+      position: relative;
+      margin-top: 0.5rem;
+    }
+    
     /* Comments with replies (nested structure) */
     .comment-with-replies {
       border-left: 2px solid rgba(0, 0, 0, 0.07);
       padding-left: 1.5rem;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
       margin-left: 0.5rem;
       transition: max-height 0.3s ease, opacity 0.3s ease;
       overflow: hidden; /* Ensure smooth animation */
@@ -405,14 +417,19 @@
     
     /* Reply comments - slightly different styling */
     .reply-comment {
-      padding-top: 1.2rem;
-      padding-bottom: 1.2rem;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
       border-bottom-color: rgba(0, 0, 0, 0.04);
     }
     
-    /* Show thread indicator line */
-    .comment-replies {
-      position: relative;
+    /* Nested replies should have slightly different styling */
+    .reply-comment .comment-replies {
+      margin-left: -0.5rem; /* Reduce left margin for nested replies */
+    }
+    
+    /* Add visual indication for deeper nesting levels */
+    .reply-comment .comment-with-replies {
+      border-left-color: rgba(0, 0, 0, 0.05); /* Lighter border for nested replies */
     }
     
     /* Dark mode support */
@@ -445,6 +462,10 @@
     
     .dark-mode .reply-comment {
       border-bottom-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .dark-mode .reply-comment .comment-with-replies {
+      border-left-color: rgba(255, 255, 255, 0.05);
     }
     
     .dark-mode .vote-button:hover {
@@ -782,25 +803,48 @@
           const commentsList = commentsSection.querySelector('.comments-list');
           commentsList.innerHTML = '';
           
-          messages.forEach(message => {
-            addComment(message);
+          // First add all top-level comments
+          const topLevelComments = messages.filter(message => !message.parentCommentId);
+          const replyComments = messages.filter(message => message.parentCommentId);
+          
+          // Create a map for quick lookup
+          const commentMap = new Map();
+          
+          // First, add all top-level comments
+          topLevelComments.forEach(message => {
+            const commentElement = addComment(message);
+            commentMap.set(message._id, commentElement);
+          });
+          
+          // Then add all replies to their proper parent
+          replyComments.forEach(message => {
+            // Find the direct parent
+            const parentId = message.parentCommentId;
+            
+            if (commentMap.has(parentId)) {
+              // If the parent comment is already rendered, add this as a reply
+              addReplyToParent(message, commentMap.get(parentId));
+            } else {
+              // Fallback if parent not found - add as a top-level comment
+              console.warn(`Parent comment not found for reply: ${message._id}. Adding as top-level.`);
+              const commentElement = addComment(message);
+              commentMap.set(message._id, commentElement);
+            }
           });
           
           // Update the comment count
           updateCommentCount();
         });
         
-        // Function to add a comment to the comments list
-        function addComment(comment) {
-          // Check if this is a reply to another comment
-          if (comment.parentCommentId) {
-            return addReplyComment(comment);
-          }
+        // Helper function to add a reply directly to its parent element
+        function addReplyToParent(comment, parentElement) {
+          // Get or create the replies container
+          let repliesContainer = parentElement.querySelector('.comment-replies');
           
-          const commentsList = commentsSection.querySelector('.comments-list');
-          const commentElement = document.createElement('div');
-          commentElement.className = 'comment';
-          commentElement.dataset.commentId = comment._id;
+          // Create a new comment element for the reply
+          const replyElement = document.createElement('div');
+          replyElement.className = 'comment reply-comment';
+          replyElement.dataset.commentId = comment._id;
           
           // Format timestamp
           const timestamp = new Date(comment.timestamp);
@@ -812,8 +856,8 @@
             minute: '2-digit'
           }).format(timestamp);
           
-          // Set comment content
-          commentElement.innerHTML = `
+          // Set reply content with collapse/expand button
+          replyElement.innerHTML = `
             <div class="comment-header">
               <div class="comment-author">${comment.username}</div>
               <div class="comment-date">${dateString}</div>
@@ -827,15 +871,33 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
-                <button class="comment-collapse-btn" style="display: none;">Collapse</button>
+                <button class="comment-collapse-btn toggle-replies" style="display: none;">+</button>
               </div>
             </div>
             <div class="comment-replies"></div>
           `;
           
-          // Add comment to list
-          commentsList.appendChild(commentElement);
+          // Add the reply to the replies container
+          repliesContainer.appendChild(replyElement);
           
+          // Add 'with-replies' class to parent and show collapse button
+          if (repliesContainer.children.length > 0) {
+            repliesContainer.classList.add('comment-with-replies');
+            const collapseBtn = parentElement.querySelector('.comment-collapse-btn');
+            if (collapseBtn) {
+              collapseBtn.style.display = 'inline-block';
+              collapseBtn.textContent = '-'; // Show as expanded by default
+            }
+          }
+          
+          // Add event listeners for reply actions
+          setupCommentEventListeners(replyElement, comment);
+          
+          return replyElement;
+        }
+        
+        // Function to set up event listeners for a comment
+        function setupCommentEventListeners(commentElement, comment) {
           // Add vote functionality
           const upvoteBtn = commentElement.querySelector('.vote-up');
           const downvoteBtn = commentElement.querySelector('.vote-down');
@@ -923,7 +985,7 @@
             commentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
           
-          // Add collapse functionality if this is a parent comment
+          // Add collapse functionality
           const collapseBtn = commentElement.querySelector('.comment-collapse-btn');
           if (collapseBtn) {
             collapseBtn.addEventListener('click', function() {
@@ -932,8 +994,8 @@
               // Toggle collapsed state
               const isCollapsed = repliesContainer.classList.toggle('collapsed');
               
-              // Update button text
-              collapseBtn.textContent = isCollapsed ? 'Expand' : 'Collapse';
+              // Update button text with + or -
+              collapseBtn.textContent = isCollapsed ? '+' : '-';
               
               // Add animation by temporarily applying a transition
               repliesContainer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
@@ -959,18 +1021,71 @@
               }, 300);
             });
           }
+        }
+        
+        // Function to add a comment to the comments list
+        function addComment(comment) {
+          // Check if this is a reply to another comment (handled separately when loading initial comments)
+          if (comment.parentCommentId && document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`)) {
+            return addReplyComment(comment);
+          }
+          
+          const commentsList = commentsSection.querySelector('.comments-list');
+          const commentElement = document.createElement('div');
+          commentElement.className = 'comment';
+          commentElement.dataset.commentId = comment._id;
+          
+          // Format timestamp
+          const timestamp = new Date(comment.timestamp);
+          const dateString = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(timestamp);
+          
+          // Set comment content with +/- for collapse/expand
+          commentElement.innerHTML = `
+            <div class="comment-header">
+              <div class="comment-author">${comment.username}</div>
+              <div class="comment-date">${dateString}</div>
+            </div>
+            <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
+            <div class="comment-footer">
+              <div class="comment-vote">
+                <button class="vote-button vote-up" aria-label="Upvote">▲</button>
+                <span class="vote-count">${comment.votes || 0}</span>
+                <button class="vote-button vote-down" aria-label="Downvote">▼</button>
+              </div>
+              <div class="comment-actions">
+                <button class="comment-reply-btn">Reply</button>
+                <button class="comment-collapse-btn" style="display: none;">-</button>
+              </div>
+            </div>
+            <div class="comment-replies"></div>
+          `;
+          
+          // Add comment to list
+          commentsList.appendChild(commentElement);
+          
+          // Set up event listeners
+          setupCommentEventListeners(commentElement, comment);
           
           return commentElement;
         }
         
-        // Function to add a reply to a parent comment
+        // Function to add a reply to a parent comment (for new comments, not initial loading)
         function addReplyComment(comment) {
           // Find the parent comment element
           const parentComment = document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`);
           
           if (!parentComment) {
             console.error('Parent comment not found:', comment.parentCommentId);
-            return null;
+            // Fall back to add as a top-level comment
+            const newComment = {...comment};
+            delete newComment.parentCommentId;
+            return addComment(newComment);
           }
           
           // Get or create the replies container
@@ -991,7 +1106,7 @@
             minute: '2-digit'
           }).format(timestamp);
           
-          // Set reply content
+          // Set reply content with collapse/expand button
           replyElement.innerHTML = `
             <div class="comment-header">
               <div class="comment-author">${comment.username}</div>
@@ -1006,6 +1121,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
+                <button class="comment-collapse-btn" style="display: none;">+</button>
               </div>
             </div>
             <div class="comment-replies"></div>
@@ -1020,95 +1136,12 @@
             const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
             if (collapseBtn) {
               collapseBtn.style.display = 'inline-block';
+              collapseBtn.textContent = '-'; // Show as expanded by default
             }
           }
           
-          // Add event listeners for reply actions
-          const replyUpvoteBtn = replyElement.querySelector('.vote-up');
-          const replyDownvoteBtn = replyElement.querySelector('.vote-down');
-          const replyVoteCount = replyElement.querySelector('.vote-count');
-          const replyReplyBtn = replyElement.querySelector('.comment-reply-btn');
-          
-          // Initialize reply votes if not present
-          if (!comment.votes) comment.votes = 0;
-          
-          // Store user votes in session storage
-          const userVotes = JSON.parse(sessionStorage.getItem('userVotes') || '{}');
-          
-          // Check if user already voted on this reply
-          if (userVotes[comment._id]) {
-            if (userVotes[comment._id] === 'up') {
-              replyUpvoteBtn.style.color = 'var(--text-primary, #141413)';
-            } else if (userVotes[comment._id] === 'down') {
-              replyDownvoteBtn.style.color = 'var(--text-primary, #141413)';
-            }
-          }
-          
-          replyUpvoteBtn.addEventListener('click', function() {
-            const currentVote = userVotes[comment._id];
-            
-            if (currentVote === 'up') {
-              // Remove upvote
-              comment.votes--;
-              delete userVotes[comment._id];
-              replyUpvoteBtn.style.color = '';
-            } else {
-              // Add upvote (and remove downvote if exists)
-              if (currentVote === 'down') {
-                comment.votes++; // Remove the previous downvote
-                replyDownvoteBtn.style.color = '';
-              }
-              comment.votes++;
-              userVotes[comment._id] = 'up';
-              replyUpvoteBtn.style.color = 'var(--text-primary, #141413)';
-            }
-            
-            replyVoteCount.textContent = comment.votes;
-            sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
-          });
-          
-          replyDownvoteBtn.addEventListener('click', function() {
-            const currentVote = userVotes[comment._id];
-            
-            if (currentVote === 'down') {
-              // Remove downvote
-              comment.votes++;
-              delete userVotes[comment._id];
-              replyDownvoteBtn.style.color = '';
-            } else {
-              // Add downvote (and remove upvote if exists)
-              if (currentVote === 'up') {
-                comment.votes--; // Remove the previous upvote
-                replyUpvoteBtn.style.color = '';
-              }
-              comment.votes--;
-              userVotes[comment._id] = 'down';
-              replyDownvoteBtn.style.color = 'var(--text-primary, #141413)';
-            }
-            
-            replyVoteCount.textContent = comment.votes;
-            sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
-          });
-          
-          // Add reply-to-reply functionality
-          replyReplyBtn.addEventListener('click', function() {
-            // Scroll to the comment form and focus, prepopulate with reply reference
-            const commentForm = document.querySelector('.comment-form');
-            const textarea = commentForm.querySelector('textarea');
-            const replyIndicator = commentForm.querySelector('.reply-indicator');
-            
-            // Update text and show reply indicator
-            textarea.value = `@${comment.username}: `;
-            replyIndicator.textContent = `Replying to ${comment.username}`;
-            replyIndicator.classList.add('active');
-            textarea.focus();
-            
-            // Store the parent comment ID in a data attribute on the form
-            commentForm.dataset.replyTo = comment._id;
-            
-            // Scroll the form into view
-            commentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          });
+          // Set up event listeners for this reply
+          setupCommentEventListeners(replyElement, comment);
           
           return replyElement;
         }
