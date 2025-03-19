@@ -142,3 +142,31 @@ For production deployment, consider the following:
 - All user inputs are sanitized to prevent XSS attacks
 - Passwords are stored as bcrypt hashes, not plaintext
 - Consider adding rate limiting for production use
+- Use HTTPS in production to protect data in transit
+
+### Important Security Note
+
+The current implementation uses a challenge-response mechanism that still requires the server to have access to the plaintext password for verification. This is a significant limitation for a production system. 
+
+**For a more secure production system, consider these alternatives:**
+
+1. **Public Key Cryptography:**
+   - Generate client-side key pairs
+   - Use asymmetric cryptography for authentication without exposing passwords
+
+2. **OAuth or OpenID Connect:**
+   - Delegate authentication to a specialized service
+   - Implement proper token-based authentication
+
+3. **Use Argon2id or PBKDF2 instead of plain SHA-256:**
+   - These algorithms are designed specifically for password hashing and verification
+   - They can be combined with challenges for secure verification
+
+4. **Verifiable Credentials:**
+   - Use a zero-knowledge proof system that validates authentication without exposing secrets
+
+5. **Specialized Authentication Services:**
+   - Consider Auth0, Firebase Authentication, or similar services
+   - They handle security best practices and updates for you
+
+Remember: Never hardcode passwords in your code or store them in version control. The current implementation still needs improvement for production use.
