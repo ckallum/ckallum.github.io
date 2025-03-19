@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="../../assets/css/article.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Socket.io client script -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <!-- Updated to use the local fonts instead of Google Fonts -->
   <style>
     @font-face {
@@ -29,6 +31,449 @@
   <script src="../../assets/js/darkmode.js" defer></script>
   <script src="../../assets/js/toc.js" defer></script>
   <script src="../../assets/js/footnotes.js" defer></script>
+  
+  <style>
+    /* Password protection styles */
+    #password-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    #password-container {
+      background-color: var(--bg-secondary);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 90%;
+      width: 400px;
+    }
+    
+    #password-container h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+    }
+    
+    #password-container input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+    
+    #password-container button {
+      background-color: var(--accent-color, #3b82f6);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    #password-container button:hover {
+      background-color: var(--accent-color-hover, #2563eb);
+    }
+    
+    #password-error {
+      color: #ef4444;
+      margin-top: 1rem;
+      display: none;
+    }
+    
+    /* Hide content initially */
+    .content-hidden {
+      visibility: hidden;
+    }
+    
+    /* Chat box styles */
+    .chat-container {
+      position: fixed;
+      right: 2rem;
+      bottom: 2rem;
+      width: 320px;
+      max-width: 90vw;
+      height: 450px;
+      max-height: 70vh;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: "Newsreader", serif;
+      z-index: 100;
+    }
+    
+    .chat-header {
+      padding: 1rem;
+      background-color: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .chat-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+    
+    .chat-toggle {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0;
+      font-size: 1.2rem;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .message {
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem;
+      border-radius: 8px;
+      max-width: 85%;
+      background-color: var(--bg-primary);
+    }
+    
+    .message-sender {
+      align-self: flex-end;
+      background-color: var(--accent-color, #3b82f6);
+      color: white;
+    }
+    
+    .message-content {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    
+    .message-meta {
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      font-weight: bold;
+      color: var(--text-secondary);
+    }
+    
+    .message-sender .message-meta {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .message-time {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+      text-align: right;
+    }
+    
+    .message-sender .message-time {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .chat-form {
+      padding: 0.75rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .chat-form input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: "Newsreader", serif;
+      font-size: 0.95rem;
+    }
+    
+    .chat-form button {
+      background-color: var(--accent-color, #3b82f6);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-family: "Newsreader", serif;
+    }
+    
+    .chat-form button:hover {
+      background-color: var(--accent-color-hover, #2563eb);
+    }
+    
+    .chat-minimized {
+      height: auto;
+    }
+    
+    .chat-minimized .chat-messages,
+    .chat-minimized .chat-form {
+      display: none;
+    }
+    
+    /* Responsive layout */
+    @media (max-width: 768px) {
+      .chat-container {
+        right: 1rem;
+        bottom: 1rem;
+        width: calc(100% - 2rem);
+      }
+    }
+    
+    /* Two column layout */
+    .two-column-layout {
+      display: flex;
+      gap: 2rem;
+    }
+    
+    .main-content {
+      flex: 1;
+    }
+    
+    @media (max-width: 1024px) {
+      .two-column-layout {
+        flex-direction: column;
+      }
+    }
+  </style>
+  
+  <script>
+    // Server validation and chat client script
+    document.addEventListener('DOMContentLoaded', function() {
+      const siteWrapper = document.querySelector('.site-wrapper');
+      let passwordVerified = false;
+      let socket = null;
+      let username = '';
+      const pageId = 'dimanche';
+      
+      // Check if user has already entered correct password in this session
+      const accessToken = sessionStorage.getItem('dimancheAccessToken');
+      if (accessToken) {
+        passwordVerified = true;
+        setupChat();
+      }
+      
+      if (!passwordVerified) {
+        // Hide content initially
+        siteWrapper.classList.add('content-hidden');
+        
+        // Create password overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'password-overlay';
+        
+        const container = document.createElement('div');
+        container.id = 'password-container';
+        
+        container.innerHTML = `
+          <h2>Protected Content</h2>
+          <p>Please enter the password to view this content.</p>
+          <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+          <div>
+            <button id="submit-password">Submit</button>
+          </div>
+          <p id="password-error">Incorrect password. Please try again.</p>
+        `;
+        
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+        
+        // Focus on password input
+        setTimeout(() => {
+          document.getElementById('password-input').focus();
+        }, 100);
+        
+        // Add event listeners
+        document.getElementById('submit-password').addEventListener('click', verifyPassword);
+        document.getElementById('password-input').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            verifyPassword();
+          }
+        });
+      }
+      
+      // Server-side password verification
+      async function verifyPassword() {
+        const input = document.getElementById('password-input');
+        const error = document.getElementById('password-error');
+        const password = input.value;
+        
+        try {
+          const response = await fetch('/api/verify-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ pageId, password })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Password correct - store access token
+            sessionStorage.setItem('dimancheAccessToken', data.accessToken);
+            
+            // Hide overlay and show content
+            const overlay = document.getElementById('password-overlay');
+            overlay.style.display = 'none';
+            siteWrapper.classList.remove('content-hidden');
+            
+            // Setup chat functionality
+            setupChat();
+          } else {
+            // Password incorrect
+            error.style.display = 'block';
+            input.value = '';
+            input.focus();
+          }
+        } catch (err) {
+          console.error('Error verifying password:', err);
+          error.textContent = 'Error connecting to server. Please try again.';
+          error.style.display = 'block';
+        }
+      }
+      
+      // Set up chat functionality
+      function setupChat() {
+        // Check if username exists in session storage
+        username = sessionStorage.getItem('dimancheUsername');
+        if (!username) {
+          // Prompt for username
+          username = prompt('Please enter your name for the chat:', '');
+          if (!username) {
+            username = 'Anonymous';
+          }
+          sessionStorage.setItem('dimancheUsername', username);
+        }
+        
+        // Create chat box
+        const chatContainer = document.createElement('div');
+        chatContainer.className = 'chat-container';
+        chatContainer.innerHTML = `
+          <div class="chat-header">
+            <h3>Dimanche Chat</h3>
+            <button class="chat-toggle">−</button>
+          </div>
+          <div class="chat-messages"></div>
+          <form class="chat-form">
+            <input type="text" placeholder="Type a message..." required>
+            <button type="submit">Send</button>
+          </form>
+        `;
+        
+        document.body.appendChild(chatContainer);
+        
+        // Setup chat toggle
+        const toggleButton = chatContainer.querySelector('.chat-toggle');
+        toggleButton.addEventListener('click', function() {
+          chatContainer.classList.toggle('chat-minimized');
+          toggleButton.textContent = chatContainer.classList.contains('chat-minimized') ? '+' : '−';
+        });
+        
+        // Initialize Socket.io connection
+        socket = io(window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin);
+        
+        // Listen for message form submissions
+        const chatForm = chatContainer.querySelector('.chat-form');
+        const chatInput = chatForm.querySelector('input');
+        
+        chatForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const content = chatInput.value.trim();
+          if (content) {
+            // Send message to server
+            socket.emit('send-message', {
+              username,
+              content,
+              pageId
+            });
+            
+            // Clear input
+            chatInput.value = '';
+          }
+        });
+        
+        // Listen for new messages
+        socket.on('new-message', function(message) {
+          addMessageToChat(message);
+        });
+        
+        // Load existing messages
+        socket.on('init-messages', function(messages) {
+          const chatMessages = chatContainer.querySelector('.chat-messages');
+          chatMessages.innerHTML = '';
+          
+          messages.forEach(message => {
+            addMessageToChat(message);
+          });
+          
+          // Scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+        
+        // Function to add a message to the chat display
+        function addMessageToChat(message) {
+          const chatMessages = chatContainer.querySelector('.chat-messages');
+          const messageElement = document.createElement('div');
+          
+          // Check if message is from current user
+          const isCurrentUser = message.username === username;
+          messageElement.className = isCurrentUser ? 'message message-sender' : 'message';
+          
+          // Format timestamp
+          const timestamp = new Date(message.timestamp);
+          const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
+          // Set message content
+          messageElement.innerHTML = `
+            <div class="message-meta">${message.username}</div>
+            <p class="message-content">${escapeHTML(message.content)}</p>
+            <div class="message-time">${timeString}</div>
+          `;
+          
+          // Add message to chat
+          chatMessages.appendChild(messageElement);
+          
+          // Scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Helper function to escape HTML to prevent XSS
+        function escapeHTML(unsafe) {
+          return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+      }
+    });
+  </script>
 </head>
 <body class="has-toc">
   <!-- Main content -->
@@ -69,8 +514,7 @@
       <div class="content-container">
         <h1 id="introduction"><em>Dimanche</em></h1>
         
-        <p class="author-date">March 16, 2025· Callum Ke· Emma Zhang  </p>
-        
+        <p class="author-date">March 16, 2025· Callum Ke· Emma Zhang</p>
         
         <h2 id="coming-soon">Coming Soon</h2>
 
