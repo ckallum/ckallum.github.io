@@ -315,14 +315,14 @@
         });
       }
       
-      // Server-side password verification using challenge-response
+      // Server-side password verification using a proper challenge-response
       async function verifyPassword() {
         const input = document.getElementById('password-input');
         const error = document.getElementById('password-error');
         const password = input.value;
         
         try {
-          // Step 1: Get a challenge from the server
+          // Step 1: Get a challenge and salt from the server
           const challengeResponse = await fetch(`/api/auth-challenge/${pageId}`, {
             method: 'GET',
             headers: {
@@ -338,19 +338,24 @@
             return;
           }
           
-          const { challenge } = challengeData;
+          const { challenge, salt } = challengeData;
           
-          // Step 2: Create a hash of the challenge + password
-          // This way we never send the actual password over the network
-          const hash = await sha256(challenge + password);
+          // Step 2: Create a two-part hash to match server's verification process
+          // First, compute the password hash (this would match what's stored on server)
+          // Hash: SHA256(salt + password)
+          const passwordHash = await sha256(salt + password);
           
-          // Step 3: Send the hash and challenge back to the server for verification
+          // Step 3: Create the challenge response hash
+          // Hash: SHA256(challenge + passwordHash)
+          const challengeHash = await sha256(challenge + passwordHash);
+          
+          // Step 4: Send the hash and challenge back to the server for verification
           const verifyResponse = await fetch('/api/verify-password', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ pageId, hash, challenge })
+            body: JSON.stringify({ pageId, hash: challengeHash, challenge })
           });
           
           const data = await verifyResponse.json();

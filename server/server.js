@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Get challenge for password verification
+// Get challenge for password verification 
 app.get('/api/auth-challenge/:pageId', async (req, res) => {
   try {
     const { pageId } = req.params;
@@ -91,22 +91,30 @@ app.get('/api/auth-challenge/:pageId', async (req, res) => {
     }
     
     // Generate a challenge (random string that will be used just for this session)
-    const challenge = require('crypto').randomBytes(32).toString('hex');
+    const crypto = require('crypto');
+    const challenge = crypto.randomBytes(32).toString('hex');
     
     // Store challenge in session (in a production app, you'd use Redis or similar)
-    // For simplicity, we'll use a Map to store challenges
     if (!global.challenges) {
       global.challenges = new Map();
     }
     
     // Set expiration for 5 minutes
     const expiration = Date.now() + (5 * 60 * 1000);
-    global.challenges.set(pageId + '-' + challenge, { expiration });
     
-    // Return the challenge to the client
+    // Store the page's salt with the challenge to use during verification
+    // This is the key security improvement - we never need the plaintext password
+    // We only need the salt from the database
+    global.challenges.set(pageId + '-' + challenge, { 
+      expiration,
+      salt: protectedPage.salt
+    });
+    
+    // Return the challenge and salt to the client
     return res.json({
       success: true,
-      challenge
+      challenge,
+      salt: protectedPage.salt
     });
   } catch (error) {
     console.error('Challenge generation error:', error);
@@ -143,37 +151,37 @@ app.post('/api/verify-password', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Protected page not found' });
     }
     
-    // Verify the password using a secure comparison method
-    // First compute a SHA-256 hash of the password to compare with our stored hash
+    // The client sends a hash of: SHA256(challenge + SHA256(salt + password))
+    // We have stored: SHA256(salt + password) as passwordHash in the database
+    
+    // The server needs to verify that:
+    // SHA256(challenge + storedPasswordHash) === clientHash
+    
     const crypto = require('crypto');
     
-    // We'll retrieve the plaintext password temporarily using our password hash verification
-    let passwordCorrect = false;
+    // Get the stored hash from the database
+    const storedPasswordHash = protectedPage.passwordHash;
     
-    // Get all possible passwords from database that match this page
-    // This allows multiple valid passwords to exist for the same page
-    const passwords = await getAllValidPasswords(pageId);
+    // Calculate what we expect the client's hash to be
+    const expectedHash = crypto
+      .createHash('sha256')
+      .update(challenge + storedPasswordHash)
+      .digest('hex');
     
-    // Check if any of the passwords match the provided hash
-    for (const password of passwords) {
-      const expectedHash = crypto
-        .createHash('sha256')
-        .update(challenge + password)
-        .digest('hex');
-      
-      if (crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash))) {
-        passwordCorrect = true;
-        break;
-      }
-    }
+    // Use timing-safe comparison to prevent timing attacks
+    const clientHash = Buffer.from(hash, 'hex');
+    const serverHash = Buffer.from(expectedHash, 'hex');
     
-    if (passwordCorrect) {
+    // Verify using constant-time comparison
+    const hashesMatch = crypto.timingSafeEqual(clientHash, serverHash);
+    
+    if (hashesMatch) {
       // Password is correct - remove the used challenge
       global.challenges.delete(pageId + '-' + challenge);
       
       // Generate a JWT token with a short expiration time
       const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex');
+      const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
       
       const accessToken = jwt.sign(
         { pageId, authorized: true }, 
@@ -195,46 +203,63 @@ app.post('/api/verify-password', async (req, res) => {
   }
 });
 
-// Helper function to securely get valid plaintext passwords
-// This is a temporary solution for demo purposes - in a real production app,
-// you would use a different challenge-response mechanism that doesn't require
-// retrieving plaintext passwords
-async function getAllValidPasswords(pageId) {
-  try {
-    // For the dimanche page, we know the password
-    // This is hardcoded just for demo - in a real app you'd use a
-    // different auth mechanism that doesn't need to retrieve passwords
-    if (pageId === 'dimanche') {
-      return ['liloneedscoffee'];
-    }
-    
-    // For other pages, no valid passwords
-    return [];
-  } catch (error) {
-    console.error('Error retrieving valid passwords:', error);
-    return [];
-  }
-}
-
-// Initialize protected pages if they don't exist
+// Initialize protected pages if they don't exist or need updating
 async function initializeProtectedPages() {
   try {
+    const crypto = require('crypto');
+    
+    // Get password from environment variables
+    const password = process.env.DIMANCHE_PASSWORD;
+    
+    if (!password) {
+      throw new Error('DIMANCHE_PASSWORD environment variable is required for initialization');
+    }
+    
     // Check if Dimanche page protection exists
     const dimanchePage = await ProtectedPage.findOne({ pageId: 'dimanche' });
     
     if (!dimanchePage) {
-      // Hash the password "liloneedscoffee"
-      const passwordHash = await bcrypt.hash('liloneedscoffee', 10);
+      // Create new protected page entry
+      
+      // Generate a random salt
+      const salt = crypto.randomBytes(16).toString('hex');
+      
+      // Hash: SHA256(salt + password)
+      const passwordHash = crypto
+        .createHash('sha256')
+        .update(salt + password)
+        .digest('hex');
       
       // Create the protected page entry
       const newProtectedPage = new ProtectedPage({
         pageId: 'dimanche',
         pageName: 'Dimanche Coffee',
-        passwordHash
+        passwordHash,
+        salt
       });
       
       await newProtectedPage.save();
       console.log('Initialized protected page: Dimanche');
+    } 
+    // Check if the page exists but needs to be updated with new salt field
+    else if (!dimanchePage.salt) {
+      console.log('Updating Dimanche page with new salted hash mechanism');
+      
+      // Generate a new salt
+      const salt = crypto.randomBytes(16).toString('hex');
+      
+      // Create new password hash with the salt
+      const passwordHash = crypto
+        .createHash('sha256')
+        .update(salt + password)
+        .digest('hex');
+      
+      // Update the record with the new hash and salt
+      dimanchePage.passwordHash = passwordHash;
+      dimanchePage.salt = salt;
+      
+      await dimanchePage.save();
+      console.log('Updated Dimanche page with new auth mechanism');
     }
   } catch (error) {
     console.error('Error initializing protected pages:', error);
