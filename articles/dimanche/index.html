@@ -470,8 +470,19 @@
       // Check if user has already entered correct password in this session
       const accessToken = sessionStorage.getItem('dimancheAccessToken');
       if (accessToken) {
-        passwordVerified = true;
-        setupComments();
+        try {
+          // Validate the access token (basic check)
+          if (accessToken.length > 10) {
+            passwordVerified = true;
+            setupComments();
+          } else {
+            console.warn("Invalid access token found in session storage");
+            sessionStorage.removeItem('dimancheAccessToken');
+          }
+        } catch (err) {
+          console.error("Error validating access token:", err);
+          sessionStorage.removeItem('dimancheAccessToken');
+        }
       }
       
       if (!passwordVerified) {
@@ -523,6 +534,8 @@
           const API_BASE_URL = window.location.hostname === 'localhost' 
             ? '' // Empty for local development (same origin)
             : 'https://ckallum-api-9e0b7df25b59.herokuapp.com'; // Replace with your actual server URL
+          
+          console.log("Using authentication API at:", API_BASE_URL);
           
           // Step 1: Get a challenge and salt from the server
           const challengeResponse = await fetch(`${API_BASE_URL}/api/auth-challenge/${pageId}`, {
@@ -657,15 +670,33 @@
           }
         });
         
-        // API base URL for server connection
+        // API base URL for server connection - ensure consistency with authentication API
         const API_BASE_URL = window.location.hostname === 'localhost' 
           ? 'http://localhost:3000' // Local development
-          : 'https://ckallum-api-9e0b7df25b59.herokuapp.com/'; // Replace with your actual server URL
+          : 'https://ckallum-api-9e0b7df25b59.herokuapp.com'; // Replace with your actual server URL
           
-        // Initialize Socket.io connection
-        socket = io(API_BASE_URL, {
-          withCredentials: true // Enable CORS for Socket.io
-        });
+        // Remove any trailing slash for consistency
+        const normalizedApiUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+          
+        // Initialize Socket.io connection with better error handling
+        try {
+          console.log("Connecting to Socket.io at:", normalizedApiUrl);
+          socket = io(normalizedApiUrl, {
+            withCredentials: true, // Enable CORS for Socket.io
+            reconnectionAttempts: 5,
+            timeout: 10000
+          });
+
+          socket.on('connect', function() {
+            console.log('Socket.io connected successfully');
+          });
+
+          socket.on('connect_error', function(err) {
+            console.error('Socket.io connection error:', err);
+          });
+        } catch (err) {
+          console.error('Error initializing Socket.io:', err);
+        }
         
         // Listen for comment form submissions
         const commentForm = commentsSection.querySelector('.comment-form');
@@ -773,72 +804,6 @@
           // Add comment to list
           commentsList.appendChild(commentElement);
           
-          return commentElement;
-        }
-        
-        // Function to add a reply to a parent comment
-        function addReplyComment(comment) {
-          // Find the parent comment element
-          const parentComment = document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`);
-          
-          if (!parentComment) {
-            console.error('Parent comment not found:', comment.parentCommentId);
-            return null;
-          }
-          
-          // Get or create the replies container
-          let repliesContainer = parentComment.querySelector('.comment-replies');
-          
-          // Create a new comment element for the reply
-          const replyElement = document.createElement('div');
-          replyElement.className = 'comment reply-comment';
-          replyElement.dataset.commentId = comment._id;
-          
-          // Format timestamp
-          const timestamp = new Date(comment.timestamp);
-          const dateString = new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }).format(timestamp);
-          
-          // Set reply content
-          replyElement.innerHTML = `
-            <div class="comment-header">
-              <div class="comment-author">${comment.username}</div>
-              <div class="comment-date">${dateString}</div>
-            </div>
-            <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
-            <div class="comment-footer">
-              <div class="comment-vote">
-                <button class="vote-button vote-up" aria-label="Upvote">▲</button>
-                <span class="vote-count">${comment.votes || 0}</span>
-                <button class="vote-button vote-down" aria-label="Downvote">▼</button>
-              </div>
-              <div class="comment-actions">
-                <button class="comment-reply-btn">Reply</button>
-              </div>
-            </div>
-            <div class="comment-replies"></div>
-          `;
-          
-          // Add the reply to the replies container
-          repliesContainer.appendChild(replyElement);
-          
-          // Add 'with-replies' class to parent and show collapse button
-          if (repliesContainer.children.length > 0) {
-            repliesContainer.classList.add('comment-with-replies');
-            const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
-            if (collapseBtn) {
-              collapseBtn.style.display = 'inline-block';
-            }
-          }
-          
-          return replyElement;
-        }
-          
           // Add vote functionality
           const upvoteBtn = commentElement.querySelector('.vote-up');
           const downvoteBtn = commentElement.querySelector('.vote-down');
@@ -939,6 +904,71 @@
               collapseBtn.textContent = isCollapsed ? 'Expand' : 'Collapse';
             });
           }
+          
+          return commentElement;
+        }
+        
+        // Function to add a reply to a parent comment
+        function addReplyComment(comment) {
+          // Find the parent comment element
+          const parentComment = document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`);
+          
+          if (!parentComment) {
+            console.error('Parent comment not found:', comment.parentCommentId);
+            return null;
+          }
+          
+          // Get or create the replies container
+          let repliesContainer = parentComment.querySelector('.comment-replies');
+          
+          // Create a new comment element for the reply
+          const replyElement = document.createElement('div');
+          replyElement.className = 'comment reply-comment';
+          replyElement.dataset.commentId = comment._id;
+          
+          // Format timestamp
+          const timestamp = new Date(comment.timestamp);
+          const dateString = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(timestamp);
+          
+          // Set reply content
+          replyElement.innerHTML = `
+            <div class="comment-header">
+              <div class="comment-author">${comment.username}</div>
+              <div class="comment-date">${dateString}</div>
+            </div>
+            <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
+            <div class="comment-footer">
+              <div class="comment-vote">
+                <button class="vote-button vote-up" aria-label="Upvote">▲</button>
+                <span class="vote-count">${comment.votes || 0}</span>
+                <button class="vote-button vote-down" aria-label="Downvote">▼</button>
+              </div>
+              <div class="comment-actions">
+                <button class="comment-reply-btn">Reply</button>
+              </div>
+            </div>
+            <div class="comment-replies"></div>
+          `;
+          
+          // Add the reply to the replies container
+          repliesContainer.appendChild(replyElement);
+          
+          // Add 'with-replies' class to parent and show collapse button
+          if (repliesContainer.children.length > 0) {
+            repliesContainer.classList.add('comment-with-replies');
+            const collapseBtn = parentComment.querySelector('.comment-collapse-btn');
+            if (collapseBtn) {
+              collapseBtn.style.display = 'inline-block';
+            }
+          }
+          
+          return replyElement;
         }
         
         // Function to update comment count
