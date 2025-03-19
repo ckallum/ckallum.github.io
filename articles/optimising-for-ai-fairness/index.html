@@ -1,16 +1,15 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="preload">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description"
-    content="Global AI Landscape 2025-2030: Investment Opportunities and Technical Trajectories - A comprehensive analysis for investment managers">
-  <title>Global AI Landscape 2025-2030</title>
+  <meta name="description" content="Optimising for Fairness in Classification Models - Research findings on the importance of choosing fair goals in machine learning">
+  <title>Optimising for Fairness in Classification Models</title>
   <link rel="stylesheet" href="../../assets/css/article.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Updated to use the local fonts instead of Google Fonts -->
   <style>
     @font-face {
       font-family: "Newsreader";
@@ -42,8 +41,7 @@
       font-size: 1.2rem;
     }
 
-    .chart-container,
-    .map-container {
+    .chart-container {
       width: 100%;
       height: 400px;
       margin-bottom: 1rem;
@@ -80,18 +78,51 @@
       margin-bottom: 0;
     }
 
-    .chart-controls,
-    .map-controls {
-      margin-bottom: 1rem;
+    .equation {
+      text-align: center;
+      margin: 1.5rem 0;
+      font-style: italic;
+    }
+    
+    .definition-box {
+      background-color: var(--bg-secondary);
+      border-left: 4px solid var(--primary-color);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .definition-box h4 {
+      margin-top: 0;
+      color: var(--primary-color);
+    }
+    
+    .definition-box p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .key-insight {
+      background-color: rgba(52, 152, 219, 0.1);
+      border: 1px solid rgba(52, 152, 219, 0.3);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+    }
+    
+    .key-insight h4 {
+      color: rgb(41, 128, 185);
+      margin-top: 0;
     }
 
-    .chart-controls select,
-    .map-controls input {
-      padding: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .visualization-container {
+        padding: 1rem;
+      }
+      
+      .chart-container {
+        height: 300px;
+      }
     }
   </style>
   <script src="../../assets/js/darkmode.js" defer></script>
@@ -137,12 +168,159 @@
         <!-- This will be populated by the toc.js script -->
       </ul>
     </div>
+    
     <div class="content-container">
-      <h1 id="optimising-for-ai-fairness">Optimising for Fairness in Classification Models</h1>
+      <h1 id="optimising-for-fairness">Optimising for Fairness in Classification Models</h1>
 
       <p class="author-date">March 19, 2025 · Callum Ke</p>
 
+      <h2 id="introduction">Introduction</h2>
       
+      <p>Machine learning systems increasingly influence high-stakes decisions in areas like hiring, lending, and university admissions. As these systems proliferate, ensuring they make fair decisions across different demographic groups has become a critical concern. However, the field faces a fundamental challenge: there is no universally agreed-upon definition of algorithmic fairness that captures all aspects of equality.</p>
+      
+      <p>This article explores the findings from my research at the University of Bristol, supervised by Dr. Laurence Aitchison, on optimizing for fairness in classification models. I propose that stakeholders should prioritize choosing inherently "fair" prediction targets rather than attempting to impose fairness constraints on models trained with biased objectives.</p>
+
+      <div class="key-insight">
+        <h4>Key Insight</h4>
+        <p>Post-hoc fairness interventions have limited effectiveness when the underlying prediction target is biased. Instead, stakeholders should prioritize selecting prediction targets that are inherently fair—those with equal base rates across demographic groups.</p>
+      </div>
+
+      <h2 id="fairness-dilemma">The Fairness Dilemma</h2>
+      
+      <p>A central challenge in fairness research is the absence of a formal definition that captures all dimensions of equality. This is complicated by the <strong>Impossibility Theorem</strong>, which demonstrates that commonly used statistical fairness definitions are inherently contradictory. Since each definition intuitively captures desirable aspects of equitable decision-making, practitioners must make difficult trade-offs.</p>
+
+      <div class="visualization-container">
+        <h4>Visualization 1: The Three Major Fairness Definitions</h4>
+        <div class="chart-container" id="fairness-definitions-viz"></div>
+        <p class="chart-note">The Impossibility Theorem demonstrates that these three fairness definitions generally cannot be satisfied simultaneously.</p>
+      </div>
+
+      <h3 id="fairness-definitions">Three Major Fairness Definitions</h3>
+      
+      <p>Let's denote our sensitive attribute as S ∈ {a, b}, the true outcome labels as Y ∈ {0, 1}, and the predicted outcomes as Ŷ ∈ {0, 1}.</p>
+
+      <div class="definition-box">
+        <h4>1. Independence (Demographic Parity)</h4>
+        <p>Ensures equal selection rates across groups: Ŷ ⊥ S</p>
+        <p class="equation">P(Ŷ = 1|S = a) = P(Ŷ = 1|S = b) = P(Ŷ = 1)</p>
+      </div>
+
+      <div class="definition-box">
+        <h4>2. Separation (Equalized Odds)</h4>
+        <p>Ensures equal error rates across groups: Ŷ ⊥ S|Y</p>
+        <p class="equation">P(Ŷ = 1|Y = 1, S = a) = P(Ŷ = 1|Y = 1, S = b)</p>
+        <p class="equation">P(Ŷ = 1|Y = 0, S = a) = P(Ŷ = 1|Y = 0, S = b)</p>
+      </div>
+
+      <div class="definition-box">
+        <h4>3. Sufficiency (Calibration by Group)</h4>
+        <p>Ensures equal precision rates across groups: Y ⊥ S|Ŷ</p>
+        <p class="equation">P(Y = 1|S = a, Ŷ = y) = P(Y = 1|S = b, Ŷ = y)</p>
+      </div>
+
+      <h3 id="impossibility-theorem">The Impossibility Theorem</h3>
+      
+      <p>The Impossibility Theorem states that these definitions are mutually exclusive except in three scenarios:</p>
+      
+      <ul>
+        <li>We have a perfectly accurate predictor</li>
+        <li>Our predictor trivially assigns all predictions to a single value (0 or 1)</li>
+        <li>The target variable has equal base rates between sensitive groups</li>
+      </ul>
+      
+      <p>The third scenario provides the only reasonable option in most real-world applications where both fairness and utility matter.</p>
+
+      <h2 id="fair-goal">A Novel Approach: The "Fair Goal"</h2>
+      
+      <p>Rather than applying fairness constraints to models trained on potentially biased targets, I propose shifting focus to the selection of inherently fair prediction objectives.</p>
+
+      <h3 id="defining-fair-goal">Defining a "Fair Goal"</h3>
+      
+      <p>In this research, a "fair goal" is defined as a prediction target where the underlying distribution has equal base rates of the positive outcome across all demographic groups. While identifying such goals isn't always straightforward, they may reasonably exist in contexts where fairness is an inherent objective.</p>
+
+      <div class="visualization-container">
+        <h4>Visualization 2: Base Rate Distributions Across Different Goals</h4>
+        <div class="chart-container" id="base-rate-viz"></div>
+        <p class="chart-note">The Value Added measure shows equal base rates between groups, making it a "fair goal" by our definition.</p>
+      </div>
+
+      <h2 id="case-study">University Admissions: A Case Study</h2>
+      
+      <p>To demonstrate this approach, I conducted a simulated experiment of university admissions, comparing classifiers trained to predict acceptance based on three different targets:</p>
+      
+      <ol>
+        <li><strong>A-level scores</strong> (traditional academic achievement)</li>
+        <li><strong>Graduation scores</strong> (final university performance)</li>
+        <li><strong>Value-added measure</strong> (improvement from entry to graduation)</li>
+      </ol>
+      
+      <p>The experiment evaluated these targets against standard fairness metrics, with particular focus on the "value-added" measure as a potentially fair prediction target.</p>
+
+      <h2 id="results">Results</h2>
+      
+      <p>The results clearly demonstrate that the "fair goal" (value-added target) simultaneously achieved lower costs across all fairness metrics compared to the other "unfair" targets. This was consistent across different training fairness constraints.</p>
+
+      <div class="visualization-container">
+        <h4>Visualization 3: Fairness Costs Comparison</h4>
+        <div class="chart-container" id="fairness-costs-viz"></div>
+        <p class="chart-note">Total fairness costs across different fairness constraints, comparing the three prediction targets.</p>
+      </div>
+
+      <h3 id="key-findings">Key Findings</h3>
+      
+      <ol>
+        <li>Classifiers trained on the value-added target showed significantly lower total fairness costs across all fairness constraints.</li>
+        <li>Traditional metrics like A-level scores and final graduation scores performed poorly on fairness measures even when fairness constraints were applied during training.</li>
+        <li>The results confirm that choosing a fair prediction target is more effective than post-hoc fairness interventions on models trained with biased objectives.</li>
+      </ol>
+
+      <div class="key-insight">
+        <h4>Research Implications</h4>
+        <p>Our findings challenge the common approach of applying fairness constraints to models trained on potentially biased targets. Instead, we demonstrate that selecting inherently fair prediction objectives can lead to models that naturally satisfy multiple fairness criteria without sacrificing utility.</p>
+      </div>
+
+      <h2 id="practical-implications">Practical Implications</h2>
+      
+      <p>These findings have significant implications for stakeholders in high-stakes decision-making contexts:</p>
+      
+      <ol>
+        <li><strong>Prioritize target selection:</strong> Resources should first be directed toward identifying and validating inherently fair prediction targets.</li>
+        <li><strong>Rethink fairness interventions:</strong> Pre-processing, in-processing, or post-processing fairness interventions have limited effectiveness when the underlying prediction target is biased.</li>
+        <li><strong>Measure what matters:</strong> Organizations should critically examine what they're optimizing for and consider alternative metrics that better align with fairness objectives.</li>
+      </ol>
+
+      <h2 id="future-directions">Future Directions</h2>
+      
+      <p>While this research focuses on statistical group fairness, other fairness frameworks exist, including:</p>
+      
+      <ul>
+        <li><strong>Causal fairness:</strong> Evaluating discrimination within causal frameworks</li>
+        <li><strong>Counterfactual fairness:</strong> Ensuring predictions remain consistent in counterfactual scenarios</li>
+        <li><strong>Individual fairness:</strong> Guaranteeing similar individuals receive similar outcomes</li>
+      </ul>
+      
+      <p>Future research could explore how choosing fair goals affects these alternative fairness definitions. Additionally, developing methods to identify or construct fair prediction targets in various domains remains an important research direction.</p>
+
+      <h2 id="conclusion">Conclusion</h2>
+      
+      <p>The pursuit of fairness in machine learning often focuses on algorithmic interventions, but my research suggests a more fundamental approach: selecting inherently fair prediction targets. By choosing goals with equal base rates across demographic groups, we can develop models that satisfy multiple fairness criteria simultaneously without sacrificing utility.</p>
+      
+      <p>As machine learning systems continue to influence high-stakes decisions, this perspective offers a promising path forward for building more equitable AI systems.</p>
+
+      <h2 id="references">References</h2>
+      
+      <ol>
+        <li>Aitchison, L., & Ke, C. (2025). <em>Fairness in Machine Learning: The Importance of Choosing the Right Goal</em>. University of Bristol, Department of Computer Science.</li>
+        <li>Barocas, S., Hardt, M., & Narayanan, A. (2019). <em>Fairness and Machine Learning</em>. fairmlbook.org.</li>
+        <li>Chouldechova, A. (2017). Fair prediction with disparate impact: A study of bias in recidivism prediction instruments. <em>Big Data</em>, 5(2), 153-163.</li>
+        <li>Corbett-Davies, S., & Goel, S. (2018). The measure and mismeasure of fairness: A critical review of fair machine learning. <em>arXiv preprint arXiv:1808.00023</em>.</li>
+        <li>Dwork, C., Hardt, M., Pitassi, T., Reingold, O., & Zemel, R. (2012). Fairness through awareness. <em>Proceedings of the 3rd Innovations in Theoretical Computer Science Conference</em>, 214-226.</li>
+        <li>Hardt, M., Price, E., & Srebro, N. (2016). Equality of opportunity in supervised learning. <em>Advances in Neural Information Processing Systems</em>, 29, 3315-3323.</li>
+        <li>Kleinberg, J., Mullainathan, S., & Raghavan, M. (2016). Inherent trade-offs in the fair determination of risk scores. <em>arXiv preprint arXiv:1609.05807</em>.</li>
+        <li>Mehrabi, N., Morstatter, F., Saxena, N., Lerman, K., & Galstyan, A. (2021). A survey on bias and fairness in machine learning. <em>ACM Computing Surveys</em>, 54(6), 1-35.</li>
+        <li>Pleiss, G., Raghavan, M., Wu, F., Kleinberg, J., & Weinberger, K. Q. (2017). On fairness and calibration. <em>Advances in Neural Information Processing Systems</em>, 30.</li>
+        <li>Verma, S., & Rubin, J. (2018). Fairness definitions explained. <em>IEEE/ACM International Workshop on Software Fairness</em>, 1-7.</li>
+      </ol>
     </div>
   </div>
 </body>
