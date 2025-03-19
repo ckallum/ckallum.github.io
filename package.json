@@ -4,11 +4,16 @@
   "description": "Personal website for Callum Ke",
   "scripts": {
     "build": "tsc",
+    "postinstall": "npm run build",
     "watch": "tsc --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "server": "node server/server.js",
-    "dev-server": "nodemon server/server.js"
+    "dev-server": "nodemon server/server.js",
+    "start": "node server/server.js"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",
