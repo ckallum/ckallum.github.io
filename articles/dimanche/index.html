@@ -391,6 +391,32 @@
       color: var(--text-secondary, #767676);
     }
     
+    /* Comment alternating colors based on EA Forum */
+    .comments-node {
+      position: relative;
+    }
+    
+    .comments-node-root {
+      margin-bottom: 1.5rem;
+    }
+    
+    .comments-node-even {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .comments-node-odd {
+      background-color: transparent;
+    }
+    
+    /* Dark mode support for alternating colors */
+    .dark-mode .comments-node-even {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .dark-mode .comments-node-odd {
+      background-color: transparent;
+    }
+    
     /* Container for replies */
     .comment-replies {
       position: relative;
@@ -399,12 +425,11 @@
     
     /* Comments with replies (nested structure) */
     .comment-with-replies {
-      border-left: 2px solid rgba(0, 0, 0, 0.07);
-      padding-left: 1.5rem;
+      padding-left: 1.5rem; /* Consistent indentation */
       margin-top: 0.5rem;
-      margin-left: 0.5rem;
       transition: max-height 0.3s ease, opacity 0.3s ease;
       overflow: hidden; /* Ensure smooth animation */
+      border-left: 2px solid rgba(0, 0, 0, 0.07);
     }
     
     /* Collapsed replies */
@@ -419,19 +444,39 @@
     
     /* Reply comments - slightly different styling */
     .reply-comment {
-      padding-top: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Visual indentation for each nesting level */
+    .nesting-level-1 { margin-left: 0; }
+    .nesting-level-2 { margin-left: 1.5rem; }
+    .nesting-level-3 { margin-left: 3rem; }
+    .nesting-level-4 { margin-left: 4.5rem; }
+    .nesting-level-5 { margin-left: 6rem; }
+    .nesting-level-6 { margin-left: 7.5rem; }
+    
+    /* Scrollbar for very deeply nested comments */
+    .comments-list {
+      overflow-x: auto;
       padding-bottom: 1rem;
-      border-bottom-color: rgba(0, 0, 0, 0.04);
     }
     
-    /* Nested replies should have slightly different styling */
-    .reply-comment .comment-replies {
-      margin-left: -0.5rem; /* Reduce left margin for nested replies */
+    /* Parent scroll indicator similar to EA Forum */
+    .parent-scroll-indicator {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.05);
+      cursor: pointer;
     }
     
-    /* Add visual indication for deeper nesting levels */
-    .reply-comment .comment-with-replies {
-      border-left-color: rgba(0, 0, 0, 0.05); /* Lighter border for nested replies */
+    .parent-scroll-indicator:hover {
+      background-color: rgba(0, 0, 0, 0.1);
     }
     
     /* Inline reply form styling */
@@ -442,11 +487,14 @@
       border: 1px solid var(--border-color, #e6e4dd);
       border-radius: 3px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      width: calc(100% - 1.5rem); /* Prevent overflow by accounting for padding */
+      box-sizing: border-box;
     }
     
     .inline-reply-form .comment-form {
       margin: 0;
       padding: 0;
+      width: 100%;
     }
     
     .inline-reply-form .reply-indicator {
@@ -460,6 +508,8 @@
     .inline-reply-form textarea {
       min-height: 100px;
       margin-bottom: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
     }
     
     /* Dark mode support for inline reply form */
@@ -894,27 +944,38 @@
           const topLevelComments = messages.filter(message => !message.parentCommentId);
           const replyComments = messages.filter(message => message.parentCommentId);
           
-          // Create a map for quick lookup
+          // Create a structured comment tree for proper nesting
           const commentMap = new Map();
           
           // First, add all top-level comments
           topLevelComments.forEach(message => {
-            const commentElement = addComment(message);
+            const commentElement = addComment(message, 1); // Level 1 for top-level comments
             commentMap.set(message._id, commentElement);
           });
           
           // Then add all replies to their proper parent
-          replyComments.forEach(message => {
+          // Sort by parent ID to ensure we process parents before their children
+          const sortedReplies = [...replyComments].sort((a, b) => {
+            // Replies to the same parent should be processed in chronological order
+            if (a.parentCommentId === b.parentCommentId) {
+              return new Date(a.timestamp) - new Date(b.timestamp);
+            }
+            return 0;
+          });
+          
+          sortedReplies.forEach(message => {
             // Find the direct parent
             const parentId = message.parentCommentId;
             
             if (commentMap.has(parentId)) {
               // If the parent comment is already rendered, add this as a reply
-              addReplyToParent(message, commentMap.get(parentId));
+              const parentElement = commentMap.get(parentId);
+              const replyElement = addReplyComment(message);
+              commentMap.set(message._id, replyElement);
             } else {
               // Fallback if parent not found - add as a top-level comment
               console.warn(`Parent comment not found for reply: ${message._id}. Adding as top-level.`);
-              const commentElement = addComment(message);
+              const commentElement = addComment(message, 1);
               commentMap.set(message._id, commentElement);
             }
           });
@@ -922,66 +983,6 @@
           // Update the comment count
           updateCommentCount();
         });
-        
-        // Helper function to add a reply directly to its parent element
-        function addReplyToParent(comment, parentElement) {
-          // Get or create the replies container
-          let repliesContainer = parentElement.querySelector('.comment-replies');
-          
-          // Create a new comment element for the reply
-          const replyElement = document.createElement('div');
-          replyElement.className = 'comment reply-comment';
-          replyElement.dataset.commentId = comment._id;
-          
-          // Format timestamp
-          const timestamp = new Date(comment.timestamp);
-          const dateString = new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }).format(timestamp);
-          
-          // Set reply content with collapse/expand button
-          replyElement.innerHTML = `
-            <div class="comment-header">
-              <div class="comment-author">${comment.username}</div>
-              <div class="comment-date">${dateString}</div>
-            </div>
-            <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
-            <div class="comment-footer">
-              <div class="comment-vote">
-                <button class="vote-button vote-up" aria-label="Upvote">▲</button>
-                <span class="vote-count">${comment.votes || 0}</span>
-                <button class="vote-button vote-down" aria-label="Downvote">▼</button>
-              </div>
-              <div class="comment-actions">
-                <button class="comment-reply-btn">Reply</button>
-                <button class="comment-collapse-btn toggle-replies" style="display: none;">+</button>
-              </div>
-            </div>
-            <div class="comment-replies"></div>
-          `;
-          
-          // Add the reply to the replies container
-          repliesContainer.appendChild(replyElement);
-          
-          // Add 'with-replies' class to parent and show collapse button
-          if (repliesContainer.children.length > 0) {
-            repliesContainer.classList.add('comment-with-replies');
-            const collapseBtn = parentElement.querySelector('.comment-collapse-btn');
-            if (collapseBtn) {
-              collapseBtn.style.display = 'inline-block';
-              collapseBtn.textContent = '-'; // Show as expanded by default
-            }
-          }
-          
-          // Add event listeners for reply actions
-          setupCommentEventListeners(replyElement, comment);
-          
-          return replyElement;
-        }
         
         // Function to set up event listeners for a comment
         function setupCommentEventListeners(commentElement, comment) {
@@ -1066,9 +1067,12 @@
             const inlineReplyForm = document.createElement('div');
             inlineReplyForm.className = 'inline-reply-form';
             
+            // Get the nesting level for proper indentation
+            const nestingLevel = parseInt(commentElement.dataset.nestingLevel || '1');
+            
             // Copy the main comment form structure but simplify
             inlineReplyForm.innerHTML = `
-              <form class="comment-form">
+              <form class="comment-form nesting-level-${nestingLevel}">
                 <div class="reply-indicator active">
                   Replying to ${comment.username}
                 </div>
@@ -1159,16 +1163,23 @@
         }
         
         // Function to add a comment to the comments list
-        function addComment(comment) {
+        function addComment(comment, nestingLevel = 1) {
           // Check if this is a reply to another comment (handled separately when loading initial comments)
           if (comment.parentCommentId && document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`)) {
-            return addReplyComment(comment);
+            return addReplyComment(comment, nestingLevel);
           }
           
           const commentsList = commentsSection.querySelector('.comments-list');
+          
+          // Create a comment node wrapper with alternating colors
+          const commentNode = document.createElement('div');
+          commentNode.className = `comments-node comments-node-root comments-node-${nestingLevel % 2 === 0 ? 'even' : 'odd'}`;
+          
+          // Create the comment element
           const commentElement = document.createElement('div');
-          commentElement.className = 'comment';
+          commentElement.className = `comment nesting-level-${nestingLevel}`;
           commentElement.dataset.commentId = comment._id;
+          commentElement.dataset.nestingLevel = nestingLevel;
           
           // Format timestamp
           const timestamp = new Date(comment.timestamp);
@@ -1198,20 +1209,31 @@
                 <button class="comment-collapse-btn" style="display: none;">-</button>
               </div>
             </div>
-            <div class="comment-replies"></div>
+            <div class="comment-replies">
+              <div class="parent-scroll-indicator" title="Scroll to comment"></div>
+            </div>
           `;
           
-          // Add comment to list
-          commentsList.appendChild(commentElement);
+          // Add the comment element to the node wrapper
+          commentNode.appendChild(commentElement);
+          
+          // Add comment node to list
+          commentsList.appendChild(commentNode);
           
           // Set up event listeners
           setupCommentEventListeners(commentElement, comment);
+          
+          // Add scroll event to parent scroll indicator
+          const scrollIndicator = commentElement.querySelector('.parent-scroll-indicator');
+          scrollIndicator.addEventListener('click', () => {
+            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
           
           return commentElement;
         }
         
         // Function to add a reply to a parent comment (for new comments, not initial loading)
-        function addReplyComment(comment) {
+        function addReplyComment(comment, initialNestingLevel = 1) {
           // Find the parent comment element
           const parentComment = document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`);
           
@@ -1220,16 +1242,25 @@
             // Fall back to add as a top-level comment
             const newComment = {...comment};
             delete newComment.parentCommentId;
-            return addComment(newComment);
+            return addComment(newComment, initialNestingLevel);
           }
           
-          // Get or create the replies container
+          // Get the parent's nesting level and increment for this reply
+          const parentNestingLevel = parseInt(parentComment.dataset.nestingLevel || '1');
+          const nestingLevel = parentNestingLevel + 1;
+          
+          // Get the replies container
           let repliesContainer = parentComment.querySelector('.comment-replies');
+          
+          // Create a comment node wrapper with alternating colors
+          const commentNode = document.createElement('div');
+          commentNode.className = `comments-node comments-node-${nestingLevel % 2 === 0 ? 'even' : 'odd'}`;
           
           // Create a new comment element for the reply
           const replyElement = document.createElement('div');
-          replyElement.className = 'comment reply-comment';
+          replyElement.className = `comment reply-comment nesting-level-${nestingLevel}`;
           replyElement.dataset.commentId = comment._id;
+          replyElement.dataset.nestingLevel = nestingLevel;
           
           // Format timestamp
           const timestamp = new Date(comment.timestamp);
@@ -1259,11 +1290,16 @@
                 <button class="comment-collapse-btn" style="display: none;">+</button>
               </div>
             </div>
-            <div class="comment-replies"></div>
+            <div class="comment-replies">
+              <div class="parent-scroll-indicator" title="Scroll to comment"></div>
+            </div>
           `;
           
-          // Add the reply to the replies container
-          repliesContainer.appendChild(replyElement);
+          // Add the reply element to the node wrapper
+          commentNode.appendChild(replyElement);
+          
+          // Add the node to the replies container
+          repliesContainer.appendChild(commentNode);
           
           // Add 'with-replies' class to parent and show collapse button
           if (repliesContainer.children.length > 0) {
@@ -1278,13 +1314,19 @@
           // Set up event listeners for this reply
           setupCommentEventListeners(replyElement, comment);
           
+          // Add scroll event to parent scroll indicator
+          const scrollIndicator = replyElement.querySelector('.parent-scroll-indicator');
+          scrollIndicator.addEventListener('click', () => {
+            replyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+          
           return replyElement;
         }
         
         // Function to update comment count (counting both top-level comments and replies)
         function updateCommentCount() {
           const commentsCount = document.querySelectorAll('.comment').length;
-          const topLevelCount = document.querySelectorAll('.comments-list > .comment').length;
+          const topLevelCount = document.querySelectorAll('.comments-node-root').length;
           const replyCount = commentsCount - topLevelCount;
           
           const countDisplay = commentsSection.querySelector('.comments-count span');
