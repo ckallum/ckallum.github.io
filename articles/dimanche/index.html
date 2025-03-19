@@ -338,6 +338,19 @@
       text-decoration: underline;
     }
     
+    /* Collapse/Expand button specific styling */
+    .comment-collapse-btn {
+      display: none; /* Hidden by default, shown when replies are present */
+      font-size: 0.8rem;
+      background-color: rgba(0, 0, 0, 0.03);
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem !important;
+    }
+    
+    .dark-mode .comment-collapse-btn {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
     /* Vote buttons */
     .comment-vote {
       display: flex;
@@ -377,14 +390,29 @@
       margin-top: 1rem;
       margin-left: 0.5rem;
       transition: max-height 0.3s ease, opacity 0.3s ease;
+      overflow: hidden; /* Ensure smooth animation */
     }
     
     /* Collapsed replies */
     .comment-with-replies.collapsed {
-      max-height: 0;
+      max-height: 0 !important;
       opacity: 0;
       overflow: hidden;
       margin-top: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    
+    /* Reply comments - slightly different styling */
+    .reply-comment {
+      padding-top: 1.2rem;
+      padding-bottom: 1.2rem;
+      border-bottom-color: rgba(0, 0, 0, 0.04);
+    }
+    
+    /* Show thread indicator line */
+    .comment-replies {
+      position: relative;
     }
     
     /* Dark mode support */
@@ -413,6 +441,10 @@
     
     .dark-mode .comment-with-replies {
       border-left-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .dark-mode .reply-comment {
+      border-bottom-color: rgba(255, 255, 255, 0.03);
     }
     
     .dark-mode .vote-button:hover {
@@ -902,6 +934,29 @@
               
               // Update button text
               collapseBtn.textContent = isCollapsed ? 'Expand' : 'Collapse';
+              
+              // Add animation by temporarily applying a transition
+              repliesContainer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
+              
+              // Set max-height based on collapsed state
+              if (isCollapsed) {
+                repliesContainer.style.maxHeight = '0';
+                repliesContainer.style.opacity = '0';
+              } else {
+                // Temporarily set a large max-height for animation
+                repliesContainer.style.maxHeight = '1000px';
+                repliesContainer.style.opacity = '1';
+              }
+              
+              // Remove the transition after animation completes
+              setTimeout(() => {
+                repliesContainer.style.transition = '';
+                
+                // Reset max-height to allow for growth if expanded
+                if (!isCollapsed) {
+                  repliesContainer.style.maxHeight = '';
+                }
+              }, 300);
             });
           }
           
@@ -968,14 +1023,110 @@
             }
           }
           
+          // Add event listeners for reply actions
+          const replyUpvoteBtn = replyElement.querySelector('.vote-up');
+          const replyDownvoteBtn = replyElement.querySelector('.vote-down');
+          const replyVoteCount = replyElement.querySelector('.vote-count');
+          const replyReplyBtn = replyElement.querySelector('.comment-reply-btn');
+          
+          // Initialize reply votes if not present
+          if (!comment.votes) comment.votes = 0;
+          
+          // Store user votes in session storage
+          const userVotes = JSON.parse(sessionStorage.getItem('userVotes') || '{}');
+          
+          // Check if user already voted on this reply
+          if (userVotes[comment._id]) {
+            if (userVotes[comment._id] === 'up') {
+              replyUpvoteBtn.style.color = 'var(--text-primary, #141413)';
+            } else if (userVotes[comment._id] === 'down') {
+              replyDownvoteBtn.style.color = 'var(--text-primary, #141413)';
+            }
+          }
+          
+          replyUpvoteBtn.addEventListener('click', function() {
+            const currentVote = userVotes[comment._id];
+            
+            if (currentVote === 'up') {
+              // Remove upvote
+              comment.votes--;
+              delete userVotes[comment._id];
+              replyUpvoteBtn.style.color = '';
+            } else {
+              // Add upvote (and remove downvote if exists)
+              if (currentVote === 'down') {
+                comment.votes++; // Remove the previous downvote
+                replyDownvoteBtn.style.color = '';
+              }
+              comment.votes++;
+              userVotes[comment._id] = 'up';
+              replyUpvoteBtn.style.color = 'var(--text-primary, #141413)';
+            }
+            
+            replyVoteCount.textContent = comment.votes;
+            sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
+          });
+          
+          replyDownvoteBtn.addEventListener('click', function() {
+            const currentVote = userVotes[comment._id];
+            
+            if (currentVote === 'down') {
+              // Remove downvote
+              comment.votes++;
+              delete userVotes[comment._id];
+              replyDownvoteBtn.style.color = '';
+            } else {
+              // Add downvote (and remove upvote if exists)
+              if (currentVote === 'up') {
+                comment.votes--; // Remove the previous upvote
+                replyUpvoteBtn.style.color = '';
+              }
+              comment.votes--;
+              userVotes[comment._id] = 'down';
+              replyDownvoteBtn.style.color = 'var(--text-primary, #141413)';
+            }
+            
+            replyVoteCount.textContent = comment.votes;
+            sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
+          });
+          
+          // Add reply-to-reply functionality
+          replyReplyBtn.addEventListener('click', function() {
+            // Scroll to the comment form and focus, prepopulate with reply reference
+            const commentForm = document.querySelector('.comment-form');
+            const textarea = commentForm.querySelector('textarea');
+            const replyIndicator = commentForm.querySelector('.reply-indicator');
+            
+            // Update text and show reply indicator
+            textarea.value = `@${comment.username}: `;
+            replyIndicator.textContent = `Replying to ${comment.username}`;
+            replyIndicator.classList.add('active');
+            textarea.focus();
+            
+            // Store the parent comment ID in a data attribute on the form
+            commentForm.dataset.replyTo = comment._id;
+            
+            // Scroll the form into view
+            commentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+          
           return replyElement;
         }
         
-        // Function to update comment count
+        // Function to update comment count (counting both top-level comments and replies)
         function updateCommentCount() {
           const commentsCount = document.querySelectorAll('.comment').length;
+          const topLevelCount = document.querySelectorAll('.comments-list > .comment').length;
+          const replyCount = commentsCount - topLevelCount;
+          
           const countDisplay = commentsSection.querySelector('.comments-count span');
-          countDisplay.textContent = commentsCount;
+          
+          // Format the count to show both total and breakdown
+          if (replyCount > 0) {
+            countDisplay.textContent = `${commentsCount} (${topLevelCount} threads, ${replyCount} replies)`;
+          } else {
+            countDisplay.textContent = commentsCount;
+          }
         }
         
         // Helper function to escape HTML to prevent XSS
