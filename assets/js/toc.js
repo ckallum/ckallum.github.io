@@ -1,7 +1,7 @@
 "use strict";
 
 let manuallySelectedHeader = null;
-let isOpen = true; // Set the initial state to open
+let isOpen = false; // Set the initial state to closed
 
 function debounce(func, wait) {
   let timeout;
@@ -89,8 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
         headerControls.appendChild(tocToggle);
       }
 
-      // Set initial state based on screen size
-      isOpen = window.innerWidth >= MOBILE_BREAKPOINT;
+      // Keep TOC closed by default regardless of screen size
+      isOpen = false;
       updateTocVisibility();
     }
 
