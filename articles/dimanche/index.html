@@ -109,237 +109,206 @@
       visibility: hidden;
     }
     
-    /* Chat box styles */
-    .chat-container {
-      position: fixed;
-      width: 320px;
-      max-width: 90vw;
-      height: 450px;
-      max-height: 70vh;
-      background-color: var(--bg-secondary, #f9f9f8);
-      border-radius: 10px;
-      border: 1px solid var(--border-color, #e6e4dd);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    /* Comments section styles */
+    .comments-section {
+      margin-top: 4rem;
+      margin-bottom: 2rem;
       font-family: "Newsreader", serif;
-      z-index: 100;
-      /* Initial position */
-      right: 3rem;
-      bottom: 3rem;
-      /* Transition for smooth repositioning */
-      transition: all 0.3s ease-in-out;
+      width: 100%;
+      max-width: var(--content-max-width, 620px);
+      border-top: 1px solid var(--border-color, #e6e4dd);
+      padding-top: 2rem;
     }
     
-    .chat-header {
-      padding: 1rem 1.2rem;
-      background-color: var(--text-primary, #141413);
-      color: var(--bg-primary, #f0efea);
-      border-bottom: 1px solid var(--border-color, #e6e4dd);
+    .comments-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
     }
     
-    .chat-header h3 {
+    .comments-header h3 {
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       font-weight: 600;
-      letter-spacing: 0.01em;
     }
     
-    .chat-toggle {
-      background: none;
-      border: none;
-      color: var(--bg-primary, #f0efea);
-      cursor: pointer;
-      padding: 0;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      transition: background-color 0.2s;
+    .comments-count {
+      font-size: 0.9rem;
+      color: var(--text-secondary, #767676);
     }
     
-    .chat-toggle:hover {
-      background-color: rgba(240, 239, 234, 0.2);
-    }
-    
-    .chat-messages {
-      flex: 1;
-      padding: 1.2rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      background-color: var(--bg-primary, #f0efea);
-    }
-    
-    .message {
-      display: flex;
-      flex-direction: column;
-      padding: 0.8rem 1rem;
-      border-radius: 14px 14px 14px 0;
-      max-width: 85%;
-      background-color: var(--bg-primary);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      position: relative;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    
-    .message-sender {
-      align-self: flex-end;
-      background-color: var(--text-primary, #141413);
-      color: var(--bg-primary, #f0efea);
-      border-radius: 14px 14px 0 14px;
-      border: none;
-    }
-    
-    .message-content {
-      margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-    
-    .message-meta {
-      font-size: 0.75rem;
-      margin-bottom: 0.25rem;
-      font-weight: bold;
-      color: var(--text-secondary);
-    }
-    
-    .message-sender .message-meta {
-      color: rgba(255, 255, 255, 0.9);
-    }
-    
-    .message-time {
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-      margin-top: 0.4rem;
-      text-align: right;
-      opacity: 0.8;
-    }
-    
-    .message-sender .message-time {
-      color: rgba(255, 255, 255, 0.8);
-    }
-    
-    /* Username input container */
-    .username-container {
-      padding: 0.85rem 1rem;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
+    .comment-form-container {
+      margin-bottom: 2rem;
       background-color: var(--bg-secondary, #f9f9f8);
+      border: 1px solid var(--border-color, #e6e4dd);
+      border-radius: 8px;
+      padding: 1.2rem;
     }
     
-    .username-container label {
-      font-size: 0.85rem;
-      white-space: nowrap;
-      color: var(--text-secondary);
+    .comment-user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    
+    .comment-user-info label {
+      font-size: 0.9rem;
+      color: var(--text-secondary, #767676);
       font-weight: 500;
     }
     
-    .username-container input {
+    .comment-user-info input {
       flex: 1;
+      max-width: 240px;
       padding: 0.6rem 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
+      border: 1px solid var(--border-color, #e6e4dd);
+      border-radius: 4px;
+      background-color: var(--bg-primary, #f0efea);
+      color: var(--text-primary, #141413);
       font-family: "Newsreader", serif;
       font-size: 0.9rem;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     
-    .username-container input:focus {
+    .comment-user-info input:focus {
       outline: none;
       border-color: var(--text-primary, #141413);
       box-shadow: 0 0 0 2px rgba(20, 20, 19, 0.1);
     }
     
-    .chat-form {
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
+    .comment-form {
       display: flex;
-      gap: 0.7rem;
-      background-color: var(--bg-primary);
+      flex-direction: column;
+      gap: 1rem;
     }
     
-    .chat-form input {
-      flex: 1;
-      padding: 0.8rem 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
+    .comment-form textarea {
+      width: 100%;
+      height: 120px;
+      padding: 1rem;
+      border: 1px solid var(--border-color, #e6e4dd);
+      border-radius: 4px;
+      background-color: var(--bg-primary, #f0efea);
+      color: var(--text-primary, #141413);
       font-family: "Newsreader", serif;
-      font-size: 0.95rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      resize: vertical;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     
-    .chat-form input:focus {
+    .comment-form textarea:focus {
       outline: none;
       border-color: var(--text-primary, #141413);
       box-shadow: 0 0 0 2px rgba(20, 20, 19, 0.1);
     }
     
-    .chat-form button {
+    .comment-form-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .comment-form button {
       background-color: var(--text-primary, #141413);
       color: var(--bg-primary, #f0efea);
       border: none;
-      border-radius: 20px;
-      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      padding: 0.7rem 1.4rem;
       cursor: pointer;
       font-family: "Newsreader", serif;
       font-weight: 500;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
     }
     
-    .chat-form button:hover {
+    .comment-form button:hover {
       opacity: 0.85;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
     }
     
-    .chat-minimized {
-      height: auto;
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
     
-    .chat-minimized .chat-messages,
-    .chat-minimized .username-container,
-    .chat-minimized .chat-form {
-      display: none;
+    .comment {
+      padding: 1.5rem;
+      border: 1px solid var(--border-color, #e6e4dd);
+      border-radius: 8px;
+      background-color: var(--bg-primary, #f0efea);
     }
     
-    /* Responsive layout */
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+    
+    .comment-author {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    
+    .comment-date {
+      font-size: 0.85rem;
+      color: var(--text-secondary, #767676);
+    }
+    
+    .comment-content {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    
+    .comment-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .comment-actions button {
+      background: none;
+      border: none;
+      color: var(--text-secondary, #767676);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      font-family: "Newsreader", serif;
+    }
+    
+    .comment-actions button:hover {
+      color: var(--text-primary, #141413);
+    }
+    
+    /* Dark mode support */
+    .dark-mode .comments-section {
+      border-top-color: var(--border-color, #444);
+    }
+    
+    .dark-mode .comment-form-container,
+    .dark-mode .comment {
+      background-color: var(--bg-secondary, #1a1a19);
+      border-color: var(--border-color, #444);
+    }
+    
+    /* Responsive adjustments */
     @media (max-width: 768px) {
-      .chat-container {
-        right: 1.5rem;
-        bottom: 1.5rem;
-        width: calc(100% - 3rem);
+      .comments-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
       }
-    }
-    
-    /* Position options */
-    .chat-position-bottom {
-      right: 50%;
-      bottom: 3rem;
-      transform: translateX(50%);
-    }
-    
-    /* When positioned above the footer */
-    .chat-above-footer {
-      box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.15);
-      border-top: 1px solid var(--border-color);
+      
+      .comment-header {
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      
+      .comment-user-info input {
+        max-width: 100%;
+      }
     }
     
     /* Two column layout */
@@ -372,7 +341,7 @@
       const accessToken = sessionStorage.getItem('dimancheAccessToken');
       if (accessToken) {
         passwordVerified = true;
-        setupChat();
+        setupComments();
       }
       
       if (!passwordVerified) {
@@ -474,8 +443,8 @@
             overlay.style.display = 'none';
             siteWrapper.classList.remove('content-hidden');
             
-            // Setup chat functionality
-            setupChat();
+            // Setup comments section
+            setupComments();
           } else {
             // Password incorrect
             error.style.display = 'block';
@@ -503,47 +472,45 @@
           .join('');
       }
       
-      // Set up chat functionality
-      function setupChat() {
+      // Set up comments section
+      function setupComments() {
         // Check if username exists in session storage
         username = sessionStorage.getItem('dimancheUsername') || 'Anonymous';
         
-        // Create chat box
-        const chatContainer = document.createElement('div');
-        chatContainer.className = 'chat-container';
-        chatContainer.innerHTML = `
-          <div class="chat-header">
-            <h3>Dimanche Chat</h3>
-            <button class="chat-toggle">−</button>
+        // Create comments container
+        const commentsSection = document.createElement('div');
+        commentsSection.className = 'comments-section';
+        commentsSection.innerHTML = `
+          <div class="comments-header">
+            <h3>Comments</h3>
+            <div class="comments-count"><span>0</span> comments</div>
           </div>
-          <div class="chat-messages"></div>
-          <div class="username-container">
-            <label for="username-input">Name:</label>
-            <input type="text" id="username-input" placeholder="Your name" value="${username}">
+          <div class="comment-form-container">
+            <div class="comment-user-info">
+              <label for="comment-username">Name:</label>
+              <input type="text" id="comment-username" placeholder="Your name" value="${username}">
+            </div>
+            <form class="comment-form">
+              <textarea placeholder="Write a comment..." required></textarea>
+              <div class="comment-form-actions">
+                <button type="submit" class="submit-comment">Post Comment</button>
+              </div>
+            </form>
           </div>
-          <form class="chat-form">
-            <input type="text" placeholder="Type a message..." required>
-            <button type="submit">Send</button>
-          </form>
+          <div class="comments-list"></div>
         `;
         
-        document.body.appendChild(chatContainer);
-        
-        // Position the chat box based on viewport
-        positionChatBox(chatContainer);
-        
-        // Handle window events for responsive positioning
-        window.addEventListener('resize', () => positionChatBox(chatContainer));
-        window.addEventListener('scroll', () => positionChatBox(chatContainer));
-        
-        // Periodic check for layout changes
-        const intervalId = setInterval(() => positionChatBox(chatContainer), 1000);
-        
-        // Clean up interval when page is unloaded
-        window.addEventListener('beforeunload', () => clearInterval(intervalId));
+        // Insert comments section before the footer
+        const footer = document.querySelector('footer');
+        const contentContainer = document.querySelector('.content-container');
+        if (contentContainer && footer) {
+          contentContainer.parentNode.insertBefore(commentsSection, footer);
+        } else {
+          document.body.appendChild(commentsSection);
+        }
         
         // Set up username input
-        const usernameInput = chatContainer.querySelector('#username-input');
+        const usernameInput = commentsSection.querySelector('#comment-username');
         usernameInput.addEventListener('change', function() {
           const newUsername = this.value.trim();
           if (newUsername) {
@@ -554,31 +521,7 @@
           }
         });
         
-        // Setup chat toggle
-        const toggleButton = chatContainer.querySelector('.chat-toggle');
-        toggleButton.addEventListener('click', function() {
-          chatContainer.classList.toggle('chat-minimized');
-          toggleButton.textContent = chatContainer.classList.contains('chat-minimized') ? '+' : '−';
-          
-          // Reposition after minimizing/maximizing
-          if (!chatContainer.classList.contains('chat-minimized')) {
-            setTimeout(() => positionChatBox(chatContainer), 100);
-          }
-        });
-        
-        // Ensure box repositions when interacting with it
-        chatContainer.addEventListener('mousedown', function() {
-          // Short delay to allow any layout changes to settle
-          setTimeout(() => positionChatBox(chatContainer), 50);
-        });
-        
-        // Reposition after focus changes
-        const chatInputs = chatContainer.querySelectorAll('input');
-        chatInputs.forEach(input => {
-          input.addEventListener('focus', () => setTimeout(() => positionChatBox(chatContainer), 300));
-        });
-        
-        // API base URL for socket connection
+        // API base URL for server connection
         const API_BASE_URL = window.location.hostname === 'localhost' 
           ? 'http://localhost:3000' // Local development
           : 'https://ckallum-api-9e0b7df25b59.herokuapp.com/'; // Replace with your actual server URL
@@ -588,16 +531,16 @@
           withCredentials: true // Enable CORS for Socket.io
         });
         
-        // Listen for message form submissions
-        const chatForm = chatContainer.querySelector('.chat-form');
-        const chatInput = chatForm.querySelector('input');
+        // Listen for comment form submissions
+        const commentForm = commentsSection.querySelector('.comment-form');
+        const commentInput = commentForm.querySelector('textarea');
         
-        chatForm.addEventListener('submit', function(e) {
+        commentForm.addEventListener('submit', function(e) {
           e.preventDefault();
           
-          const content = chatInput.value.trim();
+          const content = commentInput.value.trim();
           if (content) {
-            // Send message to server
+            // Send comment to server
             socket.emit('send-message', {
               username,
               content,
@@ -605,53 +548,78 @@
             });
             
             // Clear input
-            chatInput.value = '';
+            commentInput.value = '';
           }
         });
         
-        // Listen for new messages
+        // Listen for new comments
         socket.on('new-message', function(message) {
-          addMessageToChat(message);
+          addComment(message);
+          updateCommentCount();
         });
         
-        // Load existing messages
+        // Load existing comments
         socket.on('init-messages', function(messages) {
-          const chatMessages = chatContainer.querySelector('.chat-messages');
-          chatMessages.innerHTML = '';
+          const commentsList = commentsSection.querySelector('.comments-list');
+          commentsList.innerHTML = '';
           
           messages.forEach(message => {
-            addMessageToChat(message);
+            addComment(message);
           });
           
-          // Scroll to bottom
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+          // Update the comment count
+          updateCommentCount();
         });
         
-        // Function to add a message to the chat display
-        function addMessageToChat(message) {
-          const chatMessages = chatContainer.querySelector('.chat-messages');
-          const messageElement = document.createElement('div');
-          
-          // Check if message is from current user
-          const isCurrentUser = message.username === username;
-          messageElement.className = isCurrentUser ? 'message message-sender' : 'message';
+        // Function to add a comment to the comments list
+        function addComment(comment) {
+          const commentsList = commentsSection.querySelector('.comments-list');
+          const commentElement = document.createElement('div');
+          commentElement.className = 'comment';
           
           // Format timestamp
-          const timestamp = new Date(message.timestamp);
-          const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timestamp = new Date(comment.timestamp);
+          const dateString = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(timestamp);
           
-          // Set message content
-          messageElement.innerHTML = `
-            <div class="message-meta">${message.username}</div>
-            <p class="message-content">${escapeHTML(message.content)}</p>
-            <div class="message-time">${timeString}</div>
+          // Set comment content
+          commentElement.innerHTML = `
+            <div class="comment-header">
+              <div class="comment-author">${comment.username}</div>
+              <div class="comment-date">${dateString}</div>
+            </div>
+            <div class="comment-content">${escapeHTML(comment.content)}</div>
+            <div class="comment-actions">
+              <button class="comment-reply-btn">Reply</button>
+            </div>
           `;
           
-          // Add message to chat
-          chatMessages.appendChild(messageElement);
+          // Add comment to list
+          commentsList.appendChild(commentElement);
           
-          // Scroll to bottom
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+          // Add reply functionality
+          const replyBtn = commentElement.querySelector('.comment-reply-btn');
+          replyBtn.addEventListener('click', function() {
+            // Scroll to the comment form and focus, prepopulate with reply reference
+            const commentForm = document.querySelector('.comment-form');
+            const textarea = commentForm.querySelector('textarea');
+            textarea.value = `@${comment.username}: `;
+            textarea.focus();
+            // Scroll the form into view
+            commentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        }
+        
+        // Function to update comment count
+        function updateCommentCount() {
+          const commentsCount = document.querySelectorAll('.comment').length;
+          const countDisplay = commentsSection.querySelector('.comments-count span');
+          countDisplay.textContent = commentsCount;
         }
         
         // Helper function to escape HTML to prevent XSS
@@ -665,96 +633,7 @@
         }
       }
       
-      // Position chat box based on viewport constraints
-      function positionChatBox(chatContainer) {
-        if (!chatContainer) return;
-        
-        // Get viewport dimensions
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        
-        // Reset any existing position classes
-        chatContainer.classList.remove('chat-position-bottom');
-        chatContainer.classList.remove('chat-above-footer');
-        
-        // Default side position for large screens
-        chatContainer.style.right = '3rem';
-        chatContainer.style.bottom = '3rem';
-        chatContainer.style.transform = 'none';
-        
-        // Get chat dimensions
-        const chatRect = chatContainer.getBoundingClientRect();
-        const chatHeight = chatRect.height;
-        const chatWidth = chatRect.width;
-        
-        // Get content elements to check for overlap
-        const contentWrapper = document.querySelector('.content-wrapper');
-        const mainImage = document.querySelector('.responsive-image');
-        const footer = document.querySelector('footer');
-        
-        const contentRect = contentWrapper ? contentWrapper.getBoundingClientRect() : null;
-        const imageRect = mainImage ? mainImage.getBoundingClientRect() : null;
-        const footerRect = footer ? footer.getBoundingClientRect() : null;
-        
-        // Check if chat fits in viewport
-        const isMobile = viewportWidth <= 768;
-        const isNarrow = viewportWidth <= 1024;
-        
-        // If mobile or narrow viewport, position at bottom center
-        if (isMobile || isNarrow) {
-          chatContainer.classList.add('chat-position-bottom');
-        } 
-        // For larger screens, check if chat overlaps with main content
-        else if (contentRect) {
-          const rightEdgeOfContent = contentRect.right;
-          const leftEdgeOfChat = viewportWidth - chatWidth - 48; // 48px = 3rem
-          
-          // Check if chat would overlap with content
-          if (leftEdgeOfChat < rightEdgeOfContent + 60) { // 60px buffer
-            chatContainer.classList.add('chat-position-bottom');
-          }
-          
-          // Check if chat overlaps with the image when on the right side
-          if (imageRect && !chatContainer.classList.contains('chat-position-bottom')) {
-            const chatLeft = leftEdgeOfChat;
-            const chatRight = chatLeft + chatWidth;
-            const chatTop = viewportHeight - chatHeight - 48; // 48px = 3rem
-            const chatBottom = viewportHeight - 48;
-            
-            // Check if chat overlaps with image
-            const overlapsImage = !(
-              chatRight < imageRect.left ||
-              chatLeft > imageRect.right ||
-              chatBottom < imageRect.top ||
-              chatTop > imageRect.bottom
-            );
-            
-            if (overlapsImage) {
-              chatContainer.classList.add('chat-position-bottom');
-            }
-          }
-        }
-        
-        // Final adjustments for bottom position - avoid footer
-        if (chatContainer.classList.contains('chat-position-bottom') && footerRect) {
-          // Calculate distance from bottom to avoid footer
-          const footerTop = footerRect.top;
-          const viewportBottom = window.scrollY + window.innerHeight;
-          const footerDistanceFromBottom = viewportBottom - footerTop;
-          
-          // If footer is visible in viewport, position chat above it
-          if (footerDistanceFromBottom > 0) {
-            // Position above footer with padding
-            chatContainer.style.bottom = (footerDistanceFromBottom + 20) + 'px';
-            chatContainer.classList.add('chat-above-footer');
-          }
-        }
-        
-        // Make sure chat isn't too tall for viewport
-        if (chatHeight > viewportHeight - 80) { // 80px buffer
-          chatContainer.style.maxHeight = (viewportHeight - 100) + 'px'; // 100px total buffer
-        }
-      }
+      // No positioning needed for the comment section as it's part of the page flow
     });
   </script>
 </head>
