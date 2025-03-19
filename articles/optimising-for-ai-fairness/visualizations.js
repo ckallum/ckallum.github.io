@@ -10,85 +10,148 @@ document.addEventListener('DOMContentLoaded', function() {
     createBaseRateChart();
   });
   
-  // Visualization 1: Venn Diagram of Fairness Definitions
+  // Visualization 1: Fairness Definitions Relationships
   function createFairnessVennDiagram() {
     const container = d3.select('#fairness-definitions-viz');
     if (container.empty()) return;
     
-    const width = container.node().getBoundingClientRect().width;
+    // Use fixed dimensions for more reliable rendering
+    const width = 600;
     const height = 400;
     
+    // Clear any existing content
+    container.html("");
+    
     const svg = container.append('svg')
-      .attr('width', width)
+      .attr('width', '100%')
       .attr('height', height)
       .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'xMidYMid meet')
       .attr('style', 'max-width: 100%; height: auto;');
     
-    // Define circles for the Venn diagram
-    const circles = [
-      { name: 'Independence', label: 'Demographic Parity', x: width * 0.3, y: height * 0.4, r: width * 0.2, color: '#3498db' },
-      { name: 'Separation', label: 'Equalized Odds', x: width * 0.5, y: height * 0.6, r: width * 0.2, color: '#e74c3c' },
-      { name: 'Sufficiency', label: 'Calibration', x: width * 0.7, y: height * 0.4, r: width * 0.2, color: '#2ecc71' }
+    // Title
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', 25)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+      .text('Relationships Between Fairness Criteria');
+    
+    // Draw the three main fairness definitions
+    const fairnessDefs = [
+      { name: 'Independence', alt: 'Demographic Parity', color: '#3498db', x: 150, y: 80 },
+      { name: 'Separation', alt: 'Equalized Odds', color: '#e74c3c', x: 300, y: 180 },
+      { name: 'Sufficiency', alt: 'Calibration', color: '#2ecc71', x: 450, y: 80 }
     ];
     
-    // Draw circles
-    svg.selectAll('circle')
-      .data(circles)
+    // Add circles for each definition
+    svg.selectAll('.fairness-circle')
+      .data(fairnessDefs)
       .enter()
       .append('circle')
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
-      .attr('r', d => d.r)
+      .attr('r', 50)
       .attr('fill', d => d.color)
       .attr('fill-opacity', 0.4)
       .attr('stroke', d => d.color)
       .attr('stroke-width', 2);
     
-    // Add labels
-    svg.selectAll('.circle-label')
-      .data(circles)
+    // Add main labels
+    svg.selectAll('.fairness-label')
+      .data(fairnessDefs)
       .enter()
       .append('text')
-      .attr('class', 'circle-label')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y - 10)
+      .attr('text-anchor', 'middle')
+      .attr('font-weight', 'bold')
+      .attr('font-size', '14px')
+      .text(d => d.name);
+    
+    // Add alternative names
+    svg.selectAll('.fairness-alt')
+      .data(fairnessDefs)
+      .enter()
+      .append('text')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y + 15)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '12px')
+      .text(d => d.alt);
+    
+    // Draw connecting lines with conflict markers
+    const connections = [
+      { source: fairnessDefs[0], target: fairnessDefs[1], conflict: true },  // Independence - Separation
+      { source: fairnessDefs[1], target: fairnessDefs[2], conflict: false }, // Separation - Sufficiency
+      { source: fairnessDefs[0], target: fairnessDefs[2], conflict: true }   // Independence - Sufficiency
+    ];
+    
+    // Draw lines
+    svg.selectAll('.connection')
+      .data(connections)
+      .enter()
+      .append('line')
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y)
+      .attr('stroke', d => d.conflict ? '#e74c3c' : '#27ae60')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', d => d.conflict ? '5,5' : 'none');
+    
+    // Add conflict markers
+    svg.selectAll('.conflict-marker')
+      .data(connections.filter(d => d.conflict))
+      .enter()
+      .append('text')
+      .attr('x', d => (d.source.x + d.target.x) / 2)
+      .attr('y', d => (d.source.y + d.target.y) / 2 - 10)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+      .attr('fill', '#e74c3c')
+      .text('✗');
+    
+    // Add legend
+    const legendItems = [
+      { label: 'Compatible', color: '#27ae60', dash: 'none', x: 150, y: height - 50 },
+      { label: 'In conflict', color: '#e74c3c', dash: '5,5', x: 350, y: height - 50 }
+    ];
+    
+    // Legend lines
+    svg.selectAll('.legend-line')
+      .data(legendItems)
+      .enter()
+      .append('line')
+      .attr('x1', d => d.x - 40)
+      .attr('y1', d => d.y)
+      .attr('x2', d => d.x - 10)
+      .attr('y2', d => d.y)
+      .attr('stroke', d => d.color)
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', d => d.dash);
+    
+    // Legend text
+    svg.selectAll('.legend-text')
+      .data(legendItems)
+      .enter()
+      .append('text')
       .attr('x', d => d.x)
       .attr('y', d => d.y)
-      .attr('text-anchor', 'middle')
-      .attr('dy', '0.3em')
-      .text(d => d.name)
-      .attr('font-weight', 'bold')
-      .attr('font-size', '14px');
+      .attr('dy', '0.35em')
+      .attr('font-size', '12px')
+      .text(d => d.label);
     
-    // Add sublabels
-    svg.selectAll('.circle-sublabel')
-      .data(circles)
-      .enter()
-      .append('text')
-      .attr('class', 'circle-sublabel')
-      .attr('x', d => d.x)
-      .attr('y', d => d.y + 20)
-      .attr('text-anchor', 'middle')
-      .attr('dy', '0.3em')
-      .text(d => d.label)
-      .attr('font-size', '12px');
-    
-    // Draw intersection label
+    // Add note about the Impossibility Theorem
     svg.append('text')
-      .attr('x', width * 0.5)
-      .attr('y', height * 0.5)
+      .attr('x', width / 2)
+      .attr('y', height - 15)
       .attr('text-anchor', 'middle')
-      .attr('dy', '0.3em')
-      .text('?')
-      .attr('font-weight', 'bold')
-      .attr('font-size', '24px');
-    
-    // Add annotations
-    svg.append('text')
-      .attr('x', width * 0.5)
-      .attr('y', height * 0.85)
-      .attr('text-anchor', 'middle')
-      .text('The Impossibility Theorem: These definitions cannot be simultaneously satisfied')
       .attr('font-style', 'italic')
-      .attr('font-size', '14px');
+      .attr('font-size', '12px')
+      .text('The Impossibility Theorem: These criteria cannot generally be satisfied simultaneously');
   }
   
   // Visualization 2: Fairness Costs Comparison Chart
