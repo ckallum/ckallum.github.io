@@ -15,10 +15,25 @@ const ProtectedPage = require('./models/protectedPage');
 const app = express();
 const server = http.createServer(app);
 
-// Configure middleware
-app.use(cors());
+// Get CORS allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',') 
+  : ['https://ckallum.com', 'http://localhost:3000'];
+
+console.log('CORS allowed origins:', allowedOrigins);
+
+// Configure middleware with specific CORS settings
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../')));
+// Serve static files only for local development
+// In production, GitHub Pages will handle static files
+if (process.env.NODE_ENV !== 'production') {
+  app.use(express.static(path.join(__dirname, '../')));
+}
 
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ckallum-website';
@@ -26,11 +41,12 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Setup Socket.io for chat
+// Setup Socket.io for chat with proper CORS settings
 const io = socketIo(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 

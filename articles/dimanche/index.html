@@ -322,12 +322,18 @@
         const password = input.value;
         
         try {
+          // API base URL - change this to your deployed server URL
+          const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? '' // Empty for local development (same origin)
+            : 'https://ckallum-api.herokuapp.com'; // Replace with your actual server URL
+          
           // Step 1: Get a challenge and salt from the server
-          const challengeResponse = await fetch(`/api/auth-challenge/${pageId}`, {
+          const challengeResponse = await fetch(`${API_BASE_URL}/api/auth-challenge/${pageId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'include' // Include cookies for CORS requests
           });
           
           const challengeData = await challengeResponse.json();
@@ -350,11 +356,12 @@
           const challengeHash = await sha256(challenge + passwordHash);
           
           // Step 4: Send the hash and challenge back to the server for verification
-          const verifyResponse = await fetch('/api/verify-password', {
+          const verifyResponse = await fetch(`${API_BASE_URL}/api/verify-password`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
+            credentials: 'include', // Include cookies for CORS requests
             body: JSON.stringify({ pageId, hash: challengeHash, challenge })
           });
           
@@ -435,8 +442,15 @@
           toggleButton.textContent = chatContainer.classList.contains('chat-minimized') ? '+' : '−';
         });
         
+        // API base URL for socket connection
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+          ? 'http://localhost:3000' // Local development
+          : 'https://ckallum-api.herokuapp.com'; // Replace with your actual server URL
+          
         // Initialize Socket.io connection
-        socket = io(window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin);
+        socket = io(API_BASE_URL, {
+          withCredentials: true // Enable CORS for Socket.io
+        });
         
         // Listen for message form submissions
         const chatForm = chatContainer.querySelector('.chat-form');

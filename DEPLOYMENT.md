@@ -22,6 +22,10 @@ docker-compose up --build
 
 ## Deploying to Heroku with Docker
 
+## Server-Side Deployment (API)
+
+Since your website is already hosted on GitHub Pages at ckallum.com, you need to deploy just the server component to Heroku to handle API requests.
+
 ### 1. Login to Heroku
 
 ```bash
@@ -32,14 +36,24 @@ heroku login
 heroku container:login
 ```
 
-### 2. Create a Heroku App
+### 2. Create a Heroku App for Your API
 
 ```bash
-# Create a new Heroku app
-heroku create ckallum-website
+# Create a new Heroku app with a name that indicates it's your API
+heroku create ckallum-api
 
 # Or use an existing app
 heroku git:remote -a your-app-name
+```
+
+### Important: Update Client Configuration
+
+Make sure the API_BASE_URL in your client code (`articles/dimanche/index.html`) points to your Heroku app's URL:
+
+```javascript
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? '' // Empty for local development (same origin)
+  : 'https://ckallum-api.herokuapp.com'; // Your Heroku app URL
 ```
 
 ### 3. Add MongoDB Add-on
@@ -55,9 +69,13 @@ heroku addons:create mongodb:sandbox
 # Set environment variables in Heroku
 heroku config:set JWT_SECRET=your_secret_jwt_key
 heroku config:set DIMANCHE_PASSWORD=your_dimanche_password
+heroku config:set NODE_ENV=production
 
-# If you're using a custom MongoDB URI (not the Heroku add-on)
-heroku config:set MONGODB_URI=your_mongodb_uri
+# Set your MongoDB Atlas URI
+heroku config:set MONGODB_URI=mongodb+srv://ckallum:iaJEXt5w6HrctUAj@cluster0.3vw3p.mongodb.net/ckallum-website?retryWrites=true&w=majority&appName=Cluster0
+
+# IMPORTANT: Set CORS allowed origins to include your static site
+heroku config:set CORS_ORIGINS=https://ckallum.com,http://localhost:3000
 ```
 
 ### 5. Deploy to Heroku
