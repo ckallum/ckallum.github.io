@@ -2,8 +2,8 @@
 
 const DARK_MODE_COLORS = {
   dark: {
-    bg: "#141413",
-    text: "#f0efea",
+    bg: "#261E16",
+    text: "#DDD2BD",
   },
   light: {
     bg: "#f0efea",
