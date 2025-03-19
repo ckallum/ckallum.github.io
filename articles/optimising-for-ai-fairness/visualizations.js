@@ -3,11 +3,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Visualization 1: Fairness Definitions Relationships
     createFairnessVennDiagram();
     
-    // Visualization 2: Fairness Costs Comparison Chart
+    // Visualization 2: Base Rate Distributions
+    createBaseRateChart();
+    
+    // Visualization 3: Fairness Costs Comparison Chart
     createFairnessCostsChart();
     
-    // Visualization 3: Base Rate Distributions
-    createBaseRateChart();
+    // Add resize event listeners for responsive charts
+    window.addEventListener('resize', function() {
+      // Debounce the resize handler to prevent excessive redraws
+      clearTimeout(window.resizeTimer);
+      window.resizeTimer = setTimeout(function() {
+        createFairnessVennDiagram();
+        createBaseRateChart();
+        createFairnessCostsChart();
+      }, 250);
+    });
   });
   
   // Visualization 1: Fairness Definitions Relationships
@@ -15,23 +26,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = d3.select('#fairness-definitions-viz');
     if (container.empty()) return;
     
-    // Use fixed dimensions for more reliable rendering
-    const width = 600;
-    const height = 400;
+    // Get actual container dimensions for responsive sizing
+    const containerWidth = container.node().getBoundingClientRect().width;
+    const aspectRatio = 0.67; // height = 67% of width
+    const height = Math.min(containerWidth * aspectRatio, 400);
     
     // Clear any existing content
     container.html("");
     
+    // Create responsive SVG that will scale with the container
     const svg = container.append('svg')
       .attr('width', '100%')
       .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet')
-      .attr('style', 'max-width: 100%; height: auto;');
+      .attr('viewBox', '0 0 600 400')
+      .attr('preserveAspectRatio', 'xMidYMid meet');
     
     // Title
     svg.append('text')
-      .attr('x', width / 2)
+      .attr('x', 300)
       .attr('y', 25)
       .attr('text-anchor', 'middle')
       .attr('font-size', '16px')
@@ -116,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add legend
     const legendItems = [
-      { label: 'Compatible', color: '#27ae60', dash: 'none', x: 150, y: height - 50 },
-      { label: 'In conflict', color: '#e74c3c', dash: '5,5', x: 350, y: height - 50 }
+      { label: 'Compatible', color: '#27ae60', dash: 'none', x: 150, y: 350 },
+      { label: 'In conflict', color: '#e74c3c', dash: '5,5', x: 350, y: 350 }
     ];
     
     // Legend lines
@@ -146,31 +158,149 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add note about the Impossibility Theorem
     svg.append('text')
-      .attr('x', width / 2)
-      .attr('y', height - 15)
+      .attr('x', 300)
+      .attr('y', 380)
       .attr('text-anchor', 'middle')
       .attr('font-style', 'italic')
       .attr('font-size', '12px')
       .text('The Impossibility Theorem: These criteria cannot generally be satisfied simultaneously');
   }
   
-  // Visualization 2: Fairness Costs Comparison Chart
+  // Visualization 2: Base Rate Distribution
+  function createBaseRateChart() {
+    const container = d3.select('#base-rate-viz');
+    if (container.empty()) return;
+    
+    // Get actual container dimensions for responsive sizing
+    const containerWidth = container.node().getBoundingClientRect().width;
+    const aspectRatio = 0.5; // height = 50% of width
+    const height = Math.min(containerWidth * aspectRatio, 300);
+    
+    // Clear any existing content
+    container.html("");
+    
+    const margin = { top: 30, right: 30, bottom: 40, left: 50 };
+    const width = 600;
+    const innerHeight = 300 - margin.top - margin.bottom;
+    const innerWidth = width - margin.left - margin.right;
+    
+    // Create responsive SVG
+    const svg = container.append('svg')
+      .attr('width', '100%')
+      .attr('height', height)
+      .attr('viewBox', `0 0 ${width} ${300}`)
+      .attr('preserveAspectRatio', 'xMidYMid meet');
+    
+    const g = svg.append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+    
+    // Data for base rates
+    const data = [
+      { target: 'A-Levels', groupA: 0.65, groupB: 0.3 },
+      { target: 'Final Score', groupA: 0.7, groupB: 0.4 },
+      { target: 'Value Added', groupA: 0.5, groupB: 0.5 }
+    ];
+    
+    // X scale
+    const x = d3.scaleBand()
+      .domain(data.map(d => d.target))
+      .range([0, innerWidth])
+      .padding(0.3);
+    
+    // Y scale
+    const y = d3.scaleLinear()
+      .domain([0, 1])
+      .range([innerHeight, 0]);
+    
+    // Grouped bar setup
+    const groups = g.selectAll('.target-group')
+      .data(data)
+      .enter().append('g')
+      .attr('class', 'target-group')
+      .attr('transform', d => `translate(${x(d.target)},0)`);
+    
+    const subgroups = ['groupA', 'groupB'];
+    const subgroupColors = ['#f39c12', '#9b59b6'];
+    
+    const xSub = d3.scaleBand()
+      .domain(subgroups)
+      .range([0, x.bandwidth()])
+      .padding(0.05);
+    
+    // Add bars
+    groups.selectAll('rect')
+      .data(d => subgroups.map(key => ({key, value: d[key]})))
+      .enter().append('rect')
+      .attr('x', d => xSub(d.key))
+      .attr('y', d => y(d.value))
+      .attr('width', xSub.bandwidth())
+      .attr('height', d => innerHeight - y(d.value))
+      .attr('fill', d => d.key === 'groupA' ? subgroupColors[0] : subgroupColors[1]);
+    
+    // Add x axis
+    g.append('g')
+      .attr('transform', `translate(0,${innerHeight})`)
+      .call(d3.axisBottom(x));
+    
+    // Add y axis
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => d * 100 + '%'));
+    
+    // Add y axis label
+    g.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', -margin.left + 15)
+      .attr('x', -innerHeight / 2)
+      .attr('text-anchor', 'middle')
+      .text('Positive Outcome Rate');
+    
+    // Add legend
+    const legend = svg.append('g')
+      .attr('font-family', 'sans-serif')
+      .attr('font-size', 10)
+      .attr('text-anchor', 'end')
+      .selectAll('g')
+      .data(['Group A', 'Group B'])
+      .enter().append('g')
+      .attr('transform', (d, i) => `translate(0,${i * 20 + margin.top})`);
+    
+    legend.append('rect')
+      .attr('x', width - 19 - margin.right)
+      .attr('y', 9)
+      .attr('width', 19)
+      .attr('height', 19)
+      .attr('fill', (d, i) => subgroupColors[i]);
+      
+    legend.append('text')
+      .attr('x', width - 24 - margin.right)
+      .attr('y', 9)
+      .attr('dy', '0.32em')
+      .text(d => d);
+  }
+  
+  // Visualization 3: Fairness Costs Comparison Chart
   function createFairnessCostsChart() {
     const container = d3.select('#fairness-costs-viz');
     if (container.empty()) return;
     
-    const width = container.node().getBoundingClientRect().width;
-    const height = 400;
-    const margin = { top: 40, right: 20, bottom: 60, left: 60 };
+    // Get actual container dimensions for responsive sizing
+    const containerWidth = container.node().getBoundingClientRect().width;
+    const aspectRatio = 0.67; // height = 67% of width
+    const height = Math.min(containerWidth * aspectRatio, 400);
     
+    // Clear any existing content
+    container.html("");
+    
+    // Create responsive SVG
     const svg = container.append('svg')
-      .attr('width', width)
+      .attr('width', '100%')
       .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('style', 'max-width: 100%; height: auto;');
+      .attr('viewBox', '0 0 600 400')
+      .attr('preserveAspectRatio', 'xMidYMid meet');
     
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
+    const margin = { top: 40, right: 20, bottom: 60, left: 60 };
+    const innerWidth = 600 - margin.left - margin.right;
+    const innerHeight = 400 - margin.top - margin.bottom;
     
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
@@ -255,123 +385,18 @@ document.addEventListener('DOMContentLoaded', function() {
       .selectAll('g')
       .data(keys.slice().reverse())
       .enter().append('g')
-      .attr('transform', (d, i) => `translate(0,${i * 20})`);
+      .attr('transform', (d, i) => `translate(0,${i * 20 + margin.top})`);
     
     legend.append('rect')
-      .attr('x', width - 19)
+      .attr('x', 600 - 19 - margin.right)
       .attr('y', 9)
       .attr('width', 19)
       .attr('height', 19)
       .attr('fill', color);
     
     legend.append('text')
-      .attr('x', width - 24)
+      .attr('x', 600 - 24 - margin.right)
       .attr('y', 9)
       .attr('dy', '0.32em')
       .text(d => d === 'ALevels' ? 'A-Levels' : d === 'FinalScore' ? 'Final Score' : 'Value Added');
-  }
-  
-  // Visualization 3: Base Rate Distribution
-  function createBaseRateChart() {
-    const container = d3.select('#base-rate-viz');
-    if (container.empty()) return;
-    
-    const width = container.node().getBoundingClientRect().width;
-    const height = 300;
-    const margin = { top: 30, right: 30, bottom: 40, left: 50 };
-    
-    const svg = container.append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('style', 'max-width: 100%; height: auto;');
-    
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-    
-    const g = svg.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-    
-    // Data for base rates
-    const data = [
-      { target: 'A-Levels', groupA: 0.65, groupB: 0.3 },
-      { target: 'Final Score', groupA: 0.7, groupB: 0.4 },
-      { target: 'Value Added', groupA: 0.5, groupB: 0.5 }
-    ];
-    
-    // X scale
-    const x = d3.scaleBand()
-      .domain(data.map(d => d.target))
-      .range([0, innerWidth])
-      .padding(0.3);
-    
-    // Y scale
-    const y = d3.scaleLinear()
-      .domain([0, 1])
-      .range([innerHeight, 0]);
-    
-    // Grouped bar setup
-    const groups = g.selectAll('.target-group')
-      .data(data)
-      .enter().append('g')
-      .attr('class', 'target-group')
-      .attr('transform', d => `translate(${x(d.target)},0)`);
-    
-    const subgroups = ['groupA', 'groupB'];
-    const subgroupColors = ['#f39c12', '#9b59b6'];
-    
-    const xSub = d3.scaleBand()
-      .domain(subgroups)
-      .range([0, x.bandwidth()])
-      .padding(0.05);
-    
-    // Add bars
-    groups.selectAll('rect')
-      .data(d => subgroups.map(key => ({key, value: d[key]})))
-      .enter().append('rect')
-      .attr('x', d => xSub(d.key))
-      .attr('y', d => y(d.value))
-      .attr('width', xSub.bandwidth())
-      .attr('height', d => innerHeight - y(d.value))
-      .attr('fill', d => d.key === 'groupA' ? subgroupColors[0] : subgroupColors[1]);
-    
-    // Add x axis
-    g.append('g')
-      .attr('transform', `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(x));
-    
-    // Add y axis
-    g.append('g')
-      .call(d3.axisLeft(y).ticks(5, '%').tickFormat(d => d * 100 + '%'));
-    
-    // Add y axis label
-    g.append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('y', -margin.left + 15)
-      .attr('x', -innerHeight / 2)
-      .attr('text-anchor', 'middle')
-      .text('Positive Outcome Rate');
-    
-    // Add legend
-    const legend = svg.append('g')
-      .attr('font-family', 'sans-serif')
-      .attr('font-size', 10)
-      .attr('text-anchor', 'end')
-      .selectAll('g')
-      .data(['Group A', 'Group B'])
-      .enter().append('g')
-      .attr('transform', (d, i) => `translate(0,${i * 20})`);
-    
-    legend.append('rect')
-      .attr('x', width - 19)
-      .attr('y', 9)
-      .attr('width', 19)
-      .attr('height', 19)
-      .attr('fill', (d, i) => subgroupColors[i]);
-    
-    legend.append('text')
-      .attr('x', width - 24)
-      .attr('y', 9)
-      .attr('dy', '0.32em')
-      .text(d => d);
   }
