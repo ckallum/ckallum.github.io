@@ -266,12 +266,13 @@
     /* Comment styles inspired by LessWrong */
     .comment {
       position: relative;
-      padding: 1.8rem 1.2rem;
+      padding: 1.5rem 1.2rem;
       margin: 0.5rem 0;
       border-bottom: 1px solid var(--border-color, #e6e4dd);
       border-radius: 5px;
       background-color: transparent;
       transition: background-color 0.2s, box-shadow 0.2s;
+      font-size: 0.95rem;
     }
     
     .comment:last-child {
@@ -303,12 +304,14 @@
     
     .comment-content {
       margin-bottom: 1rem;
-      line-height: 1.7;
+      line-height: 1.6;
       white-space: pre-wrap;
+      font-size: 0.95rem;
+      color: var(--text-primary, #2c2c2c);
     }
     
     .comment-content p {
-      margin: 0 0 1rem 0;
+      margin: 0 0 0.8rem 0;
     }
     
     .comment-content p:last-child {
@@ -340,6 +343,93 @@
     .comment-actions button:hover {
       color: var(--text-primary, #141413);
       text-decoration: underline;
+    }
+    
+    /* Delete button styling */
+    .comment-delete-btn {
+      color: #9e2a2a !important;
+      opacity: 0.8;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    
+    .comment-delete-btn:hover {
+      color: #b82e2e !important;
+      opacity: 1;
+      text-decoration: underline;
+    }
+    
+    .dark-mode .comment-delete-btn {
+      color: #e08080 !important;
+    }
+    
+    .dark-mode .comment-delete-btn:hover {
+      color: #e99797 !important;
+    }
+    
+    /* Delete confirmation popup */
+    .delete-confirm-popup {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(var(--bg-primary-rgb, 240, 239, 234), 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-radius: 5px;
+      backdrop-filter: blur(2px);
+    }
+    
+    .dark-mode .delete-confirm-popup {
+      background-color: rgba(var(--bg-primary-rgb, 20, 20, 20), 0.9);
+    }
+    
+    .delete-confirm-content {
+      text-align: center;
+      padding: 1rem;
+      max-width: 90%;
+    }
+    
+    .delete-confirm-content p {
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    
+    .delete-confirm-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    
+    .delete-confirm-buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: "Newsreader", serif;
+      font-size: 0.9rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    
+    .delete-confirm-cancel {
+      background-color: rgba(0, 0, 0, 0.1);
+      color: var(--text-primary);
+    }
+    
+    .delete-confirm-cancel:hover {
+      background-color: rgba(0, 0, 0, 0.15);
+    }
+    
+    .delete-confirm-delete {
+      background-color: #9e2a2a;
+      color: white;
+    }
+    
+    .delete-confirm-delete:hover {
+      background-color: #b82e2e;
     }
     
     /* Collapse/Expand button specific styling */
@@ -1384,6 +1474,53 @@
           updateCommentCount();
         });
         
+        // Handle socket events for comment updates and deletion
+        socket.on('comment-updated', function(updateData) {
+          const { commentId, content, username } = updateData;
+          const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+          
+          if (commentElement) {
+            // Update comment content
+            const contentElement = commentElement.querySelector('.comment-content');
+            if (contentElement) {
+              contentElement.innerHTML = content;
+            }
+            
+            // Update comment author
+            const authorElement = commentElement.querySelector('.comment-author');
+            if (authorElement) {
+              authorElement.textContent = username;
+            }
+            
+            // Add a visual indication that the comment was deleted
+            commentElement.classList.add('comment-deleted');
+          }
+        });
+        
+        // Handle completely deleted comments
+        socket.on('comment-deleted', function(deleteData) {
+          const { commentId } = deleteData;
+          const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+          
+          if (commentElement) {
+            // Get the parent node to properly remove the entire comment
+            const commentNode = commentElement.closest('.comments-node');
+            if (commentNode) {
+              // Fade out animation
+              commentNode.style.transition = 'opacity 0.3s ease';
+              commentNode.style.opacity = '0';
+              
+              // Remove after animation completes
+              setTimeout(() => {
+                commentNode.remove();
+                
+                // Update comment count
+                updateCommentCount();
+              }, 300);
+            }
+          }
+        });
+        
         // Function to set up event listeners for a comment
         function setupCommentEventListeners(commentElement, comment) {
           // Add vote functionality
@@ -1577,6 +1714,48 @@
             });
           });
           
+          // Add delete functionality
+          const deleteBtn = commentElement.querySelector('.comment-delete-btn');
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+              // Create a confirmation popup
+              const confirmPopup = document.createElement('div');
+              confirmPopup.className = 'delete-confirm-popup';
+              confirmPopup.innerHTML = `
+                <div class="delete-confirm-content">
+                  <p>Are you sure you want to delete this comment?</p>
+                  <p class="delete-confirm-note">This action cannot be undone.</p>
+                  <div class="delete-confirm-buttons">
+                    <button class="delete-confirm-cancel">Cancel</button>
+                    <button class="delete-confirm-delete">Delete</button>
+                  </div>
+                </div>
+              `;
+              
+              // Add to the comment element
+              commentElement.appendChild(confirmPopup);
+              
+              // Add event listeners for the confirmation buttons
+              const cancelBtn = confirmPopup.querySelector('.delete-confirm-cancel');
+              const confirmBtn = confirmPopup.querySelector('.delete-confirm-delete');
+              
+              // Cancel just removes the popup
+              cancelBtn.addEventListener('click', function() {
+                confirmPopup.remove();
+              });
+              
+              // Confirm sends the delete request to the server
+              confirmBtn.addEventListener('click', function() {
+                socket.emit('delete-comment', { 
+                  commentId: comment._id
+                });
+                
+                // Remove popup immediately
+                confirmPopup.remove();
+              });
+            });
+          }
+          
           // Add collapse functionality
           const collapseBtn = commentElement.querySelector('.comment-collapse-btn');
           if (collapseBtn) {
@@ -1668,6 +1847,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
+                <button class="comment-delete-btn">Delete</button>
                 <button class="comment-collapse-btn" style="display: none;" aria-label="Expand/collapse replies"></button>
               </div>
             </div>
@@ -1749,6 +1929,7 @@
               </div>
               <div class="comment-actions">
                 <button class="comment-reply-btn">Reply</button>
+                <button class="comment-delete-btn">Delete</button>
                 <button class="comment-collapse-btn" style="display: none;" aria-label="Expand/collapse replies"></button>
               </div>
             </div>

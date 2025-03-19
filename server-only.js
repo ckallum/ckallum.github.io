@@ -307,6 +307,68 @@ io.on('connection', (socket) => {
     }
   });
   
+  // Handle comment deletion
+  socket.on('delete-comment', async ({ commentId }) => {
+    try {
+      // Find the comment to be deleted
+      const comment = await Comment.findById(commentId);
+      
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      
+      const pageId = comment.pageId;
+      const parentCommentId = comment.parentCommentId;
+      const topLevelCommentId = comment.topLevelCommentId;
+      
+      // Check if this is a comment with replies
+      const hasReplies = comment.directChildrenCount > 0;
+      
+      if (hasReplies) {
+        // For comments with replies, don't actually delete, just mark as deleted
+        await Comment.findByIdAndUpdate(commentId, {
+          content: "[Comment deleted]",
+          username: "Deleted"
+        });
+        
+        // Notify clients about the content update
+        io.to(`page-${pageId}`).emit('comment-updated', {
+          commentId,
+          content: "[Comment deleted]",
+          username: "Deleted"
+        });
+      } else {
+        // For comments without replies, actually delete them
+        await Comment.findByIdAndDelete(commentId);
+        
+        // If this was a reply, update the parent's direct children count
+        if (parentCommentId) {
+          await Comment.findByIdAndUpdate(
+            parentCommentId,
+            { $inc: { directChildrenCount: -1, descendentCount: -1 } }
+          );
+          
+          // For all ancestors up the chain, update descendentCount
+          if (topLevelCommentId && topLevelCommentId !== parentCommentId) {
+            await Comment.findByIdAndUpdate(
+              topLevelCommentId,
+              { $inc: { descendentCount: -1 } }
+            );
+          }
+        }
+        
+        // Notify clients about the deletion
+        io.to(`page-${pageId}`).emit('comment-deleted', { commentId });
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      socket.emit('delete-error', { 
+        message: 'Failed to delete comment',
+        error: error.message 
+      });
+    }
+  });
+  
   // Handle disconnection
   socket.on('disconnect', () => {
     console.log('Client disconnected');
