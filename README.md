@@ -2,6 +2,8 @@
 
 This repository hosts my personal website published at [ckallum.github.io](https://ckallum.github.io).
 
+It's is work in progress. Projects to come.
+
 ## Repository Structure
 
 The website follows a modern, simplified file structure with TypeScript:
