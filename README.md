@@ -27,7 +27,7 @@ The website follows a modern, simplified file structure with TypeScript:
 │   ├── toc.ts             # Table of contents functionality source
 │   └── footnotes.ts       # Footnote functionality source
 └── articles/              # All articles
-    └── the-investment-state-of-ai-2025/
+    └── {article_name.ts} 
         └── index.html     # Article content
 ```
 
