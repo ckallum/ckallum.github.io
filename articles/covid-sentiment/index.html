@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="preload">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +18,7 @@
       font-display: block;
       src: url("../../assets/fonts/Newsreader.woff2") format("woff2");
     }
-    
+
     @font-face {
       font-family: "Newsreader";
       font-style: italic;
@@ -25,11 +26,26 @@
       font-display: block;
       src: url("../../assets/fonts/Newsreader-italic.woff2") format("woff2");
     }
+
+    .visualization-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
+    }
+
+    .chart-note {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
   </style>
   <script src="../../assets/js/darkmode.js" defer></script>
   <script src="../../assets/js/toc.js" defer></script>
   <script src="../../assets/js/footnotes.js" defer></script>
 </head>
+
 <body class="has-toc">
   <!-- Main content -->
   <div class="site-wrapper">
@@ -47,7 +63,8 @@
           </div>
           <!-- TOC Toggle Button -->
           <button id="tocToggle" aria-label="Toggle table of contents">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -56,7 +73,7 @@
         </div>
       </div>
     </header>
-    
+
     <!-- Table of Contents Container -->
     <div class="toc-container">
       <h2>Contents</h2>
@@ -64,20 +81,251 @@
         <!-- This will be populated by the toc.js script -->
       </ul>
     </div>
-    
+
     <div class="content-wrapper">
       <div class="content-container">
         <h1 id="introduction">Analysing Britain's Sentiment During COVID-19</h1>
-        
+
         <p class="author-date">March, 30 2025 Callum Ke</p>
-        
-        
-        <h2 id="race-goals">Summary</h2>
-        
-        <p><em>TODO</em></p>
+
+        <p>
+          During the pandemic, I found myself in a debate with a friend (I'll call him Bob) about
+          lockdown policies and how the general population in Britain would react. Bob and I particularly disagreed
+          on two points: first, whether public sentiment would vary based on region and/or country;
+          and second, whether people had become numb to or simply didn't care about the rising death counts across the
+          country.
+
+          I was positive on the former and negative on the latter.
+        </p>
+
+        <p>
+          Given my admitted boredom after submitting my thesis and wanting to prove a point.
+          It was only right to kill two birds with one stone by doing the thing. Did this end up taking a lot longer
+          than I
+          though? Yes. Did I learn something? I think so.
+          Was I right? Well let's not spoil that just yet.
+        </p>
+
+        <p>
+          Needless to say, please do take any conclusions I make with a heavy tablespoon of salt. Again,
+          this was to prove a point to my friend and not supposed to be submitted to a scientific journal.
+          You'll understand why below.
+        </p>
+        <h2>Getting good data is hard.</h2>
+        <p>
+          Okay we all understand the importance of data but boy did I not prepare myself how hard it was to actually
+          compile a
+          useful set of data and prepare it for analysis.
+        </p>
+
+        <p><strong>Twitter(now X)</strong>. What a pain. Good thing I found <a
+            href="https://github.com/JustAnotherArchivist/snscrape"> <em>snscrape</em></a>
+          to get around the rate limiting. I compiled two set of Tweet's(X's?) relating to COVID and lockdown, labelled
+          by geocode and date. Admittedly I could've
+          used this curated <a href="https://arxiv.org/abs/2004.03688">dataset by Panacea</a> but alas.
+        </p>
+
+        <p>
+          <strong>UK Geographic Data. </strong> Why is this so difficult to find a centralised source? I had
+          to use three different data sources(ONS, Met Office, City Population) all with different formats and for some
+          reason county definitions aren't consistent.
+        </p>
+
+        <p>
+          <strong>UK COVID Statistics. </strong> dot gov and Public Health Wales did it's job here. Thankfully we have
+          open repositories for COVID stats. I was looking for deaths and number of infections.
+          But Northern Ireland why didn't you have anything I could find?
+        </p>
+
+        <p>
+          <strong>Event's.</strong> Used the Guardian API. Prop's to them for maintaining it. Though admittedly the
+          outlet has a particular political leaning.
+        </p>
+
+        <h2>Evaluating sentiment is not an exact science.</h2>
+        <p> Honestly, I had no experience with NLP and never really had any interest in the field (note: this is
+          pre-ChatGPT and the LLM boom).
+          However, it was admittedly quite fun to experiment with various libraries and models. It was also ammusing to
+          see the
+          differences between them. Nothing better than finding correlation's you didn't predict.
+        </p>
+
+        <p>
+          I used the following sentiment analysis methods.
+        <ul>
+          <li><strong>Vader:</strong> rule-based model, small dictionary size(missing = neutral sentiment) but does
+            allow for emoji's, acronyms and slang which is particularly useful for the British lexicon and Tweets.</li>
+          <li><strong>LSTM:</strong> deep-learning based model using a RNN and a standard soft-max activation function.
+          </li>
+          <li><strong>TextBlob:</strong> simple model, similar to Vader but doesn't work for the social-media lingo.
+          </li>
+          <li><strong>Naive Bayes:</strong> probablistic model as you can guess by the name. Assume's the position of
+            the word is irrelevant/independent of it's effect.</li>
+        </ul>
+        </p>
+
+        <p>
+          Here's a quick comparison of how they compared over both Tweet data-sets. Note: I normalised the sentiment
+          values across
+          models for better comparison.
+        </p>
+
+
+        <div class="visualization-container">
+          <img src="./images/covid-sentiment-models.png" alt="NLP Model Comparison - Covid Dataset">
+          <p class="chart-note"> [COVID-19 Dataset]</p>
+        </div>
+
+        <p>
+        <p>
+          Interestingly the peaks and trough's are pretty consistent between models and the sentiment
+          is mostly positive between models. Naive-Bayes is perhaps overly optimistic?</p>
+
+        <div class="visualization-container">
+          <img src="./images/lockdown-sentiment-models.png" alt="NLP Model Comparison - Lockdown Dataset">
+          <p class="chart-note"> [Lockdown Dataset]</p>
+        </div>
+
+        <p>
+          Unsuprisingly the sentiment of
+          lock-down trends down over time.
+        </p>
+
+        <h2>Who was right?</h2>
+
+        <h3>Regional Sentiment Variations</h3>
+        <p>
+          One clear trend is that Scotland’s sentiment is almost
+          always below England and Wales. My hypothesis was that
+          stricter and more prolonged
+          periods of lockdown endured in Scotland would result in suppresion
+          of the populations mood over time. If you didn't know Scotland and England
+          have separate parliaments(as do the other devolved nations) but the animosity
+          between these two countries are particularly harsh.
+
+          I also had a sneaky suspicion that
+          the Scottish population were less likely to be happy with Boris Johnson due to
+          the political climate (Brexit, Indepedence etc). Callum 1-0 Bob
+        <div class="visualization-container">
+          <img src="./images/country-sentiment-chart.png" alt="">
+          <p class="chart-note">Naive-Bayes: Sentiment across countries 2020-2021</p>
+        </div>
+
+        <p>
+          Ayrshire and Fife were the grumpiest counties. As an "Auld Reekie"
+          i.e. someone from Edinburgh (<em>translation: Old Stinky due to the fumes in the
+            Old Town back way before I was born</em>), I find it funny that our neighbours are
+          so vocally angry on Twitter. Though I guess this doesn't differ much from their day-to-day attitude.
+
+        </p>
+        <div class="visualization-container">
+          <img src="./images/sentiment-table-county.png" alt="">
+          <p class="chart-note">Naive-Bayes: Happiest and saddest counties</p>
+        </div>
+
+        </p>
+
+        <h3>Numb-ness to Deaths and Infections</h3>
+
+        <p>
+          Sticking with Scotland, though the trends are broadly the same across England,
+          Wales and Northern Ireland, you may observe some clear patterns. At the start of June,
+          COVID deaths had decreased by 75% from the previous peak in April. This coincided
+          with the beginnings of an upward trend in how the public were feeling. Throughout June
+          and July, sentiment remained above average. Brit's do love their time in the sun after all.
+        </p>
+
+        <div class="visualization-container">
+          <img src="./images/covid-sentiment-rates-england.png">
+          <p class="chart-note">[Naive Bayes] Sentiment vs COVID infection and death rates.</p>
+        </div>
+
+        <p>
+          However, through August, sentiment began to decrease substantially, reaching its lowest point
+          since May 30th. The correlation between public sentiment and pandemic-related
+          deaths and cases is strong between January and February. During these months, sentiment remained
+          low as COVID deaths reached an all-time high. This peak in deaths corresponded with the lowest sentiment
+          recorded since November. By the end of February, as COVID deaths decreased by 60% from their all-time high,
+          sentiment began to recover.
+        </p>
+
+        <p>
+          Callum 2-0 Bob.
+        </p>
+
+
+        <h2>So what [else] do you know now?</h2>
+        <p>If you didn't get the "You're Dead to Me" reference then we probably can't be friends, I'm sorry.</p>
+
+
+        <div class="visualization-container">
+          <img src="./images/sentiment-table-overall.png" alt="">
+          <p class="chart-note">Statistic Overview</p>
+        </div>
+
+
+        <p>
+          Making use of Guardian's News API, we can figure out why certain
+          dates stood out.
+          The day with the lowest lockdown sentiment was the 3rd
+          of January 2021. This is also the day
+          Boris Johnson announced that coronavirus restrictions would
+          likely get tougher.
+        </p>
+
+        <div class="visualization-container">
+          <img src="./images/lockdown-sentiment-rates-england.png">
+          <p class="chart-note">[England, Naive-Bayes] Lockdown Sentiment versus Covid Rates</p>
+        </div>
+
+        <p>
+          The day with the highest Covid sentiment across the UK
+          was the 21st of March 2020. Again the Prime Minister Boris Johnson
+          announced the people of the UK can ’turn the tide of coronavirus’ within 12 weeks.</p>
+
+        <div class="visualization-container">
+          <img src="./images/covid-sentiment-rates-england.png">
+          <p class="chart-note">[England, Naive-Bayes] COVID Sentiment versus Covid Rates</p>
+        </div>
+
+        <p>
+          On the 3rd of October, Dominic Raab announced that he
+          feared Boris Johnson might die when he was taken into
+          intensive care. Though I was half expecting Scotland to rejoice. But alas.
+          The next day would only worsen: Scotland’s COVID cases doubling in a
+          week; the Prime Minister saying the road to Christmas will
+          be ’bumpy’; Conservative members turn on Boris Johnson
+          over the handling of the pandemic and a document
+          revealing plans for different local lockdown tiers is leaked.
+          Understandably, these events caused the lowest recorded
+          sentiment for the whole of the UK on the 4th of October.
+          Not great.
+        </p>
+
+        <h2>Fini</h2>
+        <p>I may as well give you this graph given that Vader enables the functionality. I'll leave it up-to you for
+          interpretation.
+        <div class="visualization-container">
+          <img src="./images/emoji-graph.png" alt="Emoji Sentiment">
+        </div>
+
+        Oh and here's a word-cloud for fun.
+
+        <div class="visualization-container">
+
+          <img src="./images/word-cloud.png" alt="Word Cloud">
+        </div>
+
+        <p>Enough rambling, have fun exploring the data <a
+            href="https://covid-sentiment-nlp-uk-7006b5c50b5e.herokuapp.com/"> <u><strong>here.</strong></u></a></p>
+
+        </p>
+
+
+
 
       </div>
-      
+
       <footer>
         <div class="back-to-top" id="back-to-top">Back to top ↑</div>
         <div class="privacy-policy-link">
@@ -87,4 +335,5 @@
     </div>
   </div>
 </body>
+
 </html>
