@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="preload">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="../../assets/css/home.css">
-  
-  <style>  
+
+  <style>
     /* Font's */
     @font-face {
       font-family: "Newsreader";
@@ -18,7 +19,7 @@
       font-display: block;
       src: url("../../assets/fonts/Newsreader.woff2") format("woff2");
     }
-    
+
     @font-face {
       font-family: "Newsreader";
       font-style: italic;
@@ -27,80 +28,84 @@
       src: url("../../assets/fonts/Newsreader-italic.woff2") format("woff2");
     }
 
-        /* Main Content */
+    /* Main Content */
     .content-wrapper {
       max-width: var(--content-max-width);
       margin: 2rem auto;
       padding: 0 1rem;
     }
-    
+
     section {
       margin-bottom: var(--section-spacing);
     }
-    
+
     h2 {
       font-size: 1.8rem;
       font-weight: 600;
       margin-bottom: 1rem;
     }
-    
+
     h3 {
       font-size: 1.4rem;
       font-weight: 600;
       margin-bottom: 0.75rem;
       margin-top: 1.5rem;
     }
-    
+
     p {
       margin-bottom: 1rem;
     }
-    
+
     a {
       color: var(--link-color);
       text-decoration: underline;
       text-underline-offset: 2px;
       text-decoration-thickness: 1px;
     }
-    
+
     a:hover {
       text-decoration-thickness: 2px;
     }
-    
+
     ul {
       list-style-type: none;
       padding-left: 0;
     }
-    
+
     li {
       margin-bottom: 0.75rem;
     }
 
-    .article-list li, .project-list li {
+    .article-list li,
+    .project-list li {
       margin-bottom: 1.5rem;
     }
-    
-    .article-title, .project-title {
+
+    .article-title,
+    .project-title {
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 0.25rem;
     }
-    
-    .article-date, .project-date {
+
+    .article-date,
+    .project-date {
       font-size: 0.9rem;
       color: #767676;
       margin-bottom: 0.25rem;
     }
-    
-    .article-excerpt, .project-description {
+
+    .article-excerpt,
+    .project-description {
       margin-bottom: 0.5rem;
     }
-    
+
     .social-links {
       display: flex;
       gap: 1rem;
       margin-top: 1rem;
     }
-    
+
     .social-links a {
       color: var(--text-color);
       font-size: 1.5rem;
@@ -110,6 +115,7 @@
   <script src="assets/js/darkmode.js" defer></script>
   <script src="assets/js/footnotes.js" defer></script>
 </head>
+
 <body>
   <header>
     <div>
@@ -127,11 +133,12 @@
 
   <main class="content-wrapper">
     <section>
-      <p>I am currently a Software Development Engineer at Amazon. I have broad interests in adversarial environments, distributed systems, interpreting and building fair AI models.</p>
+      <p>I am currently a Software Development Engineer at Amazon. I have broad interests in adversarial environments,
+        distributed systems, interpreting and building fair AI models.</p>
       <p>I studied Computer Science at the University of Bristol, achieving First Class Honours.</p>
       <p>When I'm not coding, you can find me reading, running, and eating. But mostly running.</p>
     </section>
-    
+
     <section>
       <h3>Articles</h3>
       <ul class="article-list">
@@ -147,22 +154,26 @@
             <a href="articles/broad-ai-trends-of-2025/">Broad AI Trends of 2025</a>
           </div>
           <div class="article-date">March 15, 2025</div>
-          <div class="article-excerpt">An analysis of investment trends, technological breakthroughs, and market dynamics in the artificial intelligence sector.</div>
+          <div class="article-excerpt">An analysis of investment trends, technological breakthroughs, and market
+            dynamics in the artificial intelligence sector.</div>
+        </li>
+        <li>
+          <div class="article-title">
+            <a href="articles/covid-sentiment/"><em>Analysing Britain's Sentiment Trends During COVID</em></a>
+          </div>
+          <div class="article-date">March 31, 2025</div>
+          <div class="article-excerpt">Can we understand how Britain is feeling during Covid using Tweet's?</div>
         </li>
       </ul>
     </section>
-    
+
     <section>
-      <h3>Projects</h3>
+      <h3>In-progress</h3>
       <ul class="project-list">
         <li>
           <div class="project-title">
-            <a href="articles/covid-sentiment/"><em>Analysing Britain's Sentiment Trends During COVID</em></a></div>
-          <div class="project-description">Can we understand how Britain is feeling during Covid using Tweet's?</div>
-        </li>
-        <li>
-          <div class="project-title">
-            <a href="articles/dimanche/"><em>Dimanche</em></a></div>
+            <a href="articles/dimanche/"><em>Dimanche</em></a>
+          </div>
           <div class="project-description">Open on Sundays, open for all.</div>
         </li>
       </ul>
@@ -188,29 +199,31 @@
         </li>
       </ul>
     </section>
-    
+
     <section>
       <h3>Connect</h3>
       Pretty much @ckallum everywhere.
-      <a href="https://github.com/ckallum/ckallum.github.io/blob/cadd70df4833722b03eb4e320f6538e14f785be0/resources/cv/cv.pdf"> Curriculum Vitae </a>
+      <a
+        href="https://github.com/ckallum/ckallum.github.io/blob/cadd70df4833722b03eb4e320f6538e14f785be0/resources/cv/cv.pdf">
+        Curriculum Vitae </a>
     </section>
   </main>
 
   <script>
     // Initialize dark mode from localStorage
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const darkModeToggle = document.getElementById('darkModeToggle');
       if (!darkModeToggle) return;
-      
+
       // Apply saved preference
       const savedDarkMode = localStorage.getItem('darkMode');
       if (savedDarkMode === 'enabled') {
         document.documentElement.classList.add('dark-mode');
         darkModeToggle.checked = true;
       }
-      
+
       // Toggle dark mode
-      darkModeToggle.addEventListener('change', function() {
+      darkModeToggle.addEventListener('change', function () {
         if (this.checked) {
           document.documentElement.classList.add('dark-mode');
           localStorage.setItem('darkMode', 'enabled');
@@ -219,7 +232,7 @@
           localStorage.setItem('darkMode', 'disabled');
         }
       });
-      
+
       // Remove preload class to enable animations
       requestAnimationFrame(() => {
         document.documentElement.classList.remove('preload');
@@ -227,4 +240,5 @@
     });
   </script>
 </body>
+
 </html>
