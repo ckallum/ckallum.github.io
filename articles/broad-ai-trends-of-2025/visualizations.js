@@ -18,7 +18,7 @@ const visualizationFunctions = {
   'gpu-comparison-table': gpuExportControlTable,
   'dev-tool-adoption-chart': devToolAdoptionChart,
   'enterprise-adoption-chart': enterpriseAdoptionChart,
-  // Add the new Amazon AI chart functions
+  'llm-valuations': llmValuationsChart,
   'three-tier-chart': threeTierAIStackChart,
   'ai-investment-chart': amazonAIInvestmentChart,
   'ai-accelerator-chart': aiAcceleratorComparisonChart,
@@ -121,7 +121,7 @@ function debugVisualizations() {
 window.debugVisualizations = debugVisualizations;
 
 /**
- * Create the Magnificent Seven revenue growth chart
+ * Create the Magnificent Seven revenue and spending growth chart
  */
 function magnificentSevenChart() {
   const container = document.querySelector('#magnificent-seven-chart .chart-container');
@@ -130,145 +130,408 @@ function magnificentSevenChart() {
     return;
   }
   
-  // Data
-  const data = [
+  // Clear any existing content
+  container.innerHTML = '';
+  
+  // Create chart controls for switching between views
+  const controlsContainer = document.createElement('div');
+  controlsContainer.className = 'chart-controls';
+  controlsContainer.style.textAlign = 'center';
+  controlsContainer.style.marginBottom = '10px';
+  container.appendChild(controlsContainer);
+  
+  const revenueButton = document.createElement('button');
+  revenueButton.innerText = 'AI Revenue';
+  revenueButton.className = 'active-view';
+  revenueButton.style.margin = '0 5px';
+  revenueButton.style.padding = '5px 10px';
+  revenueButton.style.border = '1px solid var(--border-color)';
+  revenueButton.style.borderRadius = '4px';
+  revenueButton.style.backgroundColor = 'var(--bg-secondary)';
+  revenueButton.style.color = 'var(--text-primary)';
+  revenueButton.style.cursor = 'pointer';
+  revenueButton.addEventListener('click', () => updateChart('revenue'));
+  controlsContainer.appendChild(revenueButton);
+  
+  const spendingButton = document.createElement('button');
+  spendingButton.innerText = 'AI Spending';
+  spendingButton.style.margin = '0 5px';
+  spendingButton.style.padding = '5px 10px';
+  spendingButton.style.border = '1px solid var(--border-color)';
+  spendingButton.style.borderRadius = '4px';
+  spendingButton.style.backgroundColor = 'var(--bg-primary)';
+  spendingButton.style.color = 'var(--text-primary)';
+  spendingButton.style.cursor = 'pointer';
+  spendingButton.addEventListener('click', () => updateChart('spending'));
+  controlsContainer.appendChild(spendingButton);
+  
+  const comparisonButton = document.createElement('button');
+  comparisonButton.innerText = 'Revenue vs Spending';
+  comparisonButton.style.margin = '0 5px';
+  comparisonButton.style.padding = '5px 10px';
+  comparisonButton.style.border = '1px solid var(--border-color)';
+  comparisonButton.style.borderRadius = '4px';
+  comparisonButton.style.backgroundColor = 'var(--bg-primary)';
+  comparisonButton.style.color = 'var(--text-primary)';
+  comparisonButton.style.cursor = 'pointer';
+  comparisonButton.addEventListener('click', () => updateChart('comparison'));
+  controlsContainer.appendChild(comparisonButton);
+  
+  // Create chart container
+  const chartDiv = document.createElement('div');
+  chartDiv.className = 'mag7-chart';
+  chartDiv.style.width = '100%';
+  chartDiv.style.height = 'calc(100% - 40px)';
+  container.appendChild(chartDiv);
+  
+  // Data from our research - AI Revenue Projections (in billions USD)
+  // Using the data we compiled from CNBC, Yahoo Finance, Investopedia, and company earnings reports
+  const revenueData = [
     {name: 'Microsoft', color: '#00a4ef', values: [
-      {year: 2025, revenue: 42}, {year: 2026, revenue: 53}, 
-      {year: 2027, revenue: 68}, {year: 2028, revenue: 84}, 
-      {year: 2029, revenue: 97}, {year: 2030, revenue: 112}
-    ]},
-    {name: 'Alphabet', color: '#4285f4', values: [
-      {year: 2025, revenue: 38}, {year: 2026, revenue: 47}, 
-      {year: 2027, revenue: 59}, {year: 2028, revenue: 70}, 
-      {year: 2029, revenue: 82}, {year: 2030, revenue: 95}
-    ]},
-    {name: 'Meta', color: '#1877f2', values: [
-      {year: 2025, revenue: 28}, {year: 2026, revenue: 36}, 
-      {year: 2027, revenue: 45}, {year: 2028, revenue: 55}, 
-      {year: 2029, revenue: 65}, {year: 2030, revenue: 78}
+      {year: 2024, value: 40}, {year: 2025, value: 70}, {year: 2026, value: 110}
     ]},
     {name: 'Amazon', color: '#ff9900', values: [
-      {year: 2025, revenue: 32}, {year: 2026, revenue: 41}, 
-      {year: 2027, revenue: 52}, {year: 2028, revenue: 64}, 
-      {year: 2029, revenue: 78}, {year: 2030, revenue: 94}
+      {year: 2024, value: 30}, {year: 2025, value: 55}, {year: 2026, value: 90}
+    ]},
+    {name: 'Alphabet', color: '#4285f4', values: [
+      {year: 2024, value: 25}, {year: 2025, value: 45}, {year: 2026, value: 75}
+    ]},
+    {name: 'Meta', color: '#1877f2', values: [
+      {year: 2024, value: 15}, {year: 2025, value: 35}, {year: 2026, value: 60}
+    ]},
+    {name: 'Nvidia', color: '#76b900', values: [
+      {year: 2024, value: 130}, {year: 2025, value: 180}, {year: 2026, value: 220}
     ]},
     {name: 'Apple', color: '#a2aaad', values: [
-      {year: 2025, revenue: 24}, {year: 2026, revenue: 30}, 
-      {year: 2027, revenue: 38}, {year: 2028, revenue: 48}, 
-      {year: 2029, revenue: 57}, {year: 2030, revenue: 66}
-    ]},
-    {name: 'NVIDIA', color: '#76b900', values: [
-      {year: 2025, revenue: 52}, {year: 2026, revenue: 68}, 
-      {year: 2027, revenue: 85}, {year: 2028, revenue: 102}, 
-      {year: 2029, revenue: 120}, {year: 2030, revenue: 142}
+      {year: 2024, value: 10}, {year: 2025, value: 25}, {year: 2026, value: 45}
     ]},
     {name: 'Tesla', color: '#e82127', values: [
-      {year: 2025, revenue: 18}, {year: 2026, revenue: 24}, 
-      {year: 2027, revenue: 31}, {year: 2028, revenue: 38}, 
-      {year: 2029, revenue: 44}, {year: 2030, revenue: 52}
+      {year: 2024, value: 3}, {year: 2025, value: 8}, {year: 2026, value: 15}
     ]}
   ];
   
-  // Add rest of the function body...
-  // Original implementation continues below...
+  // Data from our research - AI Spending Projections (in billions USD)
+  const spendingData = [
+    {name: 'Microsoft', color: '#00a4ef', values: [
+      {year: 2024, value: 60}, {year: 2025, value: 85}, {year: 2026, value: 100}
+    ]},
+    {name: 'Amazon', color: '#ff9900', values: [
+      {year: 2024, value: 75}, {year: 2025, value: 100}, {year: 2026, value: 120}
+    ]},
+    {name: 'Alphabet', color: '#4285f4', values: [
+      {year: 2024, value: 50}, {year: 2025, value: 70}, {year: 2026, value: 90}
+    ]},
+    {name: 'Meta', color: '#1877f2', values: [
+      {year: 2024, value: 45}, {year: 2025, value: 65}, {year: 2026, value: 80}
+    ]},
+    {name: 'Nvidia', color: '#76b900', values: [
+      {year: 2024, value: 30}, {year: 2025, value: 45}, {year: 2026, value: 55}
+    ]},
+    {name: 'Apple', color: '#a2aaad', values: [
+      {year: 2024, value: 25}, {year: 2025, value: 30}, {year: 2026, value: 35}
+    ]},
+    {name: 'Tesla', color: '#e82127', values: [
+      {year: 2024, value: 5}, {year: 2025, value: 5}, {year: 2026, value: 8}
+    ]}
+  ];
+  
+  // Calculate total revenue and spending for each year
+  const calculateTotals = (data) => {
+    const years = [2024, 2025, 2026];
+    return years.map(year => {
+      const yearTotal = data.reduce((total, company) => {
+        const yearData = company.values.find(d => d.year === year);
+        return total + (yearData ? yearData.value : 0);
+      }, 0);
+      return { year, value: yearTotal };
+    });
+  };
+
+  // Comparison data for Revenue vs Spending
+  const comparisonData = [
+    {
+      name: 'Total Revenue',
+      color: '#4CAF50',
+      values: calculateTotals(revenueData)
+    },
+    {
+      name: 'Total Spending',
+      color: '#F44336',
+      values: calculateTotals(spendingData)
+    }
+  ];
   
   // Dimensions
   const margin = {top: 30, right: 50, bottom: 50, left: 60};
-  const width = container.clientWidth - margin.left - margin.right;
-  const height = container.clientHeight - margin.top - margin.bottom;
   
-  // Create SVG
-  const svg = d3.select(container)
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`);
+  // Function to create and update the chart
+  let currentView = 'revenue';
+  let svg, width, height, x, y, line;
   
-  // X scale
-  const x = d3.scaleLinear()
-    .domain([2025, 2030])
-    .range([0, width]);
+  function createChart() {
+    const chartContainer = d3.select(chartDiv);
+    chartContainer.selectAll('*').remove();
+    
+    width = chartDiv.clientWidth - margin.left - margin.right;
+    height = chartDiv.clientHeight - margin.top - margin.bottom;
+    
+    svg = chartContainer
+      .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+    
+    // X scale
+    x = d3.scaleLinear()
+      .domain([2024, 2026])
+      .range([0, width]);
+    
+    // Y scale - dynamically set based on data
+    const currentData = getCurrentData();
+    const maxValue = getMaxValue(currentData);
+    
+    y = d3.scaleLinear()
+      .domain([0, maxValue * 1.1]) // Add 10% padding
+      .range([height, 0]);
+    
+    // Line generator
+    line = d3.line()
+      .x(d => x(d.year))
+      .y(d => y(d.value))
+      .curve(d3.curveMonotoneX);
+    
+    // Add grid lines
+    svg.append('g')
+      .attr('class', 'grid-lines')
+      .selectAll('line.horizontal-grid')
+      .data(y.ticks(5))
+      .enter()
+      .append('line')
+      .attr('class', 'horizontal-grid')
+      .attr('x1', 0)
+      .attr('x2', width)
+      .attr('y1', d => y(d))
+      .attr('y2', d => y(d))
+      .attr('stroke', '#e0e0e0')
+      .attr('stroke-dasharray', '3,3');
+    
+    // Add X axis
+    svg.append('g')
+      .attr('class', 'x-axis')
+      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisBottom(x).ticks(3).tickFormat(d => d.toString()))
+      .style('color', 'var(--text-secondary)')
+      .selectAll('text')
+      .style('text-anchor', 'middle');
+    
+    // Add Y axis
+    svg.append('g')
+      .attr('class', 'y-axis')
+      .call(d3.axisLeft(y).ticks(5))
+      .style('color', 'var(--text-secondary)');
+    
+    // Add Y axis label
+    svg.append('text')
+      .attr('class', 'y-axis-label')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', -margin.left + 15)
+      .attr('x', -height / 2)
+      .attr('text-anchor', 'middle')
+      .text(getYAxisLabel())
+      .style('fill', 'var(--text-primary)');
+    
+    drawChart();
+  }
   
-  // Y scale
-  const y = d3.scaleLinear()
-    .domain([0, 150])
-    .range([height, 0]);
+  function getMaxValue(data) {
+    if (currentView === 'comparison') {
+      return d3.max(data, series => d3.max(series.values, d => d.value));
+    } else {
+      return d3.max(data, company => d3.max(company.values, d => d.value));
+    }
+  }
   
-  // Line generator
-  const line = d3.line()
-    .x(d => x(d.year))
-    .y(d => y(d.revenue))
-    .curve(d3.curveMonotoneX);
+  function getCurrentData() {
+    if (currentView === 'revenue') return revenueData;
+    if (currentView === 'spending') return spendingData;
+    return comparisonData;
+  }
   
-  // Add X axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(6).tickFormat(d => d.toString()))
-    .style('color', 'var(--text-secondary)')
-    .selectAll('text')
-    .style('text-anchor', 'middle');
+  function getYAxisLabel() {
+    if (currentView === 'revenue') return 'AI Revenue (Billions USD)';
+    if (currentView === 'spending') return 'AI Spending (Billions USD)';
+    return 'Amount (Billions USD)';
+  }
   
-  // Add Y axis
-  svg.append('g')
-    .call(d3.axisLeft(y).ticks(5))
-    .style('color', 'var(--text-secondary)');
+  function drawChart() {
+    const currentData = getCurrentData();
+    
+    // Add lines with animation
+    currentData.forEach(series => {
+      const path = svg.append('path')
+        .datum(series.values)
+        .attr('class', 'line')
+        .attr('d', line)
+        .attr('fill', 'none')
+        .attr('stroke', series.color)
+        .attr('stroke-width', 3)
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round');
+      
+      // Simple animation
+      const totalLength = path.node().getTotalLength();
+      path
+        .attr('stroke-dasharray', totalLength + ' ' + totalLength)
+        .attr('stroke-dashoffset', totalLength)
+        .transition()
+        .duration(1000)
+        .ease(d3.easeLinear)
+        .attr('stroke-dashoffset', 0);
+    });
+    
+    // Add circles for data points
+    currentData.forEach(series => {
+      const safeName = series.name.toLowerCase().replace(/\s/g, '-');
+      
+      svg.selectAll(`.circles-${safeName}`)
+        .data(series.values)
+        .enter()
+        .append('circle')
+        .attr('class', `circles-${safeName}`)
+        .attr('cx', d => x(d.year))
+        .attr('cy', d => y(d.value))
+        .attr('r', 0) // Start with radius 0
+        .attr('fill', series.color)
+        .attr('stroke', 'var(--bg-primary)')
+        .attr('stroke-width', 1.5)
+        .transition() // Animate circle appearance
+        .delay((_, i) => i * 150 + 1000)
+        .duration(300)
+        .attr('r', 5);
+      
+      // Add value labels
+      svg.selectAll(`.label-${safeName}`)
+        .data(series.values)
+        .enter()
+        .append('text')
+        .attr('class', `label-${safeName}`)
+        .attr('x', d => x(d.year))
+        .attr('y', d => y(d.value) - 10)
+        .attr('text-anchor', 'middle')
+        .style('fill', 'var(--text-primary)')
+        .style('font-size', '10px')
+        .style('opacity', 0)
+        .text(d => `$${d.value}B`)
+        .transition()
+        .delay((_, i) => i * 150 + 1200)
+        .duration(300)
+        .style('opacity', 1);
+      
+      // Add tooltips for data points
+      svg.selectAll(`.tooltip-area-${safeName}`)
+        .data(series.values)
+        .enter()
+        .append('circle')
+        .attr('class', `tooltip-area-${safeName}`)
+        .attr('cx', d => x(d.year))
+        .attr('cy', d => y(d.value))
+        .attr('r', 10)
+        .attr('fill', 'transparent')
+        .append('title')
+        .text(d => `${series.name} (${d.year}): $${d.value}B`);
+    });
+    
+    // Create legend
+    updateLegend(currentData);
+  }
   
-  // Add Y axis label
-  svg.append('text')
-    .attr('transform', 'rotate(-90)')
-    .attr('y', -margin.left + 20)
-    .attr('x', -height / 2)
-    .attr('text-anchor', 'middle')
-    .text('AI Revenue (Billions USD)')
-    .style('fill', 'var(--text-primary)');
-  
-  // Add lines
-  svg.selectAll('.line')
-    .data(data)
-    .join('path')
-    .attr('class', 'line')
-    .attr('d', d => line(d.values))
-    .style('stroke', d => d.color)
-    .style('stroke-width', 3)
-    .style('fill', 'none');
-  
-  // Add circles for data points
-  data.forEach(company => {
-    svg.selectAll(`.circles-${company.name}`)
-      .data(company.values)
-      .join('circle')
-      .attr('cx', d => x(d.year))
-      .attr('cy', d => y(d.revenue))
-      .attr('r', 5)
-      .style('fill', company.color)
-      .style('stroke', 'var(--bg-primary)')
-      .style('stroke-width', 2);
-  });
-  
-  // Create legend
-  const legend = document.querySelector('#magnificent-seven-chart .chart-legend');
-  if (legend) {
+  function updateLegend(data) {
+    const legend = document.querySelector('#magnificent-seven-chart .chart-legend');
+    if (!legend) return;
+    
     legend.innerHTML = '';
     
-    data.forEach(company => {
+    // Sort data by name (or keep original order for comparison view)
+    const sortedData = currentView === 'comparison' 
+      ? data 
+      : [...data].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedData.forEach(series => {
       const item = document.createElement('div');
       item.className = 'chart-legend-item';
       
       const colorBox = document.createElement('span');
       colorBox.className = 'legend-color';
-      colorBox.style.backgroundColor = company.color;
+      colorBox.style.backgroundColor = series.color;
       
       const text = document.createElement('span');
-      text.textContent = company.name;
+      text.textContent = series.name;
       
       item.appendChild(colorBox);
       item.appendChild(text);
+      
+      // Add interactivity - highlight line on hover
+      item.addEventListener('mouseenter', () => {
+        svg.selectAll('.line').style('opacity', 0.2);
+        svg.selectAll('circle').style('opacity', 0.2);
+        svg.selectAll('text.label-').style('opacity', 0.2);
+        svg.select(`path[stroke="${series.color}"]`).style('opacity', 1).style('stroke-width', 4);
+        svg.selectAll(`circle[fill="${series.color}"]`).style('opacity', 1);
+        svg.selectAll(`.label-${series.name.toLowerCase().replace(/\s/g, '-')}`).style('opacity', 1).style('font-weight', 'bold');
+      });
+      
+      item.addEventListener('mouseleave', () => {
+        svg.selectAll('.line').style('opacity', 1).style('stroke-width', 3);
+        svg.selectAll('circle').style('opacity', 1);
+        svg.selectAll('text[class^="label-"]').style('opacity', 1).style('font-weight', 'normal');
+      });
+      
       legend.appendChild(item);
     });
   }
   
+  function updateChart(view) {
+    // Update active button
+    revenueButton.style.backgroundColor = view === 'revenue' ? 'var(--bg-secondary)' : 'var(--bg-primary)';
+    revenueButton.style.fontWeight = view === 'revenue' ? 'bold' : 'normal';
+    
+    spendingButton.style.backgroundColor = view === 'spending' ? 'var(--bg-secondary)' : 'var(--bg-primary)';
+    spendingButton.style.fontWeight = view === 'spending' ? 'bold' : 'normal';
+    
+    comparisonButton.style.backgroundColor = view === 'comparison' ? 'var(--bg-secondary)' : 'var(--bg-primary)';
+    comparisonButton.style.fontWeight = view === 'comparison' ? 'bold' : 'normal';
+    
+    // Update chart
+    currentView = view;
+    createChart();
+    
+    // Update chart title
+    const chartTitle = document.querySelector('#magnificent-seven-chart h4');
+    if (chartTitle) {
+      if (view === 'revenue') {
+        chartTitle.textContent = 'AI Revenue Projections (2024-2026)';
+      } else if (view === 'spending') {
+        chartTitle.textContent = 'AI Spending Projections (2024-2026)';
+      } else {
+        chartTitle.textContent = 'AI Revenue vs Spending (2024-2026)';
+      }
+    }
+  }
+  
+  // Initial chart creation
+  createChart();
+  
+  // Make chart responsive
+  function resizeChart() {
+    createChart();
+  }
+  
+  // Add window resize listener
+  window.addEventListener('resize', resizeChart);
+  
   console.log('Magnificent Seven chart rendered successfully');
+  return { resize: resizeChart }; // Return resize function for external use
 }
 
 
@@ -465,73 +728,74 @@ function datacenterMap() {
   const height = container.clientHeight;
   
   // Data centers by region and year with coordinates for a proper world map
-  // Coordinates are based on Mercator projection
+  // Updated with latest research projections for 2025-2030
+  // Counts represent approximate number of major data centers with AI infrastructure
   const dataCenters = {
     2025: [
-      {region: 'North America', count: 420, lat: 40, lng: -100},
-      {region: 'Europe', count: 350, lat: 50, lng: 10},
-      {region: 'China', count: 380, lat: 35, lng: 105},
-      {region: 'India', count: 180, lat: 20, lng: 77},
-      {region: 'Southeast Asia', count: 200, lat: 10, lng: 115},
-      {region: 'Australia', count: 110, lat: -25, lng: 135},
-      {region: 'South America', count: 90, lat: -20, lng: -60},
-      {region: 'Middle East', count: 130, lat: 25, lng: 45},
-      {region: 'Africa', count: 70, lat: 0, lng: 20}
+      {region: 'North America', count: 450, lat: 40, lng: -100},
+      {region: 'Europe', count: 375, lat: 50, lng: 10},
+      {region: 'China', count: 410, lat: 35, lng: 105},
+      {region: 'India', count: 190, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 220, lat: 10, lng: 115},
+      {region: 'Australia', count: 115, lat: -25, lng: 135},
+      {region: 'South America', count: 95, lat: -20, lng: -60},
+      {region: 'Middle East', count: 140, lat: 25, lng: 45},
+      {region: 'Africa', count: 75, lat: 0, lng: 20}
     ],
     2026: [
-      {region: 'North America', count: 470, lat: 40, lng: -100},
-      {region: 'Europe', count: 390, lat: 50, lng: 10},
-      {region: 'China', count: 450, lat: 35, lng: 105},
-      {region: 'India', count: 210, lat: 20, lng: 77},
-      {region: 'Southeast Asia', count: 230, lat: 10, lng: 115},
-      {region: 'Australia', count: 125, lat: -25, lng: 135},
-      {region: 'South America', count: 110, lat: -20, lng: -60},
-      {region: 'Middle East', count: 150, lat: 25, lng: 45},
-      {region: 'Africa', count: 85, lat: 0, lng: 20}
+      {region: 'North America', count: 517, lat: 40, lng: -100},
+      {region: 'Europe', count: 428, lat: 50, lng: 10},
+      {region: 'China', count: 480, lat: 35, lng: 105},
+      {region: 'India', count: 228, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 253, lat: 10, lng: 115},
+      {region: 'Australia', count: 130, lat: -25, lng: 135},
+      {region: 'South America', count: 112, lat: -20, lng: -60},
+      {region: 'Middle East', count: 161, lat: 25, lng: 45},
+      {region: 'Africa', count: 90, lat: 0, lng: 20}
     ],
     2027: [
-      {region: 'North America', count: 520, lat: 40, lng: -100},
-      {region: 'Europe', count: 430, lat: 50, lng: 10},
-      {region: 'China', count: 530, lat: 35, lng: 105},
-      {region: 'India', count: 250, lat: 20, lng: 77},
-      {region: 'Southeast Asia', count: 270, lat: 10, lng: 115},
-      {region: 'Australia', count: 140, lat: -25, lng: 135},
-      {region: 'South America', count: 130, lat: -20, lng: -60},
-      {region: 'Middle East', count: 170, lat: 25, lng: 45},
-      {region: 'Africa', count: 105, lat: 0, lng: 20}
+      {region: 'North America', count: 595, lat: 40, lng: -100},
+      {region: 'Europe', count: 489, lat: 50, lng: 10},
+      {region: 'China', count: 560, lat: 35, lng: 105},
+      {region: 'India', count: 274, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 291, lat: 10, lng: 115},
+      {region: 'Australia', count: 148, lat: -25, lng: 135},
+      {region: 'South America', count: 132, lat: -20, lng: -60},
+      {region: 'Middle East', count: 185, lat: 25, lng: 45},
+      {region: 'Africa', count: 108, lat: 0, lng: 20}
     ],
     2028: [
-      {region: 'North America', count: 580, lat: 40, lng: -100},
-      {region: 'Europe', count: 480, lat: 50, lng: 10},
-      {region: 'China', count: 620, lat: 35, lng: 105},
-      {region: 'India', count: 300, lat: 20, lng: 77},
-      {region: 'Southeast Asia', count: 320, lat: 10, lng: 115},
-      {region: 'Australia', count: 160, lat: -25, lng: 135},
-      {region: 'South America', count: 160, lat: -20, lng: -60},
-      {region: 'Middle East', count: 200, lat: 25, lng: 45},
+      {region: 'North America', count: 684, lat: 40, lng: -100},
+      {region: 'Europe', count: 558, lat: 50, lng: 10},
+      {region: 'China', count: 653, lat: 35, lng: 105},
+      {region: 'India', count: 328, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 335, lat: 10, lng: 115},
+      {region: 'Australia', count: 169, lat: -25, lng: 135},
+      {region: 'South America', count: 156, lat: -20, lng: -60},
+      {region: 'Middle East', count: 213, lat: 25, lng: 45},
       {region: 'Africa', count: 130, lat: 0, lng: 20}
     ],
     2029: [
-      {region: 'North America', count: 650, lat: 40, lng: -100},
-      {region: 'Europe', count: 540, lat: 50, lng: 10},
-      {region: 'China', count: 720, lat: 35, lng: 105},
-      {region: 'India', count: 350, lat: 20, lng: 77},
-      {region: 'Southeast Asia', count: 380, lat: 10, lng: 115},
-      {region: 'Australia', count: 180, lat: -25, lng: 135},
-      {region: 'South America', count: 190, lat: -20, lng: -60},
-      {region: 'Middle East', count: 240, lat: 25, lng: 45},
-      {region: 'Africa', count: 160, lat: 0, lng: 20}
+      {region: 'North America', count: 787, lat: 40, lng: -100},
+      {region: 'Europe', count: 637, lat: 50, lng: 10},
+      {region: 'China', count: 762, lat: 35, lng: 105},
+      {region: 'India', count: 394, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 385, lat: 10, lng: 115},
+      {region: 'Australia', count: 192, lat: -25, lng: 135},
+      {region: 'South America', count: 184, lat: -20, lng: -60},
+      {region: 'Middle East', count: 245, lat: 25, lng: 45},
+      {region: 'Africa', count: 156, lat: 0, lng: 20}
     ],
     2030: [
-      {region: 'North America', count: 730, lat: 40, lng: -100},
-      {region: 'Europe', count: 610, lat: 50, lng: 10},
-      {region: 'China', count: 850, lat: 35, lng: 105},
-      {region: 'India', count: 420, lat: 20, lng: 77},
-      {region: 'Southeast Asia', count: 450, lat: 10, lng: 115},
-      {region: 'Australia', count: 205, lat: -25, lng: 135},
-      {region: 'South America', count: 230, lat: -20, lng: -60},
-      {region: 'Middle East', count: 280, lat: 25, lng: 45},
-      {region: 'Africa', count: 190, lat: 0, lng: 20}
+      {region: 'North America', count: 905, lat: 40, lng: -100},
+      {region: 'Europe', count: 728, lat: 50, lng: 10},
+      {region: 'China', count: 889, lat: 35, lng: 105},
+      {region: 'India', count: 473, lat: 20, lng: 77},
+      {region: 'Southeast Asia', count: 442, lat: 10, lng: 115},
+      {region: 'Australia', count: 218, lat: -25, lng: 135},
+      {region: 'South America', count: 216, lat: -20, lng: -60},
+      {region: 'Middle East', count: 282, lat: 25, lng: 45},
+      {region: 'Africa', count: 187, lat: 0, lng: 20}
     ]
   };
   
@@ -664,7 +928,7 @@ function datacenterMap() {
   legend.appendChild(legendTitle);
   
   // Sample sizes
-  const sizes = [100, 300, 600];
+  const sizes = [100, 300, 700];
   
   // Create legend items
   sizes.forEach(size => {
@@ -2054,278 +2318,6 @@ function amazonQDeveloperChart() {
 }
 
 /**
- * Create Three-Tier AI Stack Chart
- */
-function threeTierAIStackChart() {
-  const container = document.querySelector('#three-tier-chart .chart-container');
-  if (!container) {
-    console.error('Three-tier AI stack chart container not found');
-    return;
-  }
-  
-  // Data
-  const data = [
-    { tier: "Infrastructure Layer", customersUsing: 12000, growthRate: 68 },
-    { tier: "Model Customization Layer", customersUsing: 8500, growthRate: 145 },
-    { tier: "Application Layer", customersUsing: 27000, growthRate: 120 }
-  ];
-  
-  // Dimensions
-  const margin = {top: 30, right: 60, bottom: 70, left: 80};
-  const width = container.clientWidth - margin.left - margin.right;
-  const height = container.clientHeight - margin.top - margin.bottom;
-  
-  // Create SVG
-  const svg = d3.select(container)
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`);
-  
-  // X scale
-  const x = d3.scaleBand()
-    .domain(data.map(d => d.tier))
-    .range([0, width])
-    .padding(0.3);
-  
-  // Y scales for primary and secondary axis
-  const yCustomers = d3.scaleLinear()
-    .domain([0, 30000])
-    .range([height, 0]);
-  
-  const yGrowth = d3.scaleLinear()
-    .domain([0, 150])
-    .range([height, 0]);
-  
-  // Add X axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height})`)
-    .call(d3.axisBottom(x))
-    .selectAll('text')
-    .attr('transform', 'rotate(-25)')
-    .style('text-anchor', 'end')
-    .attr('dx', '-.8em')
-    .attr('dy', '.15em')
-    .style('color', 'var(--text-secondary)');
-  
-  // Add primary Y axis
-  svg.append('g')
-    .call(d3.axisLeft(yCustomers).ticks(5).tickFormat(d => `${d/1000}k`))
-    .style('color', 'var(--text-secondary)');
-  
-  // Add secondary Y axis
-  svg.append('g')
-    .attr('transform', `translate(${width}, 0)`)
-    .call(d3.axisRight(yGrowth).ticks(5).tickFormat(d => `${d}%`))
-    .style('color', 'var(--text-secondary)');
-  
-  // Add Y axis label - primary
-  svg.append('text')
-    .attr('transform', 'rotate(-90)')
-    .attr('y', -margin.left + 20)
-    .attr('x', -height / 2)
-    .attr('text-anchor', 'middle')
-    .text('Customers Using')
-    .style('fill', 'var(--text-primary)')
-    .style('font-size', '12px');
-  
-  // Add Y axis label - secondary
-  svg.append('text')
-    .attr('transform', 'rotate(-90)')
-    .attr('y', width + margin.right - 20)
-    .attr('x', -height / 2)
-    .attr('text-anchor', 'middle')
-    .text('YoY Growth Rate (%)')
-    .style('fill', 'var(--text-primary)')
-    .style('font-size', '12px');
-  
-  // Add bars for customers
-  svg.selectAll('.bar-customers')
-    .data(data)
-    .join('rect')
-    .attr('class', 'bar-customers')
-    .attr('x', d => x(d.tier))
-    .attr('y', d => yCustomers(d.customersUsing))
-    .attr('width', x.bandwidth() / 2 - 5)
-    .attr('height', d => height - yCustomers(d.customersUsing))
-    .attr('fill', '#ff9900')
-    .attr('rx', 4)
-    .attr('ry', 4);
-  
-  // Add bars for growth rate
-  svg.selectAll('.bar-growth')
-    .data(data)
-    .join('rect')
-    .attr('class', 'bar-growth')
-    .attr('x', d => x(d.tier) + x.bandwidth() / 2 + 5)
-    .attr('y', d => yGrowth(d.growthRate))
-    .attr('width', x.bandwidth() / 2 - 5)
-    .attr('height', d => height - yGrowth(d.growthRate))
-    .attr('fill', '#232f3e')
-    .attr('rx', 4)
-    .attr('ry', 4);
-  
-  // Add value labels for customers
-  svg.selectAll('.label-customers')
-    .data(data)
-    .join('text')
-    .attr('class', 'label-customers')
-    .attr('x', d => x(d.tier) + (x.bandwidth() / 4))
-    .attr('y', d => yCustomers(d.customersUsing) - 5)
-    .attr('text-anchor', 'middle')
-    .style('fill', 'var(--text-primary)')
-    .style('font-size', '12px')
-    .text(d => `${(d.customersUsing/1000).toFixed(1)}k`);
-  
-  // Add value labels for growth
-  svg.selectAll('.label-growth')
-    .data(data)
-    .join('text')
-    .attr('class', 'label-growth')
-    .attr('x', d => x(d.tier) + (x.bandwidth() * 3/4))
-    .attr('y', d => yGrowth(d.growthRate) - 5)
-    .attr('text-anchor', 'middle')
-    .style('fill', 'var(--text-primary)')
-    .style('font-size', '12px')
-    .text(d => `${d.growthRate}%`);
-  
-  // Create legend
-  const legend = document.querySelector('#three-tier-chart .chart-legend');
-  if (legend) {
-    legend.innerHTML = '';
-    
-    // Customer adoption legend item
-    const customersItem = document.createElement('div');
-    customersItem.className = 'chart-legend-item';
-    
-    const customersColor = document.createElement('span');
-    customersColor.className = 'legend-color';
-    customersColor.style.backgroundColor = '#ff9900';
-    
-    const customersText = document.createElement('span');
-    customersText.textContent = 'Adoption';
-    
-    customersItem.appendChild(customersColor);
-    customersItem.appendChild(customersText);
-    legend.appendChild(customersItem);
-    
-    // Growth rate legend item
-    const growthItem = document.createElement('div');
-    growthItem.className = 'chart-legend-item';
-    
-    const growthColor = document.createElement('span');
-    growthColor.className = 'legend-color';
-    growthColor.style.backgroundColor = '#232f3e';
-    
-    const growthText = document.createElement('span');
-    growthText.textContent = 'YoY Growth';
-    
-    growthItem.appendChild(growthColor);
-    growthItem.appendChild(growthText);
-    legend.appendChild(growthItem);
-  }
-  
-  console.log('Three-tier AI stack chart rendered successfully');
-}
-
-/**
- * Create Amazon AI Investment Breakdown Chart
- */
-function amazonAIInvestmentChart() {
-  const container = document.querySelector('#ai-investment-chart .chart-container');
-  if (!container) {
-    console.error('Amazon AI investment chart container not found');
-    return;
-  }
-  
-  // Data
-  const data = [
-    { category: "Infrastructure (GPUs, Data Centers)", percentage: 45 },
-    { category: "Foundation Model Development", percentage: 20 },
-    { category: "AI Application Development", percentage: 15 },
-    { category: "Talent Acquisition & Research", percentage: 12 },
-    { category: "Strategic Acquisitions & Partnerships", percentage: 8 }
-  ];
-  
-  // Color scheme (Amazon colors)
-  const colors = ['#ff9900', '#232f3e', '#37475a', '#007eb9', '#4d8ac0'];
-  
-  // Dimensions
-  const margin = {top: 20, right: 30, bottom: 20, left: 30};
-  const width = container.clientWidth - margin.left - margin.right;
-  const height = container.clientHeight - margin.top - margin.bottom;
-  const radius = Math.min(width, height) / 2;
-  
-  // Create SVG
-  const svg = d3.select(container)
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', `translate(${width / 2 + margin.left}, ${height / 2 + margin.top})`);
-  
-  // Pie and arc generators
-  const pie = d3.pie()
-    .value(d => d.percentage)
-    .sort(null);
-  
-  const arc = d3.arc()
-    .innerRadius(radius * 0.4)
-    .outerRadius(radius * 0.8);
-  
-  const labelArc = d3.arc()
-    .innerRadius(radius * 0.9)
-    .outerRadius(radius * 0.9);
-  
-  // Create pie chart segments
-  const segments = svg.selectAll('.arc')
-    .data(pie(data))
-    .enter()
-    .append('g')
-    .attr('class', 'arc');
-  
-  segments.append('path')
-    .attr('d', arc)
-    .attr('fill', (d, i) => colors[i])
-    .attr('stroke', 'var(--bg-primary)')
-    .attr('stroke-width', 2);
-  
-  // Add percentage labels inside arcs
-  segments.append('text')
-    .attr('transform', d => `translate(${arc.centroid(d)})`)
-    .attr('text-anchor', 'middle')
-    .attr('dy', '.35em')
-    .attr('fill', '#fff')
-    .attr('font-weight', 'bold')
-    .text(d => `${d.data.percentage}%`);
-  
-  // Create legend
-  const legend = document.querySelector('#ai-investment-chart .chart-legend');
-  if (legend) {
-    legend.innerHTML = '';
-    
-    data.forEach((d, i) => {
-      const legendItem = document.createElement('div');
-      legendItem.className = 'chart-legend-item';
-      
-      const colorBox = document.createElement('span');
-      colorBox.className = 'legend-color';
-      colorBox.style.backgroundColor = colors[i];
-      
-      const text = document.createElement('span');
-      text.textContent = `${d.category}: ${d.percentage}%`;
-      
-      legendItem.appendChild(colorBox);
-      legendItem.appendChild(text);
-      legend.appendChild(legendItem);
-    });
-  }
-  
-  console.log('Amazon AI investment chart rendered successfully');
-}
-
-/**
  * Create AI Accelerator Performance Comparison Chart
  */
 function aiAcceleratorComparisonChart() {
@@ -2906,3 +2898,392 @@ function aiTrainingCostChart() {
   console.log('AI training cost chart rendered successfully');
 }
 
+/**
+ * Create Alexa+ Performance Metrics Chart
+ */
+function alexaPlusMetricsChart() {
+  const container = document.querySelector('#alexa-plus-chart .chart-container');
+  if (!container) {
+    console.error('Alexa+ metrics chart container not found');
+    return;
+  }
+  
+  // Metrics data
+  const metricsData = [
+    { metric: "Active Users", value: 175, fullMark: 200, displayValue: "175M users" },
+    { metric: "Daily Interactions", value: 2.8, fullMark: 3, displayValue: "2.8B interactions" },
+    { metric: "YoY Growth", value: 32, fullMark: 50, displayValue: "32% growth" },
+    { metric: "Satisfaction", value: 87, fullMark: 100, displayValue: "87% satisfaction" }
+  ];
+  
+  // Dimensions for the radar chart
+  const margin = {top: 50, right: 50, bottom: 50, left: 50};
+  const width = Math.min(container.clientWidth, container.clientHeight) - margin.left - margin.right;
+  const height = width;
+  const radius = width / 2;
+  
+  // Create SVG
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left + radius},${margin.top + radius})`);
+  
+  // Scales
+  // Angle scale for metrics
+  const angleScale = d3.scaleBand()
+    .domain(metricsData.map(d => d.metric))
+    .range([0, 2 * Math.PI]);
+  
+  // Radius scale for values
+  const radiusScale = d3.scaleLinear()
+    .domain([0, 100])
+    .range([0, radius]);
+  
+  // Function to calculate point coordinates
+  function getCoordinates(metric, value) {
+    const angle = angleScale(metric) + angleScale.bandwidth() / 2;
+    // Normalize the value as a percentage of fullMark
+    const normalizedValue = metricsData.find(d => d.metric === metric).fullMark;
+    const percentage = (value / normalizedValue) * 100;
+    const r = radiusScale(percentage);
+    return {
+      x: r * Math.sin(angle),
+      y: -r * Math.cos(angle)
+    };
+  }
+  
+  // Add circular axis lines
+  const circleAxes = [25, 50, 75, 100];
+  circleAxes.forEach(percentage => {
+    svg.append('circle')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', radiusScale(percentage))
+      .attr('fill', 'none')
+      .attr('stroke', 'var(--border-color)')
+      .attr('stroke-dasharray', percentage === 100 ? 'none' : '2,3')
+      .attr('stroke-width', percentage === 100 ? 2 : 1);
+    
+    // Add percentage label
+    if (percentage < 100) {
+      svg.append('text')
+        .attr('x', 5)
+        .attr('y', -radiusScale(percentage) - 2)
+        .attr('text-anchor', 'start')
+        .attr('font-size', '9px')
+        .style('fill', 'var(--text-secondary)')
+        .text(`${percentage}%`);
+    }
+  });
+  
+  // Add radial axis lines and labels
+  metricsData.forEach(d => {
+    const angle = angleScale(d.metric) + angleScale.bandwidth() / 2;
+    const lineEnd = getCoordinates(d.metric, d.fullMark);
+    
+    // Draw axis line
+    svg.append('line')
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('x2', lineEnd.x)
+      .attr('y2', lineEnd.y)
+      .attr('stroke', 'var(--border-color)')
+      .attr('stroke-width', 1);
+    
+    // Position for label, slightly beyond the outer circle
+    const labelDistance = radius * 1.15;
+    const labelX = labelDistance * Math.sin(angle);
+    const labelY = -labelDistance * Math.cos(angle);
+    
+    // Add metric label
+    svg.append('text')
+      .attr('x', labelX)
+      .attr('y', labelY)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', '12px')
+      .style('fill', 'var(--text-primary)')
+      .text(d.metric);
+  });
+  
+  // Calculate polygon points
+  const polygonPoints = metricsData.map(d => {
+    const coords = getCoordinates(d.metric, d.value);
+    return [coords.x, coords.y];
+  });
+  
+  // Draw the radar polygon
+  svg.append('polygon')
+    .attr('points', polygonPoints.flat().join(','))
+    .attr('fill', '#ff9900')
+    .attr('fill-opacity', 0.6)
+    .attr('stroke', '#ff9900')
+    .attr('stroke-width', 2);
+  
+  // Add data points
+  metricsData.forEach(d => {
+    const coords = getCoordinates(d.metric, d.value);
+    
+    // Add point
+    svg.append('circle')
+      .attr('cx', coords.x)
+      .attr('cy', coords.y)
+      .attr('r', 5)
+      .attr('fill', '#ff9900')
+      .attr('stroke', 'white')
+      .attr('stroke-width', 2);
+    
+    // Add value label
+    const labelDistance = radiusScale((d.value / d.fullMark) * 100) * 1.1;
+    const angle = angleScale(d.metric) + angleScale.bandwidth() / 2;
+    const labelX = labelDistance * Math.sin(angle);
+    const labelY = -labelDistance * Math.cos(angle);
+    
+    svg.append('text')
+      .attr('x', labelX)
+      .attr('y', labelY)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', '11px')
+      .attr('font-weight', 'bold')
+      .style('fill', 'var(--text-primary)')
+      .text(d.displayValue);
+  });
+  
+  // Create metrics cards
+  const metricsContainer = d3.select(container)
+    .append('div')
+    .style('display', 'grid')
+    .style('grid-template-columns', 'repeat(auto-fit, minmax(120px, 1fr))')
+    .style('gap', '10px')
+    .style('margin-top', '20px');
+  
+  metricsData.forEach(metric => {
+    const card = metricsContainer.append('div')
+      .style('background-color', 'var(--bg-primary, white)')
+      .style('border', '1px solid var(--border-color, #ddd)')
+      .style('border-radius', '8px')
+      .style('padding', '10px')
+      .style('text-align', 'center');
+    
+    card.append('div')
+      .style('font-size', '0.9rem')
+      .style('font-weight', 'bold')
+      .style('color', 'var(--text-secondary, #666)')
+      .text(metric.metric);
+    
+    // Format value based on metric
+    let formattedValue;
+    if (metric.metric === "Active Users") {
+      formattedValue = "175M";
+    } else if (metric.metric === "Daily Interactions") {
+      formattedValue = "2.8B";
+    } else if (metric.metric === "YoY Growth") {
+      formattedValue = "32%";
+    } else if (metric.metric === "Satisfaction") {
+      formattedValue = "87%";
+    } else {
+      formattedValue = metric.value;
+    }
+    
+    card.append('div')
+      .style('font-size', '1.5rem')
+      .style('font-weight', 'bold')
+      .style('color', '#ff9900')
+      .style('margin', '5px 0')
+      .text(formattedValue);
+    
+    // Description text based on metric
+    let description;
+    if (metric.metric === "Active Users") {
+      description = "Monthly active users globally";
+    } else if (metric.metric === "Daily Interactions") {
+      description = "Daily voice commands processed";
+    } else if (metric.metric === "YoY Growth") {
+      description = "Year-over-year increase in usage";
+    } else if (metric.metric === "Satisfaction") {
+      description = "User satisfaction rating";
+    } else {
+      description = "";
+    }
+    
+    card.append('div')
+      .style('font-size', '0.8rem')
+      .style('color', 'var(--text-secondary, #666)')
+      .text(description);
+  });
+  
+  // Create legend
+  const legend = document.querySelector('#alexa-plus-chart .chart-legend');
+  if (legend) {
+    legend.innerHTML = '';
+    
+    const sourceText = document.createElement('div');
+    sourceText.className = 'chart-source';
+    sourceText.innerHTML = 'Source: Amazon Consumer Technology Report (2025)';
+    sourceText.style.fontSize = '0.8rem';
+    sourceText.style.fontStyle = 'italic';
+    legend.appendChild(sourceText);
+  }
+  
+  console.log('Alexa+ metrics chart rendered successfully');
+}
+
+/**
+ * Create a visualization of general-purpose LLM company valuations
+ */
+function llmValuationsChart() {
+  const container = document.querySelector('#llm-valuations .chart-container');
+  if (!container) {
+    console.error('LLM valuations chart container not found');
+    return;
+  }
+  
+  // Clear any existing content
+  container.innerHTML = '';
+  
+  // Data for general-purpose LLM company valuations in billions USD (most recent valuations as of 2025)
+  // Focusing only on general-purpose LLM companies
+  const data = [
+    { company: 'OpenAI', valuation: 157, color: '#74aa9c', founded: 2015, 
+      description: 'Creator of ChatGPT and GPT-4, backed by Microsoft' },
+    { company: 'xAI', valuation: 50, color: '#1d3557', founded: 2023, 
+      description: 'Elon Musk\'s AI startup developing Grok' },
+    { company: 'Anthropic', valuation: 40, color: '#6b67e5', founded: 2021, 
+      description: 'Creator of Claude, backed by Amazon and Google' },
+    { company: 'Mistral AI', valuation: 6.2, color: '#8338ec', founded: 2023, 
+      description: 'European AI lab focused on open-source LLMs' },
+    { company: 'Cohere', valuation: 5.5, color: '#fb5607', founded: 2019, 
+      description: 'Specialized in enterprise-focused language models' },
+    { company: 'Inflection AI', valuation: 1.5, color: '#94d2bd', founded: 2022, 
+      description: 'Developer of Pi, an AI personal assistant' }
+  ];
+  
+  // Sort data by valuation in descending order
+  data.sort((a, b) => b.valuation - a.valuation);
+  
+  // Add company and founded year as combined label
+  data.forEach(d => {
+    d.labelWithYear = `${d.company} (${d.founded})`;
+  });
+  
+  // Dimensions - making it more compact to fit in the page better
+  const margin = {top: 30, right: 120, bottom: 50, left: 160};
+  const width = Math.min(800, container.clientWidth) - margin.left - margin.right;
+  const height = Math.min(400, data.length * 50) - margin.top - margin.bottom;
+  
+  // Create SVG with responsive sizing
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', '100%') 
+    .attr('height', height + margin.top + margin.bottom)
+    .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet')
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+  // Create scales - using the combined label for y-axis
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.valuation) * 1.1])
+    .range([0, width]);
+  
+  const y = d3.scaleBand()
+    .domain(data.map(d => d.labelWithYear))
+    .range([0, height])
+    .padding(0.3);
+  
+  // Add X axis
+  svg.append('g')
+    .attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => `$${d}B`))
+    .selectAll('text')
+    .style('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('color', 'var(--text-secondary, #666)');
+  
+  // Add X axis label
+  svg.append('text')
+    .attr('x', width / 2)
+    .attr('y', height + margin.bottom - 10)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .text('Valuation (Billions USD)')
+    .style('fill', 'var(--text-primary, #333)');
+  
+  // Add Y axis with combined labels
+  svg.append('g')
+    .call(d3.axisLeft(y))
+    .style('font-size', '12px')
+    .style('color', 'var(--text-secondary, #666)')
+    .style('font-weight', 'bold');
+  
+  // Add horizontal grid lines
+  svg.append('g')
+    .attr('class', 'grid-lines')
+    .selectAll('line.horizontal-grid')
+    .data(x.ticks(5))
+    .enter()
+    .append('line')
+    .attr('class', 'horizontal-grid')
+    .attr('x1', d => x(d))
+    .attr('x2', d => x(d))
+    .attr('y1', 0)
+    .attr('y2', height)
+    .attr('stroke', '#e0e0e0')
+    .attr('stroke-dasharray', '3,3');
+  
+  // Create bars with animation
+  svg.selectAll('.bar')
+    .data(data)
+    .enter()
+    .append('rect')
+    .attr('class', 'bar')
+    .attr('y', d => y(d.labelWithYear))
+    .attr('height', y.bandwidth())
+    .attr('x', 0)
+    .attr('width', 0) // Start with width 0 for animation
+    .attr('fill', d => d.color)
+    .attr('rx', 4) // Rounded corners
+    .attr('ry', 4)
+    .transition() // Add animation
+    .duration(1000)
+    .delay((_, i) => i * 100)
+    .attr('width', d => x(d.valuation));
+  
+  // Add valuation labels
+  svg.selectAll('.value-label')
+    .data(data)
+    .enter()
+    .append('text')
+    .attr('class', 'value-label')
+    .attr('x', d => x(d.valuation) + 5)
+    .attr('y', d => y(d.labelWithYear) + y.bandwidth() / 2)
+    .attr('dy', '0.35em')
+    .style('fill', 'var(--text-primary, #333)')
+    .style('font-weight', 'bold')
+    .style('font-size', '12px')
+    .style('opacity', 0) // Start with opacity 0 for animation
+    .text(d => `$${d.valuation}B`)
+    .transition() // Add animation
+    .duration(500)
+    .delay((_, i) => i * 100 + 1000)
+    .style('opacity', 1);
+  
+  // Add tooltips for bars - show description on hover
+  svg.selectAll('.tooltip-area')
+    .data(data)
+    .enter()
+    .append('rect')
+    .attr('class', 'tooltip-area')
+    .attr('y', d => y(d.labelWithYear))
+    .attr('height', y.bandwidth())
+    .attr('x', 0)
+    .attr('width', width)
+    .attr('fill', 'transparent')
+    .append('title')
+    .text(d => `${d.company}: ${d.description}`);
+  
+  console.log('LLM valuations chart rendered successfully');
+}
