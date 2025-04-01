@@ -93,6 +93,143 @@
       background-color: var(--bg-primary);
       color: var(--text-primary);
     }
+        /* Amazon Case Study Specific Styles */
+        .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .metric-card {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .metric-title {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      color: #ff9900;
+    }
+
+    .metric-description {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    .callout {
+      background-color: rgba(255, 153, 0, 0.1);
+      border-left: 4px solid #ff9900;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .chip-comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+
+    .chip-comparison-table th,
+    .chip-comparison-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .chip-comparison-table th {
+      background-color: var(--bg-secondary);
+      font-weight: 600;
+    }
+
+    .chip-comparison-table tr:nth-child(even) {
+      background-color: var(--bg-secondary);
+    }
+
+    .timeline {
+      position: relative;
+      max-width: 1200px;
+      margin: 2rem auto;
+    }
+
+    .timeline::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      background-color: var(--border-color);
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      margin-left: -3px;
+    }
+
+    .timeline-container {
+      padding: 10px 40px;
+      position: relative;
+      background-color: inherit;
+      width: 50%;
+    }
+
+    .timeline-container.left {
+      left: 0;
+    }
+
+    .timeline-container.right {
+      left: 50%;
+    }
+
+    .timeline-content {
+      padding: 20px;
+      background-color: var(--bg-secondary);
+      position: relative;
+      border-radius: 6px;
+    }
+
+    .timeline-year {
+      font-weight: 700;
+      margin-top: 0;
+      color: #ff9900;
+    }
+
+    @media screen and (max-width: 768px) {
+      .timeline::after {
+        left: 31px;
+      }
+
+      .timeline-container {
+        width: 100%;
+        padding-left: 70px;
+        padding-right: 25px;
+      }
+
+      .timeline-container.right {
+        left: 0%;
+      }
+    }
   </style>
   <script src="../../assets/js/darkmode.js" defer></script>
   <script src="../../assets/js/toc.js" defer></script>
@@ -145,79 +282,120 @@
         <p class="author-date">March 18, 2025 · Callum Ke</p>
 
         <p>
-          The reader will likely be aware that AI has blossomed as of late. The technical among us
+          The reader will likely be aware that AI has been blossoming. The technical among us
           will be the first to jump to the paper "Attention is All You Need", the birth-place of the transformer as
           the real foundational breakthrough but I urge the reader to take a step back and be honest with themselves.
           In reality what really brings theory into the mainstream is consumer utitlity. ChatGPT was that catalyst,
           a humble blank text box that opened the door of generative models to the public and brought back the dream
-          of AGI.
-
+          of AGI. One can now imagine advancing medical diagnostics, aiding in novel research breakthroughs,
+          personalized education systems and optimised compliance/legal/financial tooling.
         </p>
 
         <p>
-          Jump to 2025 and the industry finds itself at a crossroads. Recent developments in foundation models,
-          resulted in massive (projected) investment in computational infrastructure have accelerated market adoption across
-          industries and has drastically changed the global landscape around data-centre's, in-house chips and new energy 
-          initiatives. 
-
-          Co-incided with the large increase of venture-capital in-flows and outsized valuations in
-          the start-up landscape, democratrisation of access to SOTA models enables the ability for rapid creation
-          and iteration. However, this comes with the baggage of new questions around regulatory
-          frameworks, competitive dynamics, and sustainable growth trajectories.
-        </p>
-
-        <p>
-          Reverting to the overly-used gold rush analogy,
-          we must ask the question if there are still undiscovered gems to be mined and if so, how many more 
-          axes do we need?
-          Or, is it time for the consumer to reap the rewards of the resources that have been discovered? 
-          The decision is still out with the jury.
+          We must ask the question if the proverbial flower of AI is still blooming with the potential yet to be
+          full displayed, or perphaps we are at this seasons full bloom and now is the time for the flower to be picked
+          such that the consumer can reap the rewards?
+          Or has growth been stunted due to the harsh surrounding environment where perhaps we may need to wait for
+          another season?
+          The decision is still yet to be made by the gardener.
         </p>
 
         <h2 id="broad-ai-market-trends">The Present</h2>
 
-        <p>The AI market has seen (robust?) expansion across both consumer and enterprise segments, with varying
-          adoption rates per industry vertical. One can imagine the potential in advancing medical diagnostics, aiding in novel research breakthroughs,
-          personalized education systems and optimised compliance/legal/financial tooling.
-        </p>
         <p>
-          Within the consumer-facing AI has become increasingly embedded in daily digital experiences through agentic workflows. Software development times
-          has been cut in half and the agency for individuals to create has never been greater. 
+          Jump to 2025 and the industry finds itself at a pivotal moment. Development in foundation models has been fast
+          flowing,
+          with each new model leap frogging over the previous iteration.
+          This has been a result of massive investment in computational infrastructure which has drastically changed the
+          global investment and political landscape in order to accommodate for the needs of AI now and in the future.
         </p>
 
         <p>
-          As an aside, AI applications are being built with the aim to remove <em>mundane</em> tasks in-order to give the end-user more
-         <strong>agency</strong>, to become more efficient and enjoy doing the things that matter. 
-          Currently, we are riding a fine line both in reality and sentiment of <strong> building tools that make end-users lazier and possibly dumber
-          in all aspects.</strong>
+          However, the industry is riding a fine line. What happens if we are building out supply to accommodate
+          for demand that may not exist. Microsoft's Satya Nadella recently raised skepticism of mass investments
+          without
+          an end goal, signalling a shift in order to prioritise sustainable growth trajectories.
+
         </p>
 
-        <p>Global AI market projections indicate continued strong growth across major markets:</p>
+        <p>
+          It is undeniable that there
+          is a trickling fear and resentment in both sentiment and in reality that AI is removing human agency and
+          creativity,
+          resulting in laziness, demoralisation and neglect for quality outcomes.
+
+          The mandate is now to build applications that aim to remove <em>mundane</em> tasks in-order to give
+          the end-user more
+          <strong>agency</strong>, to become more efficient and enjoy doing the things that matter.
+        </p>
+
+
+        <h2 id="key-players">Key Players</h2>
+
+        <p>The global dynamic currently looks like:</p>
 
         <ul>
-          <li>The United States maintains its leadership position in fundamental research and enterprise AI adoption
+          <li>The United States maintains its leadership position in fundamental research, enterprise and consumer AI
+            adoption through its start-up and VC culture.
           </li>
-          <li>China has accelerated its domestic AI ecosystem development despite export control constraints</li>
-          <li>The European Union has established a distinctive regulatory approach that emphasizes responsible AI
-            development</li>
+          <li>
+            China has accelerated its domestic AI ecosystem development through its big corporations and is paving its
+            own way, determined not to be left behind despite export control constraints. </li>
+          <li>
+            The European Union has established a distinctive regulatory approach that emphasizes responsible AI
+            development working with the big players around the world.
+          </li>
         </ul>
 
-        <p></p>
+        <h3 id="western-tech-giants"> The US: The Magnificent Seven</h3>
 
-        <h2 id="key-players">Key Players Performance & Projections</h2>
-
-        <h3 id="western-tech-giants">The Magnificent Seven</h3>
-
-        <p>Apple, Microsoft, Alphabet, Amazon, Meta, Tesla, and NVIDIA continue to dominate the AI landscape through
-          their combined market power, technical talent concentration, and computational resources. Each has established
+        <p>Apple, Microsoft, Alphabet, Amazon, Meta, NVIDIA and Tesla continue to dominate the AI landscape through
+          their combined market power and monopoly over computational resources and talent. Each has carved out
           distinctive AI strategies:</p>
 
         <ul>
-          <li>Microsoft has leveraged its OpenAI partnership to integrate AI capabilities across its enterprise products
+          <li>
+            Microsoft has leveraged its OpenAI partnership to integrate AI capabilities across its enterprise and SAAS
+            products.
+            Though arguably, Satya Nadella has been downplaying sentiment towards AI investments as of late, with a
+            shift in focus towards
+            sustainable growth and concrete revenue's.
           </li>
-          <li>Alphabet balances consumer AI applications with its DeepMind research division</li>
-          <li>Meta continues investing heavily in multimodal foundation models and AR/VR applications</li>
-          <li>NVIDIA has solidified its position as the essential infrastructure provider for AI development</li>
+          <li>
+            Alphabet is the R&D giant. Merging with their research arm DeepMind, their suite of Gemini products
+            alongside G-Suite has
+            arguably made the most consumer impact. With the release of Gemini 2.5 Pro, they are now the leader across
+            many benchmarks
+            for foundational models.
+          </li>
+          <li>
+            Meta carves out it niche with open-source multimodal foundation models and is openly investing heavily into
+            the space. However,
+            LlaMMa has seen to be falling behind. </li>
+          <li>
+            Amazon continues it's tread as the "do it all company" focusing on AI integration in all customer facing
+            verticles such as retail, devices, robotics and developers.
+            AWS BedRock is the ultimate SOTA model marketplace, allowing developers in the AWS eco-system to use models
+            out of the box.
+            Their hidden gem is the progress they are making with chip development especially on the training and
+            inference side as well as massive scale-out in
+            data-centers to serve models.
+          </li>
+          <li>
+            NVIDIA has solidified its position as the essential infrastructure provider for GPU's and data-centers. It
+            would be an understatement to say no-one comes close
+            to competing with them when it comes to GPU performance and software integration for their GPU's.
+            Development has not stopped, their pipeline is already in place for
+            the next 3 years and the sheer demand can be seen by the number of enterprise partnerships they have from
+            their GTM conference.
+          </li>
+          <li>
+            Tesla has long tried to remarket themselves as an AI and software company, justifying its larger valuations
+            compared
+            to its other traditional piers. Their focus is still widly on ADV though arguably lagging behind
+            Waymo(Google) and
+            the evergrowing BYD. It seems now they are trying to be the fore-front in the robotics space with Optimus.
+          </li>
         </ul>
 
         <div id="magnificent-seven-chart" class="visualization-container">
@@ -239,11 +417,10 @@
           despite navigating a complex regulatory environment both domestically and internationally:</p>
 
         <ul>
-          <li>Baidu has established leadership in autonomous driving technology and conversational AI</li>
-          <li>ByteDance continues refining its recommendation algorithms and expanding content generation capabilities
-          </li>
-          <li>SenseTime has maintained its position in computer vision applications while diversifying into other AI
-            domains</li>
+          <li>Alibaba: QWEN</li>
+          <li>Baidu: (Ernie)</li>
+          <li>ByteDance: DuoBao</li>
+          <li>Tencent: Hunyuan</li>
         </ul>
 
         <div id="chinese-tech-chart" class="visualization-container">
@@ -259,15 +436,34 @@
               target="_blank">SCMP Chinese Tech AI Spending</a></p>
         </div>
 
-        <p>A comparative analysis of growth trajectories reveals diverging strategies between Western and Chinese
-          companies, with the latter increasingly focusing on developing domestic computational resources and
-          fundamental research capabilities.</p>
+        <h3>The Boutique's</h3>
 
-        <h2 id="hardware-infrastructure">Hardware Infrastructure Landscape</h2>
+        <p>
+          The (mostly) privately funded research firms are akin to traditional fashion houses. Gucci, Prada and LV set
+          the
+          fashion trend for each season. Their ideas, once displayed, trickle down to cheaper and perhaps more
+          consumer-accessible fashion retailers.
 
-        <p>The global distribution of AI computational infrastructure continues to reflect both market demand and
-          geopolitical realities. Data center capacity has expanded significantly in key regions including North
-          America, Europe, and Asia-Pacific, with particular growth in infrastructure optimized for AI workloads.</p>
+          We can view OpenAI, Anthropic and now DeepSeek as the same tone setters, each with their own flavour, taking
+          the risks and pushing boundaries
+          on SOTA(state-of-the-art) models. Their techniques are then quickly adopted and tweaked by the open-source
+          community. Once this happens,
+          the demand of once was considered SOTA (see Claude-3.5 or DeepSeek 3) falls drastically and margins decrease.
+          This fear of falling behind
+          is what keeps these firms raking in capital in order to push the frontier and establish themselves as the main
+          player in the AI race.
+        </p>
+
+        <h2 id="hardware-infrastructure">Data centers and GPU's, please.</h2>
+
+        <p>
+          The global distribution of AI computational infrastructure investment and research continues to reflect both
+          market demand globally.
+          Data center capacity has expanded significantly in key regions including North
+          America, Europe, and Asia-Pacific, with particular growth in infrastructure optimized for AI workloads. Yes,
+          data-centers are not just
+          for AI. Have people really forgotten about the "Cloud"?
+        </p>
 
         <div id="datacenter-map" class="visualization-container">
           <h4>Global AI Data Center Distribution (2025-2030)</h4>
@@ -285,9 +481,14 @@
               Market Trends</a></p>
         </div>
 
-        <p>The GPU market remains dominated by NVIDIA, though competitive dynamics are evolving with both established
-          semiconductor companies and new entrants developing specialized AI chips. Recent earnings calls highlight
-          accelerated capital expenditure on AI infrastructure across major technology companies.</p>
+        <p>The GPU market remains dominated by NVIDIA, though competitive dynamics are evolving in the supply chain,
+          with both established
+          semiconductor companies and new entrants developing specialized AI chips. Chip production and design has been
+          monopolised by a small set of companies within Taiwan and the Netherlands(TSMC, ASML).
+          However, with export controls and geo-political dynamics, China has found a need to invest in domestic chip
+          production. Noticeably, Huawei and Shenzen SiCarrier
+          are trying to replicate the major players in GPU's(Huawei Ascend) and 28nm/5nm chips(via domestic DUV lithography machines). 
+        </p>
 
         <div id="gpu-comparison-chart" class="visualization-container">
           <h4>GPU Performance Comparison: NVIDIA vs. Chinese Alternatives</h4>
@@ -306,13 +507,6 @@
           significant implications for AI development capabilities across different markets.</p>
 
         <h2 id="export-controls">Export Controls and Geopolitical Impacts</h2>
-
-        <p>Current export control regimes have created a bifurcated development environment for advanced AI systems,
-          with particular impact on hardware access, research collaboration, and talent mobility. The recent success of
-          Chinese AI companies like DeepSeek, despite these restrictions, has intensified debate about the effectiveness
-          and long-term implications of such controls.</p>
-
-        <h3 id="current-control-landscape">Current Control Landscape</h3>
 
         <p>Since 2022, the United States has implemented progressively stricter controls on advanced semiconductor
           exports to China, particularly targeting high-performance GPUs used for AI training. These measures have
@@ -390,123 +584,27 @@
             regulations</p>
         </div>
 
-        <h3 id="deepseek-case-study">The DeepSeek Case Study</h3>
-
-        <p>DeepSeek's success provides a valuable case study of how Chinese AI companies are adapting to export control
-          constraints. According to reports, DeepSeek may have access to approximately 50,000 Hopper-generation chips,
-          including a mix of H100s, H800s, and H20s. This hardware arsenal has enabled them to train competitive models
-          at significantly lower costs than their Western counterparts.</p>
-
-        <p>As Dario Amodei, CEO of Anthropic, noted in his analysis: "It appears that a substantial fraction of
-          DeepSeek's AI chip fleet consists of chips that haven't been banned (but should be); chips that were shipped
-          before they were banned; and some that seem very likely to have been smuggled."</p>
-
-        <p>This mixed hardware environment highlights both the successes and limitations of the current export control
-          regime:</p>
-
-        <ul>
-          <li>Export controls have successfully limited access to cutting-edge H100 GPUs, forcing companies to work with
-            less powerful alternatives</li>
-          <li>Timing gaps between control announcements and implementations created windows for stockpiling</li>
-          <li>China has developed alternative supply chains, though with significant performance trade-offs</li>
-          <li>Chinese companies have adapted by investing heavily in algorithmic and architectural innovations to
-            maximize efficiency</li>
-        </ul>
-
-        <h3 id="adaptive-strategies">Adaptive Strategies Under Constraints</h3>
-
-        <p>The bifurcated development environment has led to distinctive approaches to AI development in China versus
-          the West:</p>
-
-        <h4>Chinese Adaptations:</h4>
-        <ul>
-          <li><strong>Efficiency Innovations:</strong> Companies like DeepSeek have pioneered techniques such as
-            Multi-Token Prediction (MTP) and optimized MoE architectures to maximize performance with limited computing
-            resources</li>
-          <li><strong>Domestic Hardware Development:</strong> Accelerated investment in alternatives like Huawei Ascend
-            chips, though these still lag significantly behind NVIDIA's performance</li>
-          <li><strong>Targeted Applications:</strong> Focus on domains where compute constraints have less impact, such
-            as specialized vertical applications</li>
-          <li><strong>Open Source Leverage:</strong> Building upon open-source foundations to accelerate development
-          </li>
-        </ul>
-
-        <h4>Western Strategic Response:</h4>
-        <ul>
-          <li><strong>Scale Advantage:</strong> Continuing to leverage abundant computing resources to push the
-            boundaries of model size and capabilities</li>
-          <li><strong>Regulatory Alignment:</strong> Developing compliance frameworks that maintain access to global
-            markets</li>
-          <li><strong>Research Partnerships:</strong> Fostering international collaboration within aligned nations</li>
-          <li><strong>Targeted Restrictions:</strong> Refining export controls to focus on the most strategically
-            significant technologies</li>
-        </ul>
-
-        <h3 id="future-scenarios">Future Scenarios and Implications</h3>
-
-        <p>Looking ahead, several potential scenarios could shape the evolution of the AI hardware landscape and export
-          controls:</p>
-
-        <ol>
-          <li><strong>Bipolar Development:</strong> Both China and the US maintain competitive AI ecosystems with
-            divergent technological approaches, leading to decreased interoperability and parallel innovation paths</li>
-          <li><strong>Increasing Control Effectiveness:</strong> More comprehensive controls could widen the gap between
-            Chinese and Western AI capabilities, especially as next-generation hardware (like NVIDIA's Blackwell
-            architecture) becomes essential for cutting-edge research</li>
-          <li><strong>Efficiency Revolution:</strong> Constraints could drive fundamental breakthroughs in computational
-            efficiency that eventually benefit the entire field</li>
-          <li><strong>Graduated Controls:</strong> More nuanced restrictions targeting only the most sensitive
-            applications while allowing controlled technology flow for commercial and research uses</li>
-        </ol>
-
-        <p>As Amodei argues: "Making AI that is smarter than almost all humans at almost all things will require
+        <p>As Dario Amodei argues(CEO Anthropic): "Making AI that is smarter than almost all humans at almost all things
+          will require
           millions of chips, tens of billions of dollars (at least), and is most likely to happen in 2026-2027." This
           timeline creates urgency for both sides of the export control debate.</p>
 
-        <h3 id="investment-implications">Investment Implications</h3>
-
-        <p>For investment managers, this bifurcated landscape creates both challenges and opportunities:</p>
-
+        Below are some criteria worth considering when looking at the landscape in China:
         <ul>
           <li><strong>Supply Chain Complexity:</strong> Investments in AI hardware must account for increasingly complex
             regulatory environments and the potential for sudden changes</li>
           <li><strong>Efficiency Premium:</strong> Companies developing technologies that improve computational
             efficiency may command premium valuations</li>
-          <li><strong>Geographic Strategy:</strong> Portfolio construction must consider the increasing divergence
-            between Chinese and Western technology ecosystems</li>
           <li><strong>Regulatory Expertise:</strong> Deep understanding of export control regimes becomes a competitive
-            advantage for investors operating across markets</li>
-          <li><strong>Hardware Diversification:</strong> Investments in alternative chip designs and architectures may
-            provide hedges against geopolitical risks</li>
+            advantage.</li>
         </ul>
 
-        <p>Ultimately, while export controls have created meaningful constraints on Chinese AI development, they have
-          not fundamentally halted progress. Instead, they have shaped a distinctive development environment that
-          produces different types of innovation with potentially far-reaching consequences for global technology
-          competition.</p>
+        <h2 id="inference-reasoning">The Rise of Reasoning</h2>
 
-        <h2 id="inference-reasoning">AI Inference, Reasoning, and Investment Opportunities</h2>
-
-        <p>As AI models evolve from pattern recognition to sophisticated reasoning capabilities, understanding the
-          distinction between inference and reasoning has become critical for investors assessing technological
-          trajectories and market opportunities.</p>
-
-        <h3 id="inference-explained">Understanding AI Inference</h3>
-
-        <p>AI inference refers to the process where a trained model makes predictions or generates outputs based on new
-          inputs. This represents the "production" phase of AI deployment where models deliver value by processing data
-          in real-time applications.</p>
-
-        <p>Key characteristics of inference operations include:</p>
-
-        <ul>
-          <li>Predictable computational patterns optimized for throughput and latency</li>
-          <li>Deployment on specialized hardware accelerators (GPUs, TPUs, custom ASICs)</li>
-          <li>Scaling challenges related to serving millions of concurrent requests</li>
-          <li>Optimization techniques including quantization, pruning, and distillation</li>
-        </ul>
-
-        <h3 id="reasoning-capabilities">The Rise of Reasoning Models</h3>
+        <p>AI models have evolved rapidly from pattern recognition, to generation to sophisticated reasoning
+          capabilities.
+          OpenAI opened the doors with GPT-o1 while DeepSeek raised the sealing with DeepSeek-R1.
+        </p>
 
         <p>Recent advances in large language models have demonstrated unprecedented reasoning capabilities—the ability
           to process information through multiple logical steps, evaluate evidence, and generate novel insights. This
@@ -521,7 +619,7 @@
           <li>Explaining decision processes in human-understandable terms</li>
         </ul>
 
-        <h3 id="current-bottlenecks">Current Technical Bottlenecks</h3>
+        <h3 id="current-bottlenecks">What Stops Reasoning</h3>
 
         <p>Despite remarkable progress, several critical bottlenecks constrain both the development and deployment of
           reasoning-capable AI systems:</p>
@@ -535,9 +633,15 @@
             with model complexity, creating sustainability challenges</li>
           <li><strong>Specialized Hardware:</strong> Current accelerators optimized for matrix multiplication operations
             are suboptimal for the sparse, conditional computation patterns of reasoning workflows</li>
-          <li><strong>System Design:</strong> Reasoning systems frequently require integration with external tools and
-            knowledge sources, creating architectural complexity</li>
         </ul>
+
+        <p>However these constraints create significant opportunities for improvement across several domains.
+          According to research by <a href="https://www.sequoiacap.com/article/generative-ai-reasoning-perspective/"
+            target="_blank">Sequoia Capital</a>, investment in reasoning-specific AI technologies increased by 218% in
+          2024, reflecting the market's recognition of this critical capability. <a
+            href="https://arxiv.org/abs/2312.08935" target="_blank">Recent technical analysis</a> suggests that
+          reasoning capabilities may follow a distinct scaling trajectory from general model size, creating
+          opportunities for specialized approaches.</p>
 
         <h3 id="hbm-memory">The Critical Role of HBM Memory</h3>
 
@@ -572,11 +676,10 @@
               target="_blank">AnandTech HBM Market Analysis</a></p>
         </div>
 
-        <h3 id="hbm-market-leaders">Leading HBM Manufacturers and Market Dynamics</h3>
+        <h3 id="hbm-market-leaders">Leading HBM Manufacturers</h3>
 
-        <p>The HBM market represents a critical chokepoint in the AI hardware supply chain, with significant
-          implications for investors. Current market leadership is concentrated among a small group of manufacturers:
-        </p>
+        <p>HBM production capacity has become a determinant of AI accelerator
+          availability, with manufacturers operating at full capacity and commanding premium pricing</p>
 
         <ul>
           <li><strong>SK Hynix:</strong> The current market leader, supplying HBM3E memory for NVIDIA's H200 and
@@ -589,83 +692,13 @@
             domestic HBM alternatives amid export restrictions</li>
         </ul>
 
-        <p>Several factors are shaping this critical market segment:</p>
-
-        <ul>
-          <li><strong>Supply Constraints:</strong> HBM production capacity has become a determinant of AI accelerator
-            availability, with manufacturers operating at full capacity and commanding premium pricing</li>
-          <li><strong>Technical Divergence:</strong> Leading manufacturers are pursuing different technical approaches
-            to HBM4 and beyond, creating potential competitive advantages</li>
-          <li><strong>Vertical Integration:</strong> Some AI chip designers are investing in securing dedicated HBM
-            manufacturing capacity or developing custom specifications</li>
-          <li><strong>Geopolitical Considerations:</strong> Export controls have accelerated investment in domestic HBM
-            production capabilities in affected markets</li>
-        </ul>
-
         <p>According to industry analysts at <a href="https://www.trendforce.com/presscenter/news/20240108-11811.html"
             target="_blank">TrendForce</a>, HBM memory supply will remain a significant constraint on AI accelerator
           production through at least 2027, with pricing expected to maintain a 200-300% premium over conventional
           memory. This creates compelling investment opportunities in both established players expanding production
           capacity and emerging specialists developing next-generation solutions.</p>
 
-        <h3 id="investment-opportunities">Investment Opportunities</h3>
-
-        <p>These technical constraints create significant investment opportunities across several domains:</p>
-
-        <ul>
-          <li><strong>Specialized Silicon:</strong> Hardware architectures optimized for reasoning workloads represent a
-            growing segment distinct from traditional inference accelerators</li>
-          <li><strong>Model Optimization:</strong> Companies developing techniques to make reasoning more efficient
-            through algorithmic innovations</li>
-          <li><strong>Distributed Systems:</strong> Infrastructure for efficiently scaling reasoning operations across
-            computational resources</li>
-          <li><strong>Domain-Specific Reasoning:</strong> Vertical applications that leverage reasoning capabilities for
-            specific high-value industries including healthcare, finance, and legal</li>
-          <li><strong>Knowledge Integration:</strong> Systems that effectively combine reasoning capabilities with
-            structured knowledge repositories</li>
-        </ul>
-
-        <p>According to research by <a href="https://www.sequoiacap.com/article/generative-ai-reasoning-perspective/"
-            target="_blank">Sequoia Capital</a>, investment in reasoning-specific AI technologies increased by 218% in
-          2024, reflecting the market's recognition of this critical capability. <a
-            href="https://arxiv.org/abs/2312.08935" target="_blank">Recent technical analysis</a> suggests that
-          reasoning capabilities may follow a distinct scaling trajectory from general model size, creating
-          opportunities for specialized approaches.</p>
-
-        <h2 id="model-performance">Model Performance Benchmarks</h2>
-
-        <p>State-of-the-art AI models continue to advance across key performance metrics:</p>
-
-        <ul>
-          <li>Inference speed improvements have enabled real-time applications in previously challenging domains</li>
-          <li>Parameter counts have stabilized for some applications while continuing to grow for others</li>
-          <li>Accuracy benchmarks show diminishing returns in some areas but breakthrough performance in others</li>
-          <li>Training costs and efficiency remain critical factors in commercial viability</li>
-          <li>Energy consumption considerations are increasingly influencing model architecture decisions</li>
-        </ul>
-
-        <div id="model-comparison-chart" class="visualization-container">
-          <h4>Leading AI Model Performance Metrics (2025)</h4>
-          <div class="chart-controls">
-            <select id="metric-selector">
-              <option value="inference">Inference Speed</option>
-              <option value="parameters">Parameter Count</option>
-              <option value="accuracy">Accuracy (MMLU)</option>
-              <option value="training">Training Costs</option>
-              <option value="energy">Energy Consumption</option>
-            </select>
-          </div>
-          <div class="chart-container"></div>
-          <div class="chart-legend"></div>
-          <p class="chart-note">Source: <a href="https://arxiv.org/abs/2303.18223" target="_blank">PaLM 2 Technical
-              Report</a>, <a href="https://ai.meta.com/blog/meta-llama-3/" target="_blank">Meta Llama 3 Technical
-              Report</a>, <a href="https://www.anthropic.com/research" target="_blank">Anthropic Research
-              Publications</a>, <a href="https://arxiv.org/abs/2405.14871" target="_blank">AI Model Energy Consumption
-              Study</a></p>
-        </div>
-
-        <p>These technical benchmarks provide essential context for understanding the economic and practical constraints
-          on AI deployment across different use cases and markets.</p>
+        <p></p>
 
         <h2 id="ai-in-software-development">AI Revolution in Software Development</h2>
 
@@ -674,8 +707,6 @@
           one of the most immediate and tangible applications of advanced AI capabilities in professional knowledge
           work.</p>
 
-        <h3 id="developer-productivity-tools">Developer Productivity Tools</h3>
-
         <p>AI-powered coding assistants have rapidly evolved from simple autocomplete tools to sophisticated pair
           programmers capable of understanding complex codebases and generating production-ready code:</p>
 
@@ -683,11 +714,6 @@
           <li><strong>Amazon Q:</strong> Amazon's enterprise-grade AI assistant for developers provides contextually
             relevant coding suggestions, documentation guidance, and security checks while maintaining compliance with
             company policies and practices</li>
-          <li><strong>Cursor:</strong> An AI-native code editor that offers advanced reasoning capabilities for
-            understanding and navigating large codebases, with particular strength in refactoring and architecture
-            analysis</li>
-          <li><strong>GitHub Copilot:</strong> Microsoft's AI pair programmer has established widespread adoption with
-            its ability to generate code snippets and functions based on natural language descriptions</li>
           <li><strong>CodeWhisperer:</strong> Amazon's AI code generator optimized for AWS services integration,
             providing specialized assistance for cloud-native application development</li>
         </ul>
@@ -704,10 +730,13 @@
               Amazon Q Adoption Data</a></p>
         </div>
 
+        <p></p>
+
         <h3 id="development-paradigm-shift">The Shifting Development Paradigm</h3>
 
         <p>Beyond individual productivity tools, AI is fundamentally changing how software is conceptualized, designed,
-          and maintained:</p>
+          and maintained. Internally at Amazon, organisations are leading top-down programs to educate developers to
+          use AI tools across all parts of the development life-cycle.</p>
 
         <ul>
           <li><strong>Prompt-First Development:</strong> Emerging methodologies focus on crafting precise natural
@@ -721,23 +750,11 @@
         </ul>
 
         <p>The most transformative impact may be in how AI tools handle increasing system complexity, allowing
-          developers to reason at higher levels of abstraction while AI manages implementation details.</p>
+          developers to reason at higher levels of abstraction while AI manages implementation details. Contrary to
+          early concerns about job displacement, evidence suggests AI tools are primarily augmenting rather
+          than replacing developers, with demand for software development talent continuing to outpace supply in most
+          markets.</p>
 
-        <h3 id="enterprise-adoption">Enterprise Adoption Patterns</h3>
-
-        <p>Enterprise adoption of AI development tools reveals distinctive patterns that differ from individual
-          developer usage:</p>
-
-        <ul>
-          <li><strong>Security and Compliance:</strong> Enterprise-grade solutions like Amazon Q incorporate robust
-            governance features including IP protection, sensitive data filtering, and custom knowledge bases</li>
-          <li><strong>Integration Depth:</strong> The most successful enterprise deployments offer deep integration with
-            existing development environments and workflows</li>
-          <li><strong>Custom Tuning:</strong> Organizations increasingly customize AI assistants with company-specific
-            codebases, documentation, and best practices</li>
-          <li><strong>Productivity Metrics:</strong> Sophisticated organizations are developing new methods to measure
-            AI's impact on developer productivity beyond traditional metrics</li>
-        </ul>
 
         <div id="enterprise-adoption-chart" class="visualization-container">
           <h4>Enterprise Concerns in AI Development Tool Adoption</h4>
@@ -752,11 +769,6 @@
               target="_blank">Google Cloud Developer Productivity Research</a></p>
         </div>
 
-        <h3 id="developer-workforce-impact">Impact on Developer Workforce</h3>
-
-        <p>The integration of AI into software development is having multifaceted effects on the developer workforce:
-        </p>
-
         <ul>
           <li><strong>Skill Evolution:</strong> Premium skills are shifting from syntax mastery to effective AI
             collaboration, architecture design, and prompt engineering</li>
@@ -768,71 +780,255 @@
             enable developers to work effectively across multiple domains</li>
         </ul>
 
-        <p>Contrary to early concerns about job displacement, evidence suggests AI tools are primarily augmenting rather
-          than replacing developers, with demand for software development talent continuing to outpace supply in most
-          markets.</p>
+        <p></p>
 
-        <h3 id="investment-implications">Investment Implications</h3>
+        <h2 id="enterprise-adoption">Case Study: Amazon's AI Adoption</h2>
 
-        <p>This transformation presents several distinct investment opportunities:</p>
+        <p>
+          Amazon has emerged as one of the leading players in the enterprise AI landscape, with a comprehensive strategy that spans from foundational infrastructure to consumer-facing applications. According to Amazon's Q4 2024 earnings call, the company's generative AI business has reached a multi-billion dollar annual run rate, signaling the success of their strategic initiatives in this space.
+        </p>
 
-        <ul>
-          <li><strong>Vertical-Specific Development Assistants:</strong> AI tools customized for specialized development
-            domains including hardware design, regulated industries, and scientific computing</li>
-          <li><strong>Enterprise Integration Platforms:</strong> Solutions that seamlessly incorporate AI assistance
-            into existing development environments while maintaining security and compliance</li>
-          <li><strong>Development Workflow Optimization:</strong> Tools that help organizations refine development
-            processes to maximize AI collaboration benefits</li>
-          <li><strong>Training and Adaptation:</strong> Services helping organizations transition developers to
-            AI-augmented workflows efficiently</li>
-          <li><strong>Productivity Measurement:</strong> Analytics platforms that quantify the impact of AI tools on
-            development velocity and quality</li>
-        </ul>
+        <h3 id="three-tier-ai-stack">Three-Tier AI Stack: Amazon's Strategic Framework</h3>
 
-        <p>Long-term, the most significant returns may come from platforms that not only assist with code generation but
-          fundamentally transform how software is conceptualized, designed, tested, and maintained.</p>
+        <p>
+          Amazon's approach to AI is structured around a three-tier stack that provides a clear framework for both internal development and customer adoption:
+        </p>
 
-        <h2 id="autonomous-systems">Autonomous Systems & EV Trends</h2>
+        <ol>
+          <li><strong>Infrastructure Layer:</strong> The foundation of Amazon's AI strategy focuses on providing the computational resources necessary for training and running advanced AI models. This includes custom silicon like Trainium2 chips (with Trainium3 already in development), specialized data center designs, and optimized networking infrastructure to support the massive computational requirements of foundation models.</li>
+          <li><strong>Model Customization Layer:</strong> The middle tier enables enterprises to leverage existing foundation models while tailoring them to specific business needs. Amazon Bedrock represents the centerpiece of this strategy, offering access to multiple foundation models from providers like Anthropic, Meta, and Mistral, along with tools for customization, fine-tuning, and responsible deployment.</li>
+          <li><strong>Application Layer:</strong> The top tier focuses on developing AI-powered applications that solve specific business problems across Amazon's diverse portfolio. This includes developer tools like Amazon Q, consumer experiences like the upgraded Alexa+, and industry-specific solutions in healthcare, supply chain, and customer service.</li>
+        </ol>
 
-        <p>Autonomous vehicle technology has progressed through a period of market consolidation, with fewer companies
-          making more substantial advances in real-world deployment. The relationship between electric vehicle adoption
-          and autonomous technology development has created complex market dynamics.</p>
-
-        <p>Key players in the autonomous driving space span both traditional automotive manufacturers and technology
-          companies, with varying approaches to market entry and technology development. Western companies like Tesla,
-          Waymo, and Cruise compete with Chinese leaders including Baidu Apollo, AutoX, and WeRide.</p>
-
-        <p>Regulatory frameworks for autonomous vehicles differ significantly across markets, creating varied
-          development environments and deployment timelines. These regulatory differences create both challenges and
-          opportunities for companies operating across multiple jurisdictions.</p>
-
-
-
-        <h2 id="technical-glossary">Technical Glossary</h2>
-
-        <p>For readers without deep technical background in artificial intelligence, this glossary provides accessible
-          explanations of key concepts referenced throughout the analysis:</p>
-
-        <ul>
-          <li><strong>Foundation Models</strong>: Large AI systems trained on broad data that can be adapted to many
-            different applications</li>
-          <li><strong>Inference</strong>: The process of using a trained AI model to make predictions or generate
-            outputs</li>
-          <li><strong>Fine-tuning</strong>: Adapting a pre-trained model to perform well on a specific task</li>
-          <li><strong>Multimodal AI</strong>: Systems that can process and generate multiple types of data (text,
-            images, audio, etc.)</li>
-          <li><strong>Training compute</strong>: The computational resources required to develop AI models</li>
-        </ul>
-      </div>
-
-      <footer>
-        <div class="back-to-top" id="back-to-top">Back to top ↑</div>
-        <div class="privacy-policy-link">
-          <a href="../../">Home</a> · <span>Callum Ke</span>
+        <div id="three-tier-chart" class="visualization-container">
+          <h4>Amazon's Three-Tier AI Stack Adoption (2025)</h4>
+          <div class="chart-container"></div>
+          <div class="chart-legend"></div>
+          <p class="chart-note">Source: AWS Earnings Reports, Internal Amazon Data (2025)</p>
         </div>
-      </footer>
+
+        <h3 id="ai-everywhere">AI Everywhere: Enterprise-Wide Integration</h3>
+
+        <p>
+          Amazon's "AI Everywhere" initiative represents one of the most ambitious corporate AI adoption programs globally. Rather than treating AI as a separate business unit, Amazon is systematically integrating AI capabilities across its entire operation. Key aspects include:
+        </p>
+
+        <ul>
+          <li><strong>Retail Intelligence:</strong> AI-powered demand forecasting, inventory optimization, and personalized recommendations have transformed Amazon's core retail business, reducing waste while increasing customer satisfaction.</li>
+          <li><strong>Logistics Optimization:</strong> Machine learning models now optimize Amazon's vast logistics network, from warehouse operations to delivery route planning, contributing to both cost reduction and improved delivery times.</li>
+          <li><strong>Content Creation and Moderation:</strong> Generative AI supports content creation across Amazon's digital properties while helping moderate user-generated content at scale.</li>
+          <li><strong>Software Development Acceleration:</strong> Internal developer productivity has increased significantly through AI coding assistants, with the lessons learned informing Amazon's developer tool offerings.</li>
+        </ul>
+
+        <div id="ai-investment-chart" class="visualization-container">
+          <h4>Amazon's AI Investment Breakdown (2025)</h4>
+          <div class="chart-container"></div>
+          <div class="chart-legend"></div>
+          <p class="chart-note">Source: Analysis of Amazon Financial Reports and Public Statements (2025)</p>
+        </div>
+
+
+        <h3 id="custom-silicon">Custom Silicon: The Trainium and Inferentia Advantage</h3>
+
+        <p>
+          A critical component of Amazon's AI strategy is its investment in custom AI accelerator chips, specifically the Trainium series for training and Inferentia series for inference. This initiative represents one of Amazon's most direct challenges to NVIDIA's dominance in the AI hardware market and provides several strategic advantages:
+        </p>
+
+        <ul>
+          <li><strong>Cost Optimization:</strong> By developing their own AI silicon, Amazon can offer AI compute at significantly lower costs than would be possible using third-party chips, passing these savings to customers while maintaining healthy margins.</li>
+          <li><strong>Supply Chain Independence:</strong> Amazon's custom chips reduce its vulnerability to supply constraints that have plagued the NVIDIA GPU market, particularly during periods of peak demand.</li>
+          <li><strong>Workload Optimization:</strong> Trainium and Inferentia are specifically designed for AI workloads rather than adapted from general-purpose architectures, enabling performance optimizations for common AI patterns.</li>
+          <li><strong>Power Efficiency:</strong> Amazon's chips demonstrate substantially better performance-per-watt metrics compared to general-purpose GPUs, translating to both cost savings and environmental benefits.</li>
+        </ul>
+
+        <p>
+          The latest generations of these chips—Trainium2 and Inferentia3—represent Amazon's most competitive offerings yet, with performance metrics that make them viable alternatives to NVIDIA's market-leading offerings for many AI workloads.
+        </p>
+
+        <div id="ai-accelerator-chart" class="visualization-container">
+          <h4>AI Accelerator Performance Comparison (2025)</h4>
+          <div class="chart-container"></div>
+          <div class="chart-legend"></div>
+          <p class="chart-note">Source: AWS Performance Reports, Industry Benchmarks, Analyst Estimates (2025)</p>
+        </div>
+
+        <p>
+          When comparing the price-performance ratio across major AI accelerators, AWS Trainium2 offers approximately 75% of the raw performance of an NVIDIA H100 at around 60% of the cost. For inference workloads, Inferentia3 delivers approximately 90% of an NVIDIA A100's performance at just 55% of the price point, making it particularly attractive for deployment scenarios where per-request costs directly impact business models.
+        </p>
+
+        <p>
+          The power efficiency advantage is even more striking, with Trainium2 offering 75% better performance-per-watt than NVIDIA's H100. This efficiency translates directly to lower operational costs in data centers and reduced environmental impact—increasingly important considerations for enterprises with sustainability commitments.
+        </p>
+
+        <div id="ai-training-cost-chart" class="visualization-container">
+          <h4>AI Training Economics (2025)</h4>
+          <div class="chart-container"></div>
+          <div class="chart-legend"></div>
+          <p class="chart-note">Source: AWS Performance Benchmarks, Industry Testing, Energy Efficiency Reports (2025)</p>
+        </div>
+
+        <p>
+          These advantages have already translated to meaningful customer adoption, with companies like Anthropic leveraging Amazon's AI chips as part of their infrastructure strategy. Through Project Rainier, a massive supercomputer cluster built with Trainium chips, Amazon and Anthropic are collaborating to push the boundaries of what's possible with custom AI silicon at scale.
+        </p>
+
+        <p>
+          Looking ahead, Amazon's silicon roadmap includes the upcoming Trainium3, expected to surpass NVIDIA's current flagship offerings in raw performance while maintaining the cost and efficiency advantages that have defined the product line. This continued investment in custom silicon represents a cornerstone of Amazon's strategy to lead in both AI infrastructure and services.
+        </p>
+
+        <table class="chip-comparison-table">
+          <thead>
+            <tr>
+              <th>Chip</th>
+              <th>Performance (vs H100)</th>
+              <th>Price (vs H100)</th>
+              <th>Performance/Watt</th>
+              <th>Availability</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>NVIDIA H100</td>
+              <td>100%</td>
+              <td>100%</td>
+              <td>1.0x</td>
+              <td>Limited</td>
+            </tr>
+            <tr>
+              <td>AWS Trainium2</td>
+              <td>75%</td>
+              <td>60%</td>
+              <td>1.75x</td>
+              <td>AWS Only</td>
+            </tr>
+            <tr>
+              <td>AWS Trainium3</td>
+              <td>110%</td>
+              <td>75%</td>
+              <td>2.2x</td>
+              <td>AWS Only (Limited)</td>
+            </tr>
+            <tr>
+              <td>AMD MI300X</td>
+              <td>80%</td>
+              <td>70%</td>
+              <td>1.25x</td>
+              <td>Limited</td>
+            </tr>
+            <tr>
+              <td>Google TPU v4</td>
+              <td>85%</td>
+              <td>65%</td>
+              <td>1.4x</td>
+              <td>GCP Only</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 id="alexa-plus">Alexa+: Reinventing the Consumer AI Experience</h3>
+
+        <p>
+          After pioneering the smart speaker category with the original Alexa, Amazon has revitalized its flagship consumer AI with Alexa+, a comprehensive upgrade leveraging the latest advances in generative AI. Key improvements include:
+        </p>
+
+        <ul>
+          <li><strong>Natural Conversation:</strong> Alexa+ supports more natural, multi-turn conversations with improved context awareness and memory of previous interactions.</li>
+          <li><strong>Proactive Assistance:</strong> Rather than simply responding to commands, Alexa+ can anticipate needs based on patterns and proactively offer assistance.</li>
+          <li><strong>Cross-Device Continuity:</strong> Conversations can now seamlessly transition across different Echo devices and the Alexa mobile app.</li>
+          <li><strong>Enhanced Reasoning:</strong> Alexa+ demonstrates improved capability to handle complex queries that require multi-step reasoning or the synthesis of information from multiple sources.</li>
+        </ul>
+
+        <p>
+          With approximately 175 million active users and 2.8 billion daily interactions, Alexa+ represents one of the world's largest deployed consumer AI platforms. This scale provides Amazon with invaluable data for continued improvement while creating a powerful channel for introducing new AI-powered services to consumers.
+        </p>
+
+        <div id="alexa-plus-chart" class="visualization-container">
+          <h4>Alexa+ Performance Metrics (Q1 2025)</h4>
+          <div class="chart-container"></div>
+          <div class="chart-legend"></div>
+          <p class="chart-note">Source: Amazon Consumer Technology Report (2025)</p>
+        </div>
+
+        <h3 id="enterprise-integration">Enterprise Integration Platforms: Bridging Legacy and AI</h3>
+
+        <p>
+          For enterprise customers, Amazon has developed comprehensive solutions that bridge existing systems with new AI capabilities:
+        </p>
+
+        <ul>
+          <li><strong>AWS Supply Chain:</strong> AI-powered supply chain management that integrates with existing ERP systems to provide enhanced visibility, forecasting, and optimization.</li>
+          <li><strong>Amazon Q Business:</strong> An enterprise knowledge assistant that securely connects to company data sources to answer questions, generate content, and automate workflows.</li>
+          <li><strong>AWS HealthScribe:</strong> Clinical documentation solution that uses AI to transform patient-clinician conversations into structured medical notes seamlessly integrated with electronic health record systems.</li>
+        </ul>
+
+        <p>
+          These solutions reflect Amazon's recognition that enterprise AI adoption requires seamless integration with existing workflows and systems rather than rip-and-replace approaches.
+        </p>
+
+        <div class="callout">
+          <h4 class="callout-title">Key Enterprise Integration Principles</h4>
+          <p>Amazon's approach to enterprise AI integration follows three core principles:</p>
+          <ul>
+            <li><strong>Security-First Design:</strong> All AI integrations maintain existing security perimeters and compliance requirements</li>
+            <li><strong>Incremental Value:</strong> Solutions deliver measurable business value at each stage of adoption</li>
+            <li><strong>Workflow Integration:</strong> AI capabilities are embedded within existing workflows rather than requiring users to switch contexts</li>
+          </ul>
+        </div>
+
+        <h3 id="strategic-investments">Strategic Investments and the Road Ahead</h3>
+
+        <p>
+          Amazon's $8 billion investment in Anthropic (doubled from its initial commitment) signals the company's determination to maintain a leadership position in the AI ecosystem. According to their most recent earnings call, Amazon plans to invest nearly $100 billion in AI initiatives in 2025, with a significant portion supporting AI development for AWS.
+        </p>
+
+        <p>
+          This strategic investment focuses on several key priorities:
+        </p>
+
+        <ol>
+          <li><strong>Expanding Custom Silicon:</strong> Further development of specialized AI chips to reduce training and inference costs while improving performance.</li>
+          <li><strong>Responsible AI Framework:</strong> Enhanced tools for bias detection, content filtering, and transparency to address growing regulatory requirements.</li>
+          <li><strong>Industry-Specific AI Solutions:</strong> Targeted development of AI applications for high-value industries including healthcare, financial services, and manufacturing.</li>
+          <li><strong>Multi-Modal Capabilities:</strong> Expanding beyond text-based AI to more sophisticated integration of vision, audio, and eventually other sensory inputs.</li>
+        </ol>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <h4 class="metric-title">AWS AI Revenue (2025)</h4>
+            <p class="metric-value">$27.5B</p>
+            <p class="metric-description">Projected revenue from AWS AI services in 2025</p>
+          </div>
+          <div class="metric-card">
+            <h4 class="metric-title">AI Investment</h4>
+            <p class="metric-value">$100B</p>
+            <p class="metric-description">Planned investment in AI initiatives for 2025</p>
+          </div>
+          <div class="metric-card">
+            <h4 class="metric-title">AI ROI</h4>
+            <p class="metric-value">3.8x</p>
+            <p class="metric-description">Average return on AI investments across Amazon</p>
+          </div>
+          <div class="metric-card">
+            <h4 class="metric-title">Bedrock Models</h4>
+            <p class="metric-value">24+</p>
+            <p class="metric-description">Foundation models available through Amazon Bedrock</p>
+          </div>
+        </div>
+
+        <p>
+          With AWS AI services projected to generate approximately $27.5 billion in revenue for 2025, growing to a potential $76.2 billion by 2028, the financial stakes of Amazon's AI strategy are enormous. However, the company's measured approach—focusing on practical applications with clear ROI rather than speculative moonshots—suggests a sustainable path forward as AI transforms from cutting-edge technology to mainstream business capability.
+        </p>
+
+        <p>
+          Amazon's AI adoption case study demonstrates how a comprehensive, layered approach to AI implementation can drive transformation across an entire enterprise while simultaneously creating new market opportunities. By treating AI as an enabler of existing business strategies rather than a separate initiative, Amazon has positioned itself for long-term leadership in both enterprise and consumer AI.
+        </p>
+          <footer>
+            <div class="back-to-top" id="back-to-top">Back to top ↑</div>
+            <div class="privacy-policy-link">
+              <a href="../../">Home</a> · <span>Callum Ke</span>
+            </div>
+          </footer>
+      </div>
     </div>
-  </div>
 </body>
 
 </html>
