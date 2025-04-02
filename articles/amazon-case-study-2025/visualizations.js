@@ -568,9 +568,9 @@ function aiAcceleratorComparisonChart() {
   
   // Dimensions
   const margin = {top: 40, right: 20, bottom: 100, left: 60};
-  const chartHeight = 180; // Height for each chart
-  const chartSpacing = 40; // Space between charts
-  const totalHeight = (chartHeight * 2) + chartSpacing + margin.top + margin.bottom;
+  const chartHeight = 120; // Height for each chart
+  const chartSpacing = 120; // Increased spacing between charts
+  const totalHeight = (chartHeight * 2) + chartSpacing + margin.top + margin.bottom; // Added extra space  
   const width = container.clientWidth - margin.left - margin.right;
   
   // Create SVG
@@ -847,7 +847,7 @@ function aiTrainingCostChart() {
   createTokenCostChart(svg, tokenCostData, width, chartHeight);
   
   // Create the efficiency chart
-  createEfficiencyChart(svg, efficiencyData, width, chartHeight, chartHeight + 80);
+  createEfficiencyChart(svg, efficiencyData, width, chartHeight, chartHeight + 100);
   
   // Add metrics grid
   createMetricsGrid(container, totalHeight - 60);
@@ -1101,7 +1101,6 @@ function aiTrainingCostChart() {
     
     const sourceText = document.createElement('div');
     sourceText.className = 'chart-source';
-    sourceText.innerHTML = 'Source: AWS Performance Benchmarks, Industry Testing, Energy Efficiency Reports (2025)';
     sourceText.style.fontSize = '0.8rem';
     sourceText.style.fontStyle = 'italic';
     legend.appendChild(sourceText);
