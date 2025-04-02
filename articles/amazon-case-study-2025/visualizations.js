@@ -827,7 +827,8 @@ function aiTrainingCostChart() {
   ];
   
   // Dimensions
-  const margin = {top: 40, right: 20, bottom: 50, left: 60};
+  // const margin = {top: 40, right: 20, bottom: 50, left: 60};
+  const margin = {top: 40, right: 20, bottom: 50, left: 100};
   const width = container.clientWidth - margin.left - margin.right;
   
   // Determine height based on container height and allocate for two charts
