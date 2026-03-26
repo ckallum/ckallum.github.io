@@ -42,6 +42,18 @@ const apiLimiter = rateLimit({
   message: { success: false, message: 'Too many requests, please try again later.' }
 });
 app.use('/api/', apiLimiter);
+// Periodically clean up expired challenges
+setInterval(() => {
+  if (global.challenges) {
+    const now = Date.now();
+    for (const [key, value] of global.challenges.entries()) {
+      if (value.expiration < now) {
+        global.challenges.delete(key);
+      }
+    }
+  }
+}, 5 * 60 * 1000); // Every 5 minutes
+
 // Serve static files only for local development
 // In production, GitHub Pages will handle static files
 if (process.env.NODE_ENV !== 'production') {
