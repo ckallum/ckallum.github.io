@@ -17,8 +17,7 @@
   <link rel="stylesheet" href="../../assets/css/article.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Socket.io client script -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <!-- Comments loaded via REST API -->
   <!-- Updated to use the local fonts instead of Google Fonts -->
   <style>
     @font-face {
@@ -1130,9 +1129,10 @@
     document.addEventListener('DOMContentLoaded', function() {
       const siteWrapper = document.querySelector('.site-wrapper');
       let passwordVerified = false;
-      let socket = null;
       let username = '';
       const pageId = 'dimanche';
+      const API_BASE_URL = ''; // Same origin for both local and production
+      let commentPollInterval = null; // Polling interval for refreshing comments
       
       // Check if user has already entered correct password in this session
       const accessToken = sessionStorage.getItem('dimancheAccessToken');
@@ -1197,13 +1197,6 @@
         const password = input.value;
         
         try {
-          // API base URL - change this to your deployed server URL
-          const API_BASE_URL = window.location.hostname === 'localhost' 
-            ? '' // Empty for local development (same origin)
-            : 'https://ckallum-api-9e0b7df25b59.herokuapp.com'; // Replace with your actual server URL
-          
-          console.log("Using authentication API at:", API_BASE_URL);
-          
           // Step 1: Get a challenge and salt from the server
           const challengeResponse = await fetch(`${API_BASE_URL}/api/auth-challenge/${pageId}`, {
             method: 'GET',
@@ -1337,60 +1330,52 @@
           }
         });
         
-        // API base URL for server connection - ensure consistency with authentication API
-        const API_BASE_URL = window.location.hostname === 'localhost' 
-          ? 'http://localhost:3000' // Local development
-          : 'https://ckallum-api-9e0b7df25b59.herokuapp.com'; // Replace with your actual server URL
-          
-        // Remove any trailing slash for consistency
-        const normalizedApiUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-          
-        // Initialize Socket.io connection with better error handling
-        try {
-          console.log("Connecting to Socket.io at:", normalizedApiUrl);
-          socket = io(normalizedApiUrl, {
-            withCredentials: true, // Enable CORS for Socket.io
-            reconnectionAttempts: 5,
-            timeout: 10000
-          });
-
-          socket.on('connect', function() {
-            console.log('Socket.io connected successfully');
-            
-            // Join the specific page room when connection is established
-            socket.emit('join-page', pageId);
-            console.log('Joined page room:', pageId);
-          });
-
-          socket.on('connect_error', function(err) {
-            console.error('Socket.io connection error:', err);
-          });
-
-          // Handle socket.io error events
-          socket.on('error', function(err) {
-            console.error('Socket.io error:', err);
-          });
-
-          // Handle comment errors sent from the server
-          socket.on('comment-error', function(errorData) {
-            console.error('Comment error:', errorData.message, errorData.error);
-          });
-
-          // Handle vote update confirmations
-          socket.on('vote-updated', function(voteData) {
-            const { commentId, votes } = voteData;
-            const commentElement = document.querySelector(`.comment[data-comment-id="${escapeSelector(commentId)}"]`);
-            
-            if (commentElement) {
-              const voteCount = commentElement.querySelector('.vote-count');
-              if (voteCount) {
-                voteCount.textContent = votes;
-              }
+        // Fetch comments from REST API
+        async function fetchComments() {
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/messages/${pageId}?limit=200&offset=0`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.success && data.messages) {
+              loadComments(data.messages);
+            } else {
+              console.error('Failed to fetch comments:', data);
             }
-          });
-        } catch (err) {
-          console.error('Error initializing Socket.io:', err);
+          } catch (err) {
+            console.error('Error fetching comments:', err);
+          }
         }
+
+        // Send a new comment via REST API
+        async function postComment(commentData) {
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/messages`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify(commentData)
+            });
+            const data = await response.json();
+            if (data.success && data.message) {
+              // Add the new comment to the UI immediately
+              addComment(data.message);
+              updateCommentCount();
+            } else {
+              console.error('Failed to post comment:', data);
+            }
+          } catch (err) {
+            console.error('Error posting comment:', err);
+          }
+        }
+
+        // Initial fetch of comments
+        fetchComments();
+
+        // Set up polling to refresh comments every 30 seconds
+        commentPollInterval = setInterval(fetchComments, 30000);
         
         // Listen for comment form submissions
         const commentForm = commentsSection.querySelector('.comment-form');
@@ -1409,14 +1394,12 @@
           
           const content = commentInput.value.trim();
           if (content) {
-            // Send top-level comment to server
-            socket.emit('send-message', {
+            // Send top-level comment to server via REST API
+            postComment({
               username,
               content,
               pageId,
-              votes: 0, // Initialize vote count
-              parentCommentId: null, // Ensure it's a top-level comment
-              children: [] // Initialize empty children array
+              parentCommentId: null
             });
             
             // Clear input
@@ -1501,154 +1484,77 @@
           });
         });
         
-        // Listen for new comments
-        socket.on('new-message', function(message) {
-          addComment(message);
-          updateCommentCount();
-        });
-        
-        // Load existing comments
-        socket.on('init-messages', function(messages) {
+        // Load comments from REST API response
+        function loadComments(messages) {
           const commentsList = commentsSection.querySelector('.comments-list');
-          commentsList.innerHTML = '';
-          
+          // Clear existing comments before re-rendering
+          while (commentsList.firstChild) {
+            commentsList.removeChild(commentsList.firstChild);
+          }
+
           // First add all top-level comments
           const topLevelComments = messages.filter(message => !message.parentCommentId);
           const replyComments = messages.filter(message => message.parentCommentId);
-          
+
           // Create a structured comment tree for proper nesting
           const commentMap = new Map();
-          
+
           // First, add all top-level comments
           topLevelComments.forEach(message => {
-            const commentElement = addComment(message, 1); // Level 1 for top-level comments
+            const commentElement = addComment(message, 1);
             commentMap.set(message._id, commentElement);
           });
-          
+
           // Then add all replies to their proper parent
-          // Process deepest ancestors first - sort by topLevelCommentId and timestamp
-          // This ensures we process the comments in a breadth-first manner within threads
           const sortedReplies = [...replyComments].sort((a, b) => {
-            // Group by top-level comment first
             if (a.topLevelCommentId !== b.topLevelCommentId) {
-              // String comparison of ObjectId is fine for grouping
               return a.topLevelCommentId > b.topLevelCommentId ? 1 : -1;
             }
-            
-            // Then sort by parentCommentId (for nested replies)
             if (a.parentCommentId !== b.parentCommentId) {
-              // For dealing with direct replies to same parent
               return a.parentCommentId > b.parentCommentId ? 1 : -1;
             }
-            
-            // Finally sort by timestamp for siblings
             return new Date(a.timestamp) - new Date(b.timestamp);
           });
-          
+
           // Process replies in multiple passes if needed to handle deeply nested comments
           let remainingReplies = [...sortedReplies];
           let processedInLastPass = -1;
-          
-          // Keep processing replies until we can't add any more
-          // (handles case where parent appears later in the array)
+
           while (remainingReplies.length > 0 && processedInLastPass !== 0) {
             processedInLastPass = 0;
             const stillRemaining = [];
-            
+
             for (const message of remainingReplies) {
-              // Find the direct parent
               const parentId = message.parentCommentId;
-              
+
               if (commentMap.has(parentId)) {
-                // If the parent comment is already rendered, add this as a reply
-                const parentElement = commentMap.get(parentId);
                 const replyElement = addReplyComment(message);
                 commentMap.set(message._id, replyElement);
                 processedInLastPass++;
               } else {
-                // If parent not found yet, keep for next pass
                 stillRemaining.push(message);
               }
             }
-            
+
             remainingReplies = stillRemaining;
           }
-          
+
           // Add any remaining replies as top-level comments (fallback)
           if (remainingReplies.length > 0) {
-            console.warn(`${remainingReplies.length} replies couldn't find parents. Adding as top-level.`);
-            
+            console.warn(remainingReplies.length + ' replies could not find parents. Adding as top-level.');
+
             remainingReplies.forEach(message => {
               const commentElement = addComment({
                 ...message,
-                parentCommentId: null // Convert to top-level comment
+                parentCommentId: null
               }, 1);
               commentMap.set(message._id, commentElement);
             });
           }
-          
+
           // Update the comment count
           updateCommentCount();
-        });
-        
-        // Handle socket events for comment updates and deletion
-        socket.on('comment-updated', function(updateData) {
-          const { commentId, content, username, edited } = updateData;
-          const commentElement = document.querySelector(`.comment[data-comment-id="${escapeSelector(commentId)}"]`);
-          
-          if (commentElement) {
-            // Update comment content
-            const contentElement = commentElement.querySelector('.comment-content');
-            if (contentElement) {
-              contentElement.innerHTML = formatCommentText(escapeHTML(content));
-            }
-            
-            // Update comment author
-            const authorElement = commentElement.querySelector('.comment-author');
-            if (authorElement) {
-              authorElement.textContent = username;
-            }
-            
-            // Check if this is a deleted comment or an edited comment
-            if (username === "Deleted" && content === "[Comment deleted]") {
-              // Add a visual indication that the comment was deleted
-              commentElement.classList.add('comment-deleted');
-            } else if (edited) {
-              // Show "edited" indicator if this is an edit
-              const dateElement = commentElement.querySelector('.comment-date');
-              if (dateElement && !commentElement.querySelector('.comment-edited-indicator')) {
-                const editedIndicator = document.createElement('span');
-                editedIndicator.className = 'comment-edited-indicator';
-                editedIndicator.textContent = '(edited)';
-                dateElement.insertAdjacentElement('afterend', editedIndicator);
-              }
-            }
-          }
-        });
-        
-        // Handle completely deleted comments
-        socket.on('comment-deleted', function(deleteData) {
-          const { commentId } = deleteData;
-          const commentElement = document.querySelector(`.comment[data-comment-id="${escapeSelector(commentId)}"]`);
-          
-          if (commentElement) {
-            // Get the parent node to properly remove the entire comment
-            const commentNode = commentElement.closest('.comments-node');
-            if (commentNode) {
-              // Fade out animation
-              commentNode.style.transition = 'opacity 0.3s ease';
-              commentNode.style.opacity = '0';
-              
-              // Remove after animation completes
-              setTimeout(() => {
-                commentNode.remove();
-                
-                // Update comment count
-                updateCommentCount();
-              }, 300);
-            }
-          }
-        });
+        }
         
         // Function to set up event listeners for a comment
         function setupCommentEventListeners(commentElement, comment) {
@@ -1672,90 +1578,45 @@
             }
           }
           
+          // TODO: Vote API endpoints not yet available. Votes are tracked locally only.
           upvoteBtn.addEventListener('click', function() {
             const currentVote = userVotes[comment._id];
-            
+
             if (currentVote === 'up') {
-              // Remove upvote
               comment.votes--;
               delete userVotes[comment._id];
               upvoteBtn.style.color = '';
-              
-              // Send vote removal to server
-              socket.emit('vote', {
-                commentId: comment._id,
-                voteType: 'downvote' // Counteract the previous upvote
-              });
             } else {
-              // Add upvote (and remove downvote if exists)
               if (currentVote === 'down') {
-                comment.votes++; // Remove the previous downvote
+                comment.votes++;
                 downvoteBtn.style.color = '';
-                
-                // Cancel the previous downvote
-                socket.emit('vote', {
-                  commentId: comment._id,
-                  voteType: 'upvote' // Counter the previous downvote
-                });
               }
-              
-              // Add the new upvote
               comment.votes++;
               userVotes[comment._id] = 'up';
               upvoteBtn.style.color = 'var(--text-primary, #141413)';
-              
-              // Send upvote to server
-              socket.emit('vote', {
-                commentId: comment._id,
-                voteType: 'upvote'
-              });
             }
-            
-            // Update UI immediately for responsive feel (server will confirm later)
+
             voteCount.textContent = comment.votes;
             sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
           });
-          
+
           downvoteBtn.addEventListener('click', function() {
             const currentVote = userVotes[comment._id];
-            
+
             if (currentVote === 'down') {
-              // Remove downvote
               comment.votes++;
               delete userVotes[comment._id];
               downvoteBtn.style.color = '';
-              
-              // Send vote removal to server
-              socket.emit('vote', {
-                commentId: comment._id,
-                voteType: 'upvote' // Counteract the previous downvote
-              });
             } else {
-              // Add downvote (and remove upvote if exists)
               if (currentVote === 'up') {
-                comment.votes--; // Remove the previous upvote
+                comment.votes--;
                 upvoteBtn.style.color = '';
-                
-                // Cancel the previous upvote
-                socket.emit('vote', {
-                  commentId: comment._id,
-                  voteType: 'downvote' // Counter the previous upvote
-                });
               }
-              
-              // Add the new downvote
               comment.votes--;
               userVotes[comment._id] = 'down';
               downvoteBtn.style.color = 'var(--text-primary, #141413)';
-              
-              // Send downvote to server
-              socket.emit('vote', {
-                commentId: comment._id,
-                voteType: 'downvote'
-              });
             }
-            
-            // Update UI immediately for responsive feel (server will confirm later)
+
             voteCount.textContent = comment.votes;
             sessionStorage.setItem('userVotes', JSON.stringify(userVotes));
           });
@@ -1827,14 +1688,12 @@
                 // Save the username to sessionStorage for future replies
                 sessionStorage.setItem('dimancheUsername', username);
                 
-                // Send comment to server with parent ID
-                socket.emit('send-message', {
+                // Send reply to server via REST API
+                postComment({
                   username,
                   content,
                   pageId,
-                  votes: 0,
-                  parentCommentId: comment._id,
-                  children: [] // Initialize empty children array for replies to this comment
+                  parentCommentId: comment._id
                 });
                 
                 // Remove the form after submission
@@ -1917,13 +1776,8 @@
                 const updatedContent = textarea.value.trim();
                 
                 if (updatedContent && updatedContent !== originalContent) {
-                  // Send the edit to the server
-                  socket.emit('edit-comment', { 
-                    commentId: comment._id,
-                    content: updatedContent
-                  });
-                  
-                  // Update the local comment object
+                  // TODO: Edit API endpoint not yet available. Update locally only.
+                  console.warn('Edit API endpoint not yet available. Changes are local only.');
                   comment.content = updatedContent;
                   comment.edited = true;
                 }
@@ -1969,14 +1823,21 @@
                 confirmPopup.remove();
               });
               
-              // Confirm sends the delete request to the server
+              // TODO: Delete API endpoint not yet available. Remove locally only.
               confirmBtn.addEventListener('click', function() {
-                socket.emit('delete-comment', { 
-                  commentId: comment._id
-                });
-                
-                // Remove popup immediately
+                console.warn('Delete API endpoint not yet available. Removal is local only.');
                 confirmPopup.remove();
+
+                // Remove the comment from the UI locally
+                const commentNode = commentElement.closest('.comments-node');
+                if (commentNode) {
+                  commentNode.style.transition = 'opacity 0.3s ease';
+                  commentNode.style.opacity = '0';
+                  setTimeout(() => {
+                    commentNode.remove();
+                    updateCommentCount();
+                  }, 300);
+                }
               });
             });
           }
