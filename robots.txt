@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /articles/dimanche/
+
+Sitemap: https://ckallum.com/sitemap.xml
