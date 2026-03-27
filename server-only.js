@@ -10,6 +10,8 @@ const mongoose = require('mongoose');
 const path = require('path');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Enhanced Comment Schema based on EA Forum approach
@@ -79,7 +81,30 @@ app.use(cors({
   methods: ['GET', 'POST'],
   credentials: true
 }));
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: '10kb' }));
+
+// Rate limiting for API endpoints
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' }
+});
+app.use('/api/', apiLimiter);
+
+// Periodically clean up expired challenges
+setInterval(() => {
+  if (global.challenges) {
+    const now = Date.now();
+    for (const [key, value] of global.challenges.entries()) {
+      if (value.expiration < now) {
+        global.challenges.delete(key);
+      }
+    }
+  }
+}, 5 * 60 * 1000); // Every 5 minutes
 
 // Add simple status endpoint
 app.get('/', (req, res) => {
@@ -247,10 +272,17 @@ io.on('connection', (socket) => {
   socket.on('send-message', async (messageData) => {
     try {
       const { username, content, pageId, parentCommentId } = messageData;
-      
-      // Validate message data
-      const validUsername = username && username.trim() ? username.trim() : 'Anonymous';
-      const validContent = content && content.trim() ? content.trim() : '';
+
+      // Validate and sanitize message data
+      const MAX_USERNAME_LENGTH = 50;
+      const MAX_CONTENT_LENGTH = 5000;
+
+      const validUsername = username && typeof username === 'string' && username.trim()
+        ? username.trim().slice(0, MAX_USERNAME_LENGTH)
+        : 'Anonymous';
+      const validContent = content && typeof content === 'string' && content.trim()
+        ? content.trim().slice(0, MAX_CONTENT_LENGTH)
+        : '';
       
       if (!validContent) {
         console.log('Ignoring empty message');
@@ -312,7 +344,10 @@ io.on('connection', (socket) => {
   socket.on('edit-comment', async ({ commentId, content }) => {
     try {
       // Validate content
-      const validContent = content && content.trim() ? content.trim() : '';
+      const MAX_CONTENT_LENGTH = 5000;
+      const validContent = content && typeof content === 'string' && content.trim()
+        ? content.trim().slice(0, MAX_CONTENT_LENGTH)
+        : '';
       
       if (!validContent) {
         throw new Error("Comment content cannot be empty");
@@ -521,6 +556,9 @@ app.post('/api/verify-password', async (req, res) => {
       global.challenges.delete(pageId + '-' + challenge);
       
       // Generate a JWT token with a short expiration time
+      if (!process.env.JWT_SECRET) {
+        console.error('WARNING: JWT_SECRET environment variable is not set. Tokens will not persist across restarts.');
+      }
       const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
       
       const accessToken = jwt.sign(

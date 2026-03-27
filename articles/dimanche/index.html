@@ -1298,7 +1298,7 @@
           <div class="comment-form-container">
             <div class="comment-user-info">
               <label for="comment-username">Name:</label>
-              <input type="text" id="comment-username" placeholder="Your name" value="${username}">
+              <input type="text" id="comment-username" placeholder="Your name" value="${escapeHTML(username)}">
             </div>
             <form class="comment-form">
               <textarea placeholder="Write a comment..." required></textarea>
@@ -1379,7 +1379,7 @@
           // Handle vote update confirmations
           socket.on('vote-updated', function(voteData) {
             const { commentId, votes } = voteData;
-            const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+            const commentElement = document.querySelector(`.comment[data-comment-id="${escapeSelector(commentId)}"]`);
             
             if (commentElement) {
               const voteCount = commentElement.querySelector('.vote-count');
@@ -1594,7 +1594,7 @@
         // Handle socket events for comment updates and deletion
         socket.on('comment-updated', function(updateData) {
           const { commentId, content, username, edited } = updateData;
-          const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+          const commentElement = document.querySelector(`.comment[data-comment-id="${escapeSelector(commentId)}"]`);
           
           if (commentElement) {
             // Update comment content
@@ -1629,7 +1629,7 @@
         // Handle completely deleted comments
         socket.on('comment-deleted', function(deleteData) {
           const { commentId } = deleteData;
-          const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+          const commentElement = document.querySelector(`.comment[data-comment-id="${escapeSelector(commentId)}"]`);
           
           if (commentElement) {
             // Get the parent node to properly remove the entire comment
@@ -1782,11 +1782,11 @@
             inlineReplyForm.innerHTML = `
               <form class="comment-form nesting-level-${nestingLevel}">
                 <div class="reply-indicator active">
-                  Replying to ${comment.username}
+                  Replying to ${escapeHTML(comment.username)}
                 </div>
                 <div class="reply-user-info">
-                  <label for="reply-username-${comment._id}">Your Name:</label>
-                  <input type="text" id="reply-username-${comment._id}" placeholder="Your name" value="${sessionStorage.getItem('dimancheUsername') || 'Anonymous'}">
+                  <label for="reply-username-${escapeHTML(comment._id)}">Your Name:</label>
+                  <input type="text" id="reply-username-${escapeHTML(comment._id)}" placeholder="Your name" value="${escapeHTML(sessionStorage.getItem('dimancheUsername') || 'Anonymous')}">
                 </div>
                 <textarea placeholder="Write a reply..." required></textarea>
                 <div class="comment-form-actions">
@@ -1820,7 +1820,7 @@
               e.preventDefault();
               
               const content = textarea.value.trim();
-              const usernameInput = form.querySelector(`#reply-username-${comment._id}`);
+              const usernameInput = form.querySelector(`#reply-username-${escapeSelector(comment._id)}`);
               const username = usernameInput.value.trim() || 'Anonymous';
               
               if (content) {
@@ -1860,7 +1860,7 @@
               const editForm = document.createElement('div');
               editForm.className = 'edit-comment-form';
               editForm.innerHTML = `
-                <textarea>${originalContent}</textarea>
+                <textarea>${escapeHTML(originalContent)}</textarea>
                 <div class="edit-form-actions">
                   <button class="cancel-edit-btn">Cancel</button>
                   <button class="save-edit-btn">Save Changes</button>
@@ -2031,7 +2031,7 @@
         // Function to add a comment to the comments list
         function addComment(comment, nestingLevel = 1) {
           // Check if this is a reply to another comment (handled separately when loading initial comments)
-          if (comment.parentCommentId && document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`)) {
+          if (comment.parentCommentId && document.querySelector(`.comment[data-comment-id="${escapeSelector(comment.parentCommentId)}"]`)) {
             return addReplyComment(comment, nestingLevel);
           }
           
@@ -2060,8 +2060,8 @@
           // Set comment content with collapse/expand buttons using CSS classes
           commentElement.innerHTML = `
             <div class="comment-header">
-              <div class="comment-author">${comment.username}</div>
-              <div class="comment-date">${dateString}</div>
+              <div class="comment-author">${escapeHTML(comment.username)}</div>
+              <div class="comment-date">${escapeHTML(dateString)}</div>
             </div>
             <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
             <div class="comment-footer">
@@ -2103,7 +2103,7 @@
         // Function to add a reply to a parent comment (for new comments, not initial loading)
         function addReplyComment(comment, initialNestingLevel = 1) {
           // Find the parent comment element
-          const parentComment = document.querySelector(`.comment[data-comment-id="${comment.parentCommentId}"]`);
+          const parentComment = document.querySelector(`.comment[data-comment-id="${escapeSelector(comment.parentCommentId)}"]`);
           
           if (!parentComment) {
             console.error('Parent comment not found:', comment.parentCommentId);
@@ -2143,8 +2143,8 @@
           // Set reply content with collapse/expand buttons using CSS classes
           replyElement.innerHTML = `
             <div class="comment-header">
-              <div class="comment-author">${comment.username}</div>
-              <div class="comment-date">${dateString}</div>
+              <div class="comment-author">${escapeHTML(comment.username)}</div>
+              <div class="comment-date">${escapeHTML(dateString)}</div>
             </div>
             <div class="comment-content">${formatCommentText(escapeHTML(comment.content))}</div>
             <div class="comment-footer">
@@ -2212,12 +2212,17 @@
         
         // Helper function to escape HTML to prevent XSS
         function escapeHTML(unsafe) {
-          return unsafe
+          return String(unsafe)
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+        }
+
+        // Helper to safely escape values used in CSS selectors
+        function escapeSelector(value) {
+          return CSS.escape(String(value));
         }
         
         // Helper function to format comment text with paragraphs
