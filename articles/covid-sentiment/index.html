@@ -50,6 +50,24 @@
       display: block;
     }
 
+    .visualization-container iframe {
+      width: 100%;
+      height: 480px;
+      border: 0;
+      display: block;
+      background-color: transparent;
+    }
+
+    .visualization-container iframe.table-embed {
+      height: 360px;
+    }
+
+    @media (max-width: 600px) {
+      .visualization-container iframe {
+        height: 380px;
+      }
+    }
+
     .chart-note {
       font-size: 0.8rem;
       font-style: italic;
@@ -127,6 +145,11 @@
           this was to prove a point to my friend and not supposed to be submitted to a scientific journal.
           You'll understand why below.
         </p>
+        <p>
+          The full interactive playground lives <a
+            href="https://ckallum.com/uk-covid-twitter-sentiment-nlp/"><u><strong>here</strong></u></a>.
+          The graphs embedded below are live views of it — poke, zoom, and filter to your heart's content.
+        </p>
         <h2>Getting good data is hard.</h2>
         <p>
           Okay we all understand the importance of data but boy did I not prepare myself how hard it was to actually
@@ -188,7 +211,8 @@
 
 
         <div class="visualization-container">
-          <img src="./images/covid-sentiment-models.png" alt="NLP Model Comparison - Covid Dataset">
+          <iframe src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=models-covid"
+                  loading="lazy" title="NLP model comparison — COVID dataset"></iframe>
           <p class="chart-note"> [COVID-19 Dataset]</p>
         </div>
 
@@ -198,7 +222,8 @@
           is mostly positive between models. Naive-Bayes is perhaps overly optimistic?</p>
 
         <div class="visualization-container">
-          <img src="./images/lockdown-sentiment-models.png" alt="NLP Model Comparison - Lockdown Dataset">
+          <iframe src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=models-lockdown"
+                  loading="lazy" title="NLP model comparison — Lockdown dataset"></iframe>
           <p class="chart-note"> [Lockdown Dataset]</p>
         </div>
 
@@ -223,7 +248,8 @@
           the Scottish population were less likely to be happy with Boris Johnson due to
           the political climate (Brexit, Indepedence etc). Callum 1-0 Bob
         <div class="visualization-container">
-          <img src="./images/country-sentiment-chart.png" alt="">
+          <iframe src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=country-sentiment"
+                  loading="lazy" title="Sentiment across countries 2020–2021"></iframe>
           <p class="chart-note">Naive-Bayes: Sentiment across countries 2020-2021</p>
         </div>
 
@@ -235,7 +261,9 @@
 
         </p>
         <div class="visualization-container">
-          <img src="./images/sentiment-table-county.png" alt="">
+          <iframe class="table-embed"
+                  src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=county-table"
+                  loading="lazy" title="Happiest and saddest counties"></iframe>
           <p class="chart-note">Naive-Bayes: Happiest and saddest counties</p>
         </div>
 
@@ -252,7 +280,8 @@
         </p>
 
         <div class="visualization-container">
-          <img src="./images/covid-sentiment-rates-england.png">
+          <iframe src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=rates-england-covid"
+                  loading="lazy" title="England — Sentiment vs COVID infection and death rates"></iframe>
           <p class="chart-note">[Naive Bayes] Sentiment vs COVID infection and death rates.</p>
         </div>
 
@@ -275,7 +304,9 @@
 
 
         <div class="visualization-container">
-          <img src="./images/sentiment-table-overall.png" alt="">
+          <iframe class="table-embed"
+                  src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=overall-table"
+                  loading="lazy" title="Overall statistics"></iframe>
           <p class="chart-note">Statistic Overview</p>
         </div>
 
@@ -290,7 +321,8 @@
         </p>
 
         <div class="visualization-container">
-          <img src="./images/lockdown-sentiment-rates-england.png">
+          <iframe src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=rates-england-lockdown"
+                  loading="lazy" title="England — Lockdown sentiment vs COVID rates"></iframe>
           <p class="chart-note">[England, Naive-Bayes] Lockdown Sentiment versus Covid Rates</p>
         </div>
 
@@ -300,7 +332,8 @@
           announced the people of the UK can ’turn the tide of coronavirus’ within 12 weeks.</p>
 
         <div class="visualization-container">
-          <img src="./images/covid-sentiment-rates-england.png">
+          <iframe src="https://ckallum.com/uk-covid-twitter-sentiment-nlp/?embed=1&chart=rates-england-covid"
+                  loading="lazy" title="England — COVID sentiment vs COVID rates"></iframe>
           <p class="chart-note">[England, Naive-Bayes] COVID Sentiment versus Covid Rates</p>
         </div>
 
@@ -333,7 +366,7 @@
         </div>
 
         <p>Enough rambling, have fun exploring the data <a
-            href="https://covid-sentiment-nlp-uk-7006b5c50b5e.herokuapp.com/"> <u><strong>here.</strong></u></a></p>
+            href="https://ckallum.com/uk-covid-twitter-sentiment-nlp/"> <u><strong>here.</strong></u></a></p>
 
         </p>
 
